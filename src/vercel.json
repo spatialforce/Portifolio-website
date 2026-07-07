@@ -1,0 +1,7 @@
+{
+    "images": {
+      "sizes": [640, 1024, 1920],
+      "formats": ["image/avif", "image/webp"],
+      "minimumCacheTTL": 60
+    }
+  }
