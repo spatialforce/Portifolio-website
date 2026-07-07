@@ -4,7 +4,7 @@ import erosionImg from "./assets/erosion.webp";
 import watershedImg from "./assets/watershed.webp";
 import lulcImg from "./assets/LULC.webp";
 import webMapImg from "./assets/webmapping.webp";
-import terrain3DImg from "./assets/3d.webp";
+import terrain3DImg from "./assets/3D.webp";
 const TOOLS = [
   "ArcGIS Pro","QGIS","Google Earth Engine","Google Earth Pro",
   "SEPAL","Global Mapper","ENVI Classic","ArcGIS Online", "ArcMap",
@@ -494,7 +494,7 @@ html, body, #root {
   transition: background 0.3s, padding 0.3s;
 }
 .nav--scrolled {
-  background: rgba(25,27,21,0.96);
+  background: rgba(25,27,21,0.97);
   padding: 1rem 4vw;
   border-bottom: 1px solid var(--linew);
 }
@@ -584,7 +584,7 @@ html, body, #root {
 .hero__photo img {
   width: 100%; height: 100%; object-fit: cover; object-position: center 15%; display: block;
   filter: sepia(18%) saturate(0.85) contrast(1.02) brightness(0.92);
-  transform: scale(0.9); transform-origin: center 22%;
+  transform: scale(0.9); transform-origin: center 22%;  will-change: transform; transform: translateZ(0) scale(0.9);
 }
 .hero__photo::before {
   content: ''; position: absolute; inset: 0;
@@ -595,6 +595,7 @@ html, body, #root {
   position: absolute; left: 0; right: 0; bottom: 0;
   display: flex; background: rgba(25,27,21,0.82); backdrop-filter: blur(6px);
   border-top: 1px solid var(--linew);
+  backdrop-filter: none
 }
 .hero__readout div { flex: 1; padding: 1.1rem 0.6rem; text-align: center; border-right: 1px solid var(--linew); }
 .hero__readout div:last-child { border-right: none; }
@@ -620,6 +621,26 @@ html, body, #root {
   display: flex; gap: 0.5rem;
 }
 .about__facts li span { color: var(--rust); font-weight: 600; }
+.about {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+.projects {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 3600px; /* this one is by far the tallest */
+}
+.services {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+.skills {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1000px;
+}
+.contact {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 700px;
+}
 
 /* ══════════════════════════════════════════
    PROJECTS — flexible image frames (bug fix), sheet references
