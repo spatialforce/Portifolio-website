@@ -204,7 +204,7 @@ export default function LandUseLandCover() {
         <p className="section-tag">§ Fig 4.2 — Post-Policy Change Series</p>
         <div className="proj-body">
           <div className="map-triptych">
-            {["2000", "2013", "2025"].map((yr) => (
+          {(["2000", "2013", "2025"] as const).map((yr) => (
               <MapFrame
                 key={yr}
                 year={yr}
@@ -380,7 +380,7 @@ export default function LandUseLandCover() {
         <p className="section-tag">§ Fig 5.2 — Mining Expansion Series</p>
         <div className="proj-body">
           <div className="map-triptych">
-            {["2005", "2015", "2025"].map((yr) => (
+          {(["2005", "2015", "2025"] as const).map((yr) => (
               <MapFrame
                 key={yr}
                 year={yr}
@@ -456,7 +456,14 @@ export default function LandUseLandCover() {
    Renders the real image with a "View full map" link when a src
    is supplied, otherwise falls back to a placeholder panel.
 ═══════════════════════════════════════════════════════════════ */
-function MapFrame({ year, src, alt, solo }) {
+type MapFrameProps = {
+  year: string;
+  src?: string;
+  alt: string;
+  solo?: boolean;
+};
+
+function MapFrame({ year, src, alt, solo = false }: MapFrameProps) {
   return (
     <div className={`map-card${solo ? " map-card--solo" : ""}`}>
       <div className="map-card__head">
@@ -494,7 +501,21 @@ function MapFrame({ year, src, alt, solo }) {
 /* ═══════════════════════════════════════════════════════════════
    LulcTable — shared land-cover-by-class table renderer.
 ═══════════════════════════════════════════════════════════════ */
-function LulcTable({ columns, rows }) {
+type LulcRow = {
+  cls: string;
+  y1: number;
+  y2: number;
+  y3: number;
+  y4: number;
+  highlight?: boolean;
+};
+
+type LulcTableProps = {
+  columns: string[];
+  rows: LulcRow[];
+};
+
+function LulcTable({ columns, rows }: LulcTableProps) {
   return (
     <div className="tbl-wrap">
       <table className="dtable">
