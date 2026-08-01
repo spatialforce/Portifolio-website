@@ -16,6 +16,26 @@ const PAGE = {
     "This page collects sample study area maps produced across various projects in Zimbabwe. Content is being added continuously, so check back for new entries.",
 };
 
+/* ═══════════════════════════════════════════════════════════════
+   SEO — canonical URL, meta description, Open Graph / Twitter Card
+   data, and the JSON-LD payload used further down. Keeping these
+   as plain constants (rather than hardcoding strings in three
+   places) means updating the page copy only requires one edit.
+═══════════════════════════════════════════════════════════════ */
+const SITE_URL = "https://spatialforce.co.zw";
+const PAGE_PATH = "/projects/study-area-maps";
+const AUTHOR_NAME = "Kudzanai Chakavarika";
+
+const SEO = {
+  title: "Study Area Maps — GIS Site Location Maps Across Zimbabwe | Kudzanai Chakavarika",
+  description:
+    "A growing collection of study area and site location maps across Zimbabwe — Bulawayo, Mutare, Gweru, Matopo, Gokwe, Mbire, Chirumhanzu and more — produced by GIS & remote sensing analyst Kudzanai Chakavarika.",
+  keywords:
+    "study area maps, site location maps, GIS Zimbabwe, cartography Zimbabwe, remote sensing Zimbabwe, spatial analysis, Kudzanai Chakavarika, Bulawayo GIS map, Mutare GIS map, Matopo National Park map, Gweru study area, Mbire wards map",
+  canonical: `${SITE_URL}${PAGE_PATH}`,
+  image: `${SITE_URL}/assets/Zimbabwe.webp`,
+};
+
 const MAPS = [
   {
     id: 1,
@@ -108,6 +128,102 @@ export default function StudyAreaMaps() {
     return () => window.removeEventListener("keydown", onKey);
   }, [lightbox]);
 
+  /* ── SEO: head tags ──
+     Sets <title>, meta description/keywords/author, canonical link,
+     Open Graph and Twitter Card tags, and robots directive. Each
+     tag is created once and cleaned up on unmount so navigating to
+     another route doesn't leave stale tags behind for the next page. */
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = SEO.title;
+
+    const created: HTMLElement[] = [];
+
+    const upsertMeta = (attr: "name" | "property", key: string, content: string) => {
+      let tag = document.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute(attr, key);
+        document.head.appendChild(tag);
+        created.push(tag);
+      }
+      tag.setAttribute("content", content);
+    };
+
+    upsertMeta("name", "description", SEO.description);
+    upsertMeta("name", "keywords", SEO.keywords);
+    upsertMeta("name", "author", AUTHOR_NAME);
+    upsertMeta("name", "robots", "index, follow");
+
+    // Open Graph
+    upsertMeta("property", "og:type", "website");
+    upsertMeta("property", "og:title", SEO.title);
+    upsertMeta("property", "og:description", SEO.description);
+    upsertMeta("property", "og:url", SEO.canonical);
+    upsertMeta("property", "og:image", SEO.image);
+    upsertMeta("property", "og:site_name", "KC/Spatial");
+
+    // Twitter Card
+    upsertMeta("name", "twitter:card", "summary_large_image");
+    upsertMeta("name", "twitter:title", SEO.title);
+    upsertMeta("name", "twitter:description", SEO.description);
+    upsertMeta("name", "twitter:image", SEO.image);
+
+    // Canonical link
+    let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
+      created.push(canonical);
+    }
+    canonical.setAttribute("href", SEO.canonical);
+
+    // JSON-LD structured data — CollectionPage + ImageGallery + Person(author)
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: SEO.title,
+      description: SEO.description,
+      url: SEO.canonical,
+      inLanguage: "en",
+      author: {
+        "@type": "Person",
+        name: AUTHOR_NAME,
+      },
+      mainEntity: {
+        "@type": "ImageGallery",
+        name: PAGE.title,
+        description: PAGE.intro,
+        image: MAPS.map((m) => ({
+          "@type": "ImageObject",
+          name: `${m.title} — ${m.focus}`,
+          contentUrl: `${SITE_URL}${m.img}`,
+          description: `${m.title}, ${m.province}, Zimbabwe — ${m.focus}.`,
+        })),
+      },
+      breadcrumb: {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Projects", item: `${SITE_URL}/projects` },
+          { "@type": "ListItem", position: 3, name: PAGE.title, item: SEO.canonical },
+        ],
+      },
+    };
+
+    const ldScript = document.createElement("script");
+    ldScript.type = "application/ld+json";
+    ldScript.text = JSON.stringify(jsonLd);
+    document.head.appendChild(ldScript);
+    created.push(ldScript);
+
+    return () => {
+      document.title = prevTitle;
+      created.forEach((el) => el.parentNode?.removeChild(el));
+    };
+  }, []);
+
   return (
     <>
       <style>{CSS}</style>
@@ -132,8 +248,8 @@ export default function StudyAreaMaps() {
         <p className="section-tag">§ Sample Maps · Zimbabwe</p>
         <div className="map-grid">
           {MAPS.map((m, i) => (
-            <button key={m.id} type="button" className="map-card" onClick={() => setLightbox(i)} aria-label={`View larger version of ${m.title}`}>
-              <img src={m.img} alt={m.title} loading="lazy" />
+            <button key={m.id} type="button" className="map-card" onClick={() => setLightbox(i)} aria-label={`View larger version of ${m.title}, ${m.province} — ${m.focus}`}>
+              <img src={m.img} alt={`${m.title} study area map, ${m.province}, Zimbabwe — ${m.focus}`} loading="lazy" />
               <span className="map-card__tag">View full map</span>
               <span className="map-card__info">
                 <span className="map-card__label">{m.title}</span>
@@ -163,7 +279,7 @@ export default function StudyAreaMaps() {
       {lightbox !== null && (
         <div className="plightbox" onClick={() => setLightbox(null)}>
           <button className="plightbox__close" onClick={() => setLightbox(null)} aria-label="Close">×</button>
-          <img src={MAPS[lightbox].img} alt={MAPS[lightbox].title} onClick={(e) => e.stopPropagation()} />
+          <img src={MAPS[lightbox].img} alt={`${MAPS[lightbox].title} study area map, ${MAPS[lightbox].province}, Zimbabwe — ${MAPS[lightbox].focus}`} onClick={(e) => e.stopPropagation()} />
           <div className="plightbox__caption" onClick={(e) => e.stopPropagation()}>
             <p className="plightbox__title">{MAPS[lightbox].title} <span>· {MAPS[lightbox].province}</span></p>
             <p className="plightbox__focus">{MAPS[lightbox].focus}</p>

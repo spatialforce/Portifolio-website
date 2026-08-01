@@ -92,6 +92,25 @@ const MUTARE_STATS = [
   { value: "-27%", label: "Cultivation decline since its 2015 peak" },
 ];
 
+/* ═══════════════════════════════════════════════════════════════
+   SEO — canonical URL, meta description, Open Graph / Twitter Card
+   data, and the JSON-LD payload used further down. Kept as plain
+   constants so page copy only needs updating in one place.
+═══════════════════════════════════════════════════════════════ */
+const SITE_URL = "https://spatialforce.co.zw";
+const PAGE_PATH = "/projects/land-use-land-cover";
+const AUTHOR_NAME = "Kudzanai Chakavarika";
+
+const SEO = {
+  title: "Land Use & Land Cover Change in Zimbabwe — Bulawayo & Chiyadzwa Diamond Mine, Mutare | Kudzanai Chakavarika",
+  description:
+    "Satellite-based land use and land cover change analysis across Zimbabwe: 38 years of urban cultivation expansion in Bulawayo (1987–2025), and 30 years of diamond mining expansion at Chiyadzwa, Mutare Ward 30 (1995–2025). By GIS & remote sensing analyst Kudzanai Chakavarika.",
+  keywords:
+    "land use land cover change Zimbabwe, LULC Bulawayo, Chiyadzwa diamond mine, Marange diamond fields, Mutare Ward 30 land cover, remote sensing Zimbabwe, Landsat classification Zimbabwe, urban agriculture Bulawayo, mine dump mapping, SEPAL Google Earth Engine, Kudzanai Chakavarika",
+  canonical: `${SITE_URL}${PAGE_PATH}`,
+  image: `${SITE_URL}/assets/LULC_2025.webp`,
+};
+
 export default function LandUseLandCover() {
   const [navScrolled, setNavScrolled] = useState(false);
 
@@ -99,6 +118,110 @@ export default function LandUseLandCover() {
     const fn = () => setNavScrolled(window.scrollY > 50);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  /* ── SEO: head tags ──
+     Sets <title>, meta description/keywords/author, canonical link,
+     Open Graph and Twitter Card tags, and robots directive. Each
+     tag is created once and cleaned up on unmount so navigating to
+     another route doesn't leave stale tags behind for the next page. */
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = SEO.title;
+
+    const created: HTMLElement[] = [];
+
+    const upsertMeta = (attr: "name" | "property", key: string, content: string) => {
+      let tag = document.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute(attr, key);
+        document.head.appendChild(tag);
+        created.push(tag);
+      }
+      tag.setAttribute("content", content);
+    };
+
+    upsertMeta("name", "description", SEO.description);
+    upsertMeta("name", "keywords", SEO.keywords);
+    upsertMeta("name", "author", AUTHOR_NAME);
+    upsertMeta("name", "robots", "index, follow");
+
+    // Open Graph
+    upsertMeta("property", "og:type", "article");
+    upsertMeta("property", "og:title", SEO.title);
+    upsertMeta("property", "og:description", SEO.description);
+    upsertMeta("property", "og:url", SEO.canonical);
+    upsertMeta("property", "og:image", SEO.image);
+    upsertMeta("property", "og:site_name", "KC/Spatial");
+
+    // Twitter Card
+    upsertMeta("name", "twitter:card", "summary_large_image");
+    upsertMeta("name", "twitter:title", SEO.title);
+    upsertMeta("name", "twitter:description", SEO.description);
+    upsertMeta("name", "twitter:image", SEO.image);
+
+    // Canonical link
+    let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
+      created.push(canonical);
+    }
+    canonical.setAttribute("href", SEO.canonical);
+
+    // JSON-LD structured data — Article covering both case studies,
+    // with each case study modelled as a Dataset, plus author + breadcrumb.
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: "Land Use & Land Cover Change in Zimbabwe: Bulawayo & Chiyadzwa Diamond Mine, Mutare",
+      description: SEO.description,
+      url: SEO.canonical,
+      inLanguage: "en",
+      author: {
+        "@type": "Person",
+        name: AUTHOR_NAME,
+      },
+      about: [
+        {
+          "@type": "Dataset",
+          name: "Bulawayo Land Use & Land Cover, 1987–2025",
+          description:
+            "Land cover classification of Bulawayo across four epochs (1987, 2000, 2013, 2025) tracking urban cultivation expansion.",
+          temporalCoverage: "1987/2025",
+          spatialCoverage: "Bulawayo, Zimbabwe",
+        },
+        {
+          "@type": "Dataset",
+          name: "Chiyadzwa Diamond Mine, Mutare Ward 30 Land Use & Land Cover, 1995–2025",
+          description:
+            "Land cover classification of Mutare Ward 30 across four epochs (1995, 2005, 2015, 2025) tracking diamond mining expansion at Chiyadzwa (Marange).",
+          temporalCoverage: "1995/2025",
+          spatialCoverage: "Mutare Ward 30, Manicaland, Zimbabwe",
+        },
+      ],
+      breadcrumb: {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Projects", item: `${SITE_URL}/projects` },
+          { "@type": "ListItem", position: 3, name: "Land Use & Land Cover", item: SEO.canonical },
+        ],
+      },
+    };
+
+    const ldScript = document.createElement("script");
+    ldScript.type = "application/ld+json";
+    ldScript.text = JSON.stringify(jsonLd);
+    document.head.appendChild(ldScript);
+    created.push(ldScript);
+
+    return () => {
+      document.title = prevTitle;
+      created.forEach((el) => el.parentNode?.removeChild(el));
+    };
   }, []);
 
   return (
@@ -115,7 +238,7 @@ export default function LandUseLandCover() {
         <span className="p-ref">Project · Land Use & Land Cover</span>
         <h1>Land Use &amp; Land Cover Change</h1>
         <p className="ptitle__subtitle">
-          A running set of LULC case studies across Zimbabwe — tracking how cultivation,
+          A running set of LULC case studies across Zimbabwe - tracking how cultivation,
           mining and settlement reshape the landscape over decades of satellite record.
         </p>
       </section>
@@ -159,7 +282,7 @@ export default function LandUseLandCover() {
                 Bulawayo lies in south-western Zimbabwe and covers approximately 546 km² of
                 semi-arid terrain, spanning high, medium and low-density suburbs, industrial
                 zones and open green corridors along streams and wetlands. As of the 2022
-                census the city holds close to 666,000 residents, and rising food prices and
+                census the city holds close to 666,000 residents and rising food prices and
                 informal livelihoods have driven a steady expansion of unregulated farming
                 into these open spaces.
               </p>
@@ -167,12 +290,12 @@ export default function LandUseLandCover() {
             <div>
               <h2 className="proj-h2">Method</h2>
               <p className="proj-p">
-                Land cover was classified for four epochs — 1987, 2000, 2013 and 2025 — using
+                Land cover was classified for four epochs - 1987, 2000, 2013 and 2025 — using
                 Landsat 5 (1987, 2000) and Landsat 8 (2013, 2025) Level-2 Collection 2 imagery,
                 processed in Google Earth Engine and the SEPAL platform. Dry-season scenes
                 with under 10% cloud cover were mosaicked to minimise vegetation greening
                 noise, then supervised-classified into seven land cover classes: water,
-                woodland, grassland, bare-land, built-up, dense vegetation, and cultivation.
+                woodland, grassland, bare-land, built-up, dense vegetation and cultivation.
               </p>
             </div>
           </div>
@@ -181,7 +304,7 @@ export default function LandUseLandCover() {
 
       {/* ── MAP 1: 1987 STANDALONE ── */}
       <section className="psection psection--paper">
-        <p className="section-tag">§ Fig 4.1 — Baseline Classification</p>
+        <p className="section-tag">§ Fig 4.1 - Baseline Classification</p>
         <div className="proj-body">
           <div className="map-solo">
             <MapFrame
@@ -191,7 +314,7 @@ export default function LandUseLandCover() {
               solo
             />
             <p className="map-caption">
-              <strong>Fig 4.1</strong> — Land use / land cover map for 1987, Bulawayo. This
+              <strong>Fig 4.1</strong> - Land use / land cover map for 1987, Bulawayo. This
               baseline predates the urban agriculture policy shifts of 2000 and captures the
               city's land cover prior to major cultivation expansion.
             </p>
@@ -215,9 +338,9 @@ export default function LandUseLandCover() {
             ))}
           </div>
           <p className="map-caption">
-            <strong>Fig 4.2</strong> — Land use / land cover change maps for Bulawayo, 2000 to
-            2025. Cultivation grew from 13.8% of total land cover in 2000 to 20.1% in 2013,
-            reaching 25% by 2025 — a 6-point jump in the 2000–2013 window alone.
+            <strong>Fig 4.2</strong> - Land use / land cover change maps for Bulawayo, 2000 to
+            2025. Cultivation grew from 13.8% of total land cover in 2000 to 20.1% in 2013
+            reaching 25% by 2025 - a 6-point jump in the 2000–2013 window alone.
           </p>
         </div>
       </section>
@@ -232,7 +355,7 @@ export default function LandUseLandCover() {
           />
           <p className="tbl-note">
             Source: Dissertation Table 4.1.0. Cultivation (highlighted) rose from 6,031.9 ha in
-            1987 to 13,708.9 ha in 2025 — more than double — while woodland fell from 20,068.2
+            1987 to 13,708.9 ha in 2025 - more than double - while woodland fell from 20,068.2
             ha to 12,484.9 ha over the same period.
           </p>
         </div>
@@ -272,7 +395,7 @@ export default function LandUseLandCover() {
 
       {/* ── TABLE 4.1.3 — ACCURACY ── */}
       <section className="psection psection--paper">
-        <p className="section-tag">§ Table 4.1.3 — Accuracy Assessment</p>
+        <p className="section-tag">§ Table 4.1.3 - Accuracy Assessment</p>
         <div className="proj-body">
           <div className="tbl-wrap tbl-wrap--narrow">
             <table className="dtable">
@@ -306,10 +429,10 @@ export default function LandUseLandCover() {
 
       <section className="case-divider" id="case-mutare">
         <span className="p-ref">Case Study II</span>
-        <h2>Chiyadzwa Diamond Mine — Mutare Ward 30</h2>
+        <h2>Chiyadzwa Diamond Mine - Mutare Ward 30</h2>
         <p>
-          A 30-year classification of Ward 30, Mutare — home to the Chiyadzwa (Marange)
-          diamond fields — tracking the conversion of woodland, grassland and cultivated
+          A 30-year classification of Ward 30, Mutare - home to the Chiyadzwa (Marange)
+          diamond fields - tracking the conversion of woodland, grassland and cultivated
           land into mine dumps and bare ground as alluvial and formal diamond extraction
           expanded across the ward.
         </p>
@@ -333,8 +456,8 @@ export default function LandUseLandCover() {
             <div>
               <h2 className="proj-h2">Study Area</h2>
               <p className="proj-p">
-                Ward 30 sits within Mutare District, Manicaland Province, and covers the
-                Chiyadzwa (Marange) diamond fields — one of Zimbabwe's largest alluvial
+                Ward 30 sits within Mutare District, Manicaland Province and covers the
+                Chiyadzwa (Marange) diamond fields - one of Zimbabwe's largest alluvial
                 diamond deposits, worked informally in the mid-2000s before formal,
                 large-scale mining took hold. The ward is otherwise dominated by
                 communal woodland, grassland and cultivated land, with riparian
@@ -344,8 +467,8 @@ export default function LandUseLandCover() {
             <div>
               <h2 className="proj-h2">Method</h2>
               <p className="proj-p">
-                Land cover was classified for four epochs — 1995, 2005, 2015 and 2025 — into
-                six classes: water, grassland, cultivation, riparian vegetation, woodland,
+                Land cover was classified for four epochs - 1995, 2005, 2015 and 2025 - into
+                six classes: water, grassland, cultivation, riparian vegetation, woodland
                 and mine dump / bareland. The 1995 epoch serves as the pre-mining baseline,
                 against which the 2005 (early informal digging), 2015 (peak formal
                 operations) and 2025 (current) epochs are compared.
@@ -367,7 +490,7 @@ export default function LandUseLandCover() {
               solo
             />
             <p className="map-caption">
-              <strong>Fig 5.1</strong> — Land use / land cover map for 1995, Mutare Ward 30.
+              <strong>Fig 5.1</strong> - Land use / land cover map for 1995, Mutare Ward 30.
               This baseline predates informal diamond digging in Chiyadzwa and captures the
               ward's land cover as almost entirely woodland and cultivation.
             </p>
@@ -391,7 +514,7 @@ export default function LandUseLandCover() {
             ))}
           </div>
           <p className="map-caption">
-            <strong>Fig 5.2</strong> — Land use / land cover change maps for Mutare Ward 30,
+            <strong>Fig 5.2</strong> - Land use / land cover change maps for Mutare Ward 30,
             2005 to 2025. Mine dump / bareland cover was negligible through 2005, then grew
             nearly 9-fold between 2005 and 2015 as formal extraction scaled up, and more than
             4-fold again between 2015 and 2025.
@@ -401,7 +524,7 @@ export default function LandUseLandCover() {
 
       {/* ── AREA TABLE ── */}
       <section className="psection psection--paper">
-        <p className="section-tag">§ Table 5.1 — Land Cover Area by Class</p>
+        <p className="section-tag">§ Table 5.1 - Land Cover Area by Class</p>
         <div className="proj-body">
           <LulcTable
             columns={["1995 (ha)", "2005 (ha)", "2015 (ha)", "2025 (ha)"]}
@@ -409,7 +532,7 @@ export default function LandUseLandCover() {
           />
           <p className="tbl-note">
             Mine dump / bareland (highlighted) grew from 111.995 ha in 1995 to 3,413.571 ha in
-            2025 — roughly a 30-fold increase — while woodland fell from 22,190.6 ha to
+            2025 - roughly a 30-fold increase - while woodland fell from 22,190.6 ha to
             19,919.5 ha. Cultivation rose steadily through 2015 before contracting by 2025,
             likely reflecting land taken up by mining and associated resettlement.
           </p>
@@ -425,7 +548,7 @@ export default function LandUseLandCover() {
               <h2 className="proj-h2">Mine Dump Expansion</h2>
               <p className="proj-p">
                 Mine dump / bareland cover was marginal through 2005 (0.28% → 0.22% of the
-                ward), then accelerated sharply — reaching 1.9% by 2015 and 8.4% by 2025 as
+                ward), then accelerated sharply - reaching 1.9% by 2015 and 8.4% by 2025 as
                 formal diamond mining operations scaled up across Chiyadzwa. The bulk of this
                 growth occurred in the most recent decade.
               </p>
@@ -434,7 +557,7 @@ export default function LandUseLandCover() {
               <h2 className="proj-h2">Cultivation Reversal</h2>
               <p className="proj-p">
                 Cultivation expanded from 31.7% of the ward in 1995 to a peak of exactly 40.0%
-                in 2015, then dropped to 29.0% by 2025 — a loss of roughly 4,432 ha from its
+                in 2015, then dropped to 29.0% by 2025 - a loss of roughly 4,432 ha from its
                 peak, consistent with farmland being displaced by mine dumps, tailings and
                 associated infrastructure.
               </p>

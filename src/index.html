@@ -2,19 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- ============ PRIMARY SEO TAGS ============ -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <title>Kudzanai Chakavarika | GIS & Remote Sensing Analyst, Bulawayo Zimbabwe</title>
     <meta
       name="description"
       content="Kudzanai Chakavarika is a Zimbabwe-based GIS & Remote Sensing Analyst specializing in spatial analysis, satellite image classification, cartographic design (including 3D terrain visualization), and web GIS/dashboard development for environmental, hydrological and natural-resource projects."
     />
-    <link rel="canonical" href="https://portfolio.spatialforce.co.zw/" />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta
+      name="keywords"
+      content="GIS Zimbabwe, remote sensing Zimbabwe, spatial analysis, satellite image classification, cartographic design, 3D terrain visualization, web GIS development, land use land cover mapping, hydrology watershed analysis, natural resource management, Kudzanai Chakavarika, Spatial Force, Bulawayo GIS analyst"
+    />
     <meta name="author" content="Kudzanai Chakavarika" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#191B15" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Canonical — this is the single source of truth for the domain.
+         Every other absolute URL on this page (og:url, og:image, twitter:image,
+         JSON-LD) must match this host exactly, or search engines and social
+         previews will treat them as different pages. -->
+    <link rel="canonical" href="https://portfolio.spatialforce.co.zw/" />
 
     <!-- ============ OPEN GRAPH (Facebook, LinkedIn, WhatsApp) ============ -->
     <meta property="og:type" content="website" />
@@ -24,10 +33,12 @@
       property="og:description"
       content="Spatial analysis, remote sensing, cartographic design & 3D mapping, and web GIS development — based in Bulawayo, Zimbabwe, working globally."
     />
-    <meta property="og:url" content="https://portifolio.spatialforce.co.zw/" />
-    <meta property="og:image" content="https://portifolio.spatialforce.co.zw/assets/og-image.jpg" />
+    <meta property="og:url" content="https://portfolio.spatialforce.co.zw/" />
+    <meta property="og:image" content="https://portfolio.spatialforce.co.zw/assets/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Kudzanai Chakavarika — GIS & Remote Sensing Analyst, Bulawayo, Zimbabwe" />
     <meta property="og:locale" content="en_ZW" />
 
     <!-- ============ TWITTER / X CARD ============ -->
@@ -37,56 +48,66 @@
       name="twitter:description"
       content="Spatial analysis, remote sensing, cartographic design & 3D mapping, and web GIS development — Bulawayo, Zimbabwe."
     />
-    <meta name="twitter:image" content="https://portifolio.spatialforce.co.zw/assets/og-image.jpg" />
+    <meta name="twitter:image" content="https://portfolio.spatialforce.co.zw/assets/og-image.jpg" />
+    <meta name="twitter:image:alt" content="Kudzanai Chakavarika — GIS & Remote Sensing Analyst, Bulawayo, Zimbabwe" />
 
     <!-- ============ PERFORMANCE ============ -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- ============ STRUCTURED DATA (JSON-LD) ============ -->
+    <!-- ============ STRUCTURED DATA (JSON-LD) ============
+         Person + WebSite combined into a single @graph so both
+         entities are linked and parsed together, rather than as
+         two disconnected scripts. -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Kudzanai Chakavarika",
-        "url": "https://portifolio.spatialforce.co.zw/",
-        "image": "https://portifolio.spatialforce.co.zw/assets/og-image.jpg",
-        "jobTitle": "GIS & Remote Sensing Analyst",
-        "worksFor": {
-          "@type": "Organization",
-          "name": "Spatial Force"
-        },
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Bulawayo",
-          "addressCountry": "ZW"
-        },
-        "email": "mailto:kudzanaichakavarika67@gmail.com",
-        "telephone": "+263779135076",
-        "sameAs": [
-          "https://www.linkedin.com/in/kudzanai-chakavarika-65a847372",
-          "https://github.com/spatialforce",
-          "https://spatialforce.co.zw"
-        ],
-        "knowsAbout": [
-          "GIS",
-          "Remote Sensing",
-          "Spatial Analysis",
-          "Cartographic Design",
-          "3D Terrain Visualization",
-          "Web GIS Development",
-          "Land Use Land Cover Mapping",
-          "Hydrology and Watershed Analysis",
-          "Natural Resource Management"
+        "@graph": [
+          {
+            "@type": "Person",
+            "@id": "https://portfolio.spatialforce.co.zw/#person",
+            "name": "Kudzanai Chakavarika",
+            "url": "https://portfolio.spatialforce.co.zw/",
+            "image": "https://portfolio.spatialforce.co.zw/assets/og-image.jpg",
+            "jobTitle": "GIS & Remote Sensing Analyst",
+            "worksFor": {
+              "@type": "Organization",
+              "name": "Spatial Force",
+              "url": "https://spatialforce.co.zw"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Bulawayo",
+              "addressCountry": "ZW"
+            },
+            "email": "mailto:kudzanaichakavarika67@gmail.com",
+            "telephone": "+263779135076",
+            "sameAs": [
+              "https://www.linkedin.com/in/kudzanai-chakavarika-65a847372",
+              "https://github.com/spatialforce",
+              "https://spatialforce.co.zw"
+            ],
+            "knowsAbout": [
+              "GIS",
+              "Remote Sensing",
+              "Spatial Analysis",
+              "Cartographic Design",
+              "3D Terrain Visualization",
+              "Web GIS Development",
+              "Land Use Land Cover Mapping",
+              "Hydrology and Watershed Analysis",
+              "Natural Resource Management"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://portfolio.spatialforce.co.zw/#website",
+            "name": "Spatial Force — Kudzanai Chakavarika Portfolio",
+            "url": "https://portfolio.spatialforce.co.zw/",
+            "inLanguage": "en",
+            "author": { "@id": "https://portfolio.spatialforce.co.zw/#person" }
+          }
         ]
-      }
-    </script>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Spatial Force — Kudzanai Chakavarika Portfolio",
-        "url": "https://portifolio.spatialforce.co.zw/"
       }
     </script>
   </head>

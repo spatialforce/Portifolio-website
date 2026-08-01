@@ -131,6 +131,25 @@ const FORESTS = [
   },
 ];
 
+/* ═══════════════════════════════════════════════════════════════
+   SEO — canonical URL, meta description, Open Graph / Twitter Card
+   data, and the JSON-LD payload used further down. Kept as plain
+   constants so page copy only needs updating in one place.
+═══════════════════════════════════════════════════════════════ */
+const SITE_URL = "https://spatialforce.co.zw";
+const PAGE_PATH = "/projects/zimbabwe-gazetted-forests";
+const AUTHOR_NAME = "Kudzanai Chakavarika";
+
+const SEO = {
+  title: "Matabeleland North Gazetted Forests — Boundary Mapping & Conservation Status | Kudzanai Chakavarika",
+  description:
+    "Complete boundary documentation, legal status and encroachment data for seven gazetted forests in Matabeleland North, Zimbabwe — Gwaai, Bembesi, Kavira, Lake Alice, Gwampa, Inseze and Chesa — produced under the Forest Act (Cap 19:05) by GIS analyst Kudzanai Chakavarika.",
+  keywords:
+    "gazetted forests Zimbabwe, Matabeleland North forestry, Forest Act Cap 19:05, Gwaai Forest, Bembesi Forest Reserve, Kavira Forest, Lake Alice Forest, Gwampa Forest, Inseze extension, Chesa Forest, forest boundary mapping, Forestry Commission Zimbabwe, deforestation Zimbabwe, Kudzanai Chakavarika",
+  canonical: `${SITE_URL}${PAGE_PATH}`,
+  image: `${SITE_URL}/assets/gwaai.webp`,
+};
+
 export default function ForestResourcesProject() {
   const [navScrolled, setNavScrolled] = useState(false);
   const [lightbox, setLightbox] = useState<{ src: string; caption: string } | null>(null);
@@ -147,6 +166,102 @@ export default function ForestResourcesProject() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [lightbox]);
+
+  /* ── SEO: head tags ──
+     Sets <title>, meta description/keywords/author, canonical link,
+     Open Graph and Twitter Card tags, and robots directive. Each
+     tag is created once and cleaned up on unmount so navigating to
+     another route doesn't leave stale tags behind for the next page. */
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = SEO.title;
+
+    const created: HTMLElement[] = [];
+
+    const upsertMeta = (attr: "name" | "property", key: string, content: string) => {
+      let tag = document.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute(attr, key);
+        document.head.appendChild(tag);
+        created.push(tag);
+      }
+      tag.setAttribute("content", content);
+    };
+
+    upsertMeta("name", "description", SEO.description);
+    upsertMeta("name", "keywords", SEO.keywords);
+    upsertMeta("name", "author", AUTHOR_NAME);
+    upsertMeta("name", "robots", "index, follow");
+
+    // Open Graph
+    upsertMeta("property", "og:type", "article");
+    upsertMeta("property", "og:title", SEO.title);
+    upsertMeta("property", "og:description", SEO.description);
+    upsertMeta("property", "og:url", SEO.canonical);
+    upsertMeta("property", "og:image", SEO.image);
+    upsertMeta("property", "og:site_name", "KC/Spatial");
+
+    // Twitter Card
+    upsertMeta("name", "twitter:card", "summary_large_image");
+    upsertMeta("name", "twitter:title", SEO.title);
+    upsertMeta("name", "twitter:description", SEO.description);
+    upsertMeta("name", "twitter:image", SEO.image);
+
+    // Canonical link
+    let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
+      created.push(canonical);
+    }
+    canonical.setAttribute("href", SEO.canonical);
+
+    // JSON-LD structured data — Article covering the seven-forest
+    // dataset, with each forest modelled as a Place, plus author + breadcrumb.
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: PAGE.title,
+      description: SEO.description,
+      url: SEO.canonical,
+      inLanguage: "en",
+      author: {
+        "@type": "Person",
+        name: AUTHOR_NAME,
+      },
+      about: FORESTS.map((f) => ({
+        "@type": "Place",
+        name: f.name,
+        description: `${f.legalStatus} in ${f.location}. Total area ${f.totalArea}, remaining forest cover ${f.remaining}.`,
+        address: {
+          "@type": "PostalAddress",
+          addressRegion: "Matabeleland North",
+          addressCountry: "ZW",
+        },
+      })),
+      breadcrumb: {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Projects", item: `${SITE_URL}/projects` },
+          { "@type": "ListItem", position: 3, name: PAGE.title, item: SEO.canonical },
+        ],
+      },
+    };
+
+    const ldScript = document.createElement("script");
+    ldScript.type = "application/ld+json";
+    ldScript.text = JSON.stringify(jsonLd);
+    document.head.appendChild(ldScript);
+    created.push(ldScript);
+
+    return () => {
+      document.title = prevTitle;
+      created.forEach((el) => el.parentNode?.removeChild(el));
+    };
+  }, []);
 
   return (
     <>
