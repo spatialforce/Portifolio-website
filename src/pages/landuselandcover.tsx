@@ -210,6 +210,7 @@ export default function LandUseLandCover() {
                 year={yr}
                 src={BULAWAYO_MAPS[yr]}
                 alt={`Land use land cover map of Bulawayo, ${yr}`}
+                solo={false}
               />
             ))}
           </div>
@@ -385,6 +386,7 @@ export default function LandUseLandCover() {
                 year={yr}
                 src={MUTARE_MAPS[yr]}
                 alt={`Land use land cover map of Mutare Ward 30, ${yr}`}
+                solo={false}
               />
             ))}
           </div>
