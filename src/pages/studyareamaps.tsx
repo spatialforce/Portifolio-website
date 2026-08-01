@@ -5,9 +5,9 @@ import Gweru from "../assets/gweru.webp"
 import Mutare from "../assets/mutare.webp"
 import Zimbabwe from "../assets/Zimbabwe.webp"
 import Matopo2 from "../assets/matopo2.webp"
-import Gokwe from "../assets/Gokwe.webp"
 import Chirumhanzu from"../assets/Chirumhanzu.webp"
-import Mbire from "../assets/MBIRE.webp"
+import Gokwe from "../assets/gokwe.webp";
+import Mbire from "../assets/Mbire.webp";
 
 const PAGE = {
   title: "Study Area Maps",
