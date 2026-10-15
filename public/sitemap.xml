@@ -36,18 +36,6 @@
     <priority>0.7</priority>
   </url>
 
-  <!--
-    The following routes exist in the app but are still placeholder
-    pages ("content coming soon") — intentionally left out of the
-    sitemap until they have real content. Submitting thin pages to
-    Google can hurt quality signals for the rest of the site. Move
-    each one into the list above once it's populated:
-
-      /projects/flood-susceptibility-mapping
-      /projects/remote-sensing-indices
-      /projects/drought-analysis
-      /projects/fire-susceptibility-mapping
-      /projects/web-mapping
-  -->
+ 
 
 </urlset>

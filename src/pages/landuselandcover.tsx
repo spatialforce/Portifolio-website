@@ -14,6 +14,17 @@ const BULAWAYO_MAPS = {
   "2025": lulc2025,
 };
 
+// Bulawayo suburbs (Case III) - each image is ONE layout holding the 1990 / 2008 / 2025 maps side by side.
+// Rename these files to match yours, or edit the three paths below.
+import cowdrayMap from "../assets/cowdray_park.webp";
+import mahatshulaMap from "../assets/Mahatshula.webp";
+import richmondMap from "../assets/richmond.webp";
+
+const SUBURB_MAPS = {
+  cowdray: cowdrayMap,
+  mahatshula: mahatshulaMap,
+  richmond: richmondMap,
+};
 // Chiyadzwa / Mutare Ward 30 map imagery
 import mutare1995 from "../assets/Mutare_LULC_1995.webp";
 import mutare2005 from "../assets/Mutare_LULC_2005.webp";
@@ -104,9 +115,9 @@ const AUTHOR_NAME = "Kudzanai Chakavarika";
 const SEO = {
   title: "Land Use & Land Cover Change in Zimbabwe — Bulawayo & Chiyadzwa Diamond Mine, Mutare | Kudzanai Chakavarika",
   description:
-    "Satellite-based land use and land cover change analysis across Zimbabwe: 38 years of urban cultivation expansion in Bulawayo (1987–2025), and 30 years of diamond mining expansion at Chiyadzwa, Mutare Ward 30 (1995–2025). By GIS & remote sensing analyst Kudzanai Chakavarika.",
+    "Satellite-based land use and land cover change analysis across Zimbabwe: 38 years of urban cultivation expansion in Bulawayo (1987–2025), and 30 years of diamond mining expansion at Chiyadzwa, Mutare Ward 30 (1995–2025). Plus a 1990-2025 suburb-level comparison of Cowdray Park, Mahatshula and Richmond in Bulawayo. By GIS & remote sensing analyst Kudzanai Chakavarika.",
   keywords:
-    "land use land cover change Zimbabwe, LULC Bulawayo, Chiyadzwa diamond mine, Marange diamond fields, Mutare Ward 30 land cover, remote sensing Zimbabwe, Landsat classification Zimbabwe, urban agriculture Bulawayo, mine dump mapping, SEPAL Google Earth Engine, Kudzanai Chakavarika",
+    "land use land cover change Zimbabwe, LULC Bulawayo, Chiyadzwa diamond mine, Marange diamond fields, Mutare Ward 30 land cover, remote sensing Zimbabwe, Landsat classification Zimbabwe, urban agriculture Bulawayo, mine dump mapping, SEPAL Google Earth Engine, Cowdray Park, Mahatshula, Richmond, Bulawayo suburbs land cover, Kudzanai Chakavarika",
   canonical: `${SITE_URL}${PAGE_PATH}`,
   image: `${SITE_URL}/assets/LULC_2025.webp`,
 };
@@ -201,6 +212,14 @@ export default function LandUseLandCover() {
           temporalCoverage: "1995/2025",
           spatialCoverage: "Mutare Ward 30, Manicaland, Zimbabwe",
         },
+        {
+          "@type": "Dataset",
+          name: "Bulawayo Suburbs Land Use & Land Cover, 1990-2025",
+          description:
+            "Three-class land cover classification (woodland, grassland, built-up) of Cowdray Park, Mahatshula and Richmond, Bulawayo, across three epochs (1990, 2008, 2025) tracking built-up expansion.",
+          temporalCoverage: "1990/2025",
+          spatialCoverage: "Cowdray Park, Mahatshula and Richmond, Bulawayo, Zimbabwe",
+        },
       ],
       breadcrumb: {
         "@type": "BreadcrumbList",
@@ -247,6 +266,7 @@ export default function LandUseLandCover() {
       <nav className="case-nav">
         <a href="#case-bulawayo">Case I · Bulawayo Urban Cultivation</a>
         <a href="#case-mutare">Case II · Chiyadzwa Diamond Mine, Mutare Ward 30</a>
+        <a href="#case-suburbs">Case III &middot; Bulawayo Suburbs, 1990&ndash;2025</a>
       </nav>
 
       {/* ═══════════════════════════ CASE I — BULAWAYO ═══════════════════════════ */}
@@ -566,6 +586,8 @@ export default function LandUseLandCover() {
         </div>
       </section>
 
+      <SuburbCase />
+
       <footer className="pfooter">
         <span>© 2026 Kudzanai Chakavarika</span>
         <a href="/">spatialforce.co.zw</a>
@@ -831,6 +853,30 @@ body { font-family: var(--fb); color: var(--ink); overflow-x: hidden; -webkit-fo
 .pfooter { background: var(--night); padding: 1.4rem 4vw; display: flex; align-items: center; justify-content: space-between; font-family: var(--fm); font-size: 0.66rem; color: rgba(247,243,233,0.4); }
 .pfooter a { color: rgba(247,243,233,0.4); text-decoration: none; }
 
+/* -- CASE III: suburb layouts (three-maps-in-one) -- */
+.map-card--wide { max-width: 980px; }
+.map-card--wide .map-frame { padding: 1.6rem 1.8rem; }
+.map-card--wide .map-img { width: 100%; height: auto; max-height: 560px; object-fit: contain; }
+.map-card--wide .map-card__head { justify-content: space-between; gap: 1rem; }
+.map-card__epochs { font-family: var(--fm); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--brass); text-transform: uppercase; }
+.sub-read { margin: 1.1rem 0 1.4rem; }
+.dtable__num { white-space: nowrap; }
+.dtable__pct { color: #6b665a; font-size: 0.76rem; margin-left: 0.35rem; }
+.dtable__row--hl .dtable__pct { color: var(--rust-d); }
+.cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.2rem; margin-bottom: 1rem; }
+.cmp__col { background: var(--cream); border: 1px solid var(--line); border-radius: 3px; padding: 1rem 1.1rem 1.1rem; }
+.cmp__col--all { border-color: var(--rust); }
+.cmp__name { font-family: var(--fd); font-weight: 800; font-size: 1rem; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ink); margin-bottom: 0.4rem; }
+.cmp__row { display: grid; grid-template-columns: 2.4rem 1fr 3.3rem; align-items: center; gap: 0.6rem; margin-top: 0.6rem; font-family: var(--fm); font-size: 0.7rem; color: #3A3630; }
+.cmp__track { height: 10px; background: rgba(32,29,24,0.08); border-radius: 2px; overflow: hidden; }
+.cmp__bar { height: 100%; background: var(--rust); }
+.cmp__val { text-align: right; font-weight: 600; color: var(--rust-d); }
+@media (max-width: 640px) {
+  .map-card--wide .map-frame { overflow-x: auto; }
+  .map-card--wide .map-img { width: auto; min-width: 600px; max-width: none; max-height: none; }
+  .map-card--wide .map-frame { padding: 0.8rem; }
+}
+
 /* ══════════════════ TABLET ≤ 1024px ══════════════════ */
 @media (max-width: 1024px) {
   .proj-grid { grid-template-columns: 1fr; gap: 1.6rem; }
@@ -855,3 +901,278 @@ body { font-family: var(--fb); color: var(--ink); overflow-x: hidden; -webkit-fo
   .pfooter { flex-direction: column; gap: 0.5rem; text-align: center; }
 }
 `;
+
+/* ═══════════════════════════════════════════════════════════════
+   CASE III — BULAWAYO SUBURBS: COWDRAY PARK / MAHATSHULA / RICHMOND
+   Three-class LULC (woodland / grassland / built-up), 1990 / 2008 / 2025.
+   ha = area in hectares, pct = share of the suburb's mapped area.
+═══════════════════════════════════════════════════════════════ */
+
+type SuburbRow = { cls: string; ha: number[]; pct: number[]; highlight?: boolean };
+
+type Suburb = {
+  id: string;
+  name: string;
+  src?: string;
+  alt: string;
+  fig: string;
+  tbl: string;
+  caption: string;
+  reading: string;
+  note: string;
+  rows: SuburbRow[];
+};
+
+const SUBURB_EPOCHS = ["1990", "2008", "2025"];
+
+const SUBURB_STATS = [
+  { value: "4.5x", label: "Growth in built-up area across the three suburbs, 1990-2025" },
+  { value: "52%", label: "Share of the three suburbs built-up by 2025 (11.7% in 1990)" },
+  { value: "16x", label: "Built-up growth in Mahatshula, the fastest of the three" },
+  { value: "-793 ha", label: "Grassland lost across the three suburbs since 1990" },
+];
+
+const SUBURBS: Suburb[] = [
+  {
+    id: "cowdray-park",
+    name: "Cowdray Park",
+    src: SUBURB_MAPS.cowdray,
+    alt: "Land use land cover maps of Cowdray Park, 1990, 2008 and 2025",
+    fig: "Fig 6.1",
+    tbl: "Table 6.1",
+    caption:
+      "Land use / land cover maps for Cowdray Park in 1990, 2008 and 2025, shown side by side in a single layout.",
+    reading:
+      "Cowdray Park is the largest of the three (about 1,593 ha) and shows the heaviest absolute conversion. Built-up land grew almost four-fold, from 226.5 ha (14.2%) to 890.5 ha (55.9%), and overtook grassland as the dominant class between 1990 and 2008. Growth was fastest in the first 18 years, at roughly 26.7 ha a year, and eased to about 10.8 ha a year after 2008 as undeveloped land ran down. Grassland fell by 468.9 ha and woodland by 195.1 ha - each roughly halving.",
+    note: "Mapped area is constant at 1,593.36 ha across all three epochs. Built-up (highlighted) is the only class that grew.",
+    rows: [
+      { cls: "Woodland", ha: [388.22, 240.63, 193.16], pct: [24.36, 15.1, 12.12] },
+      { cls: "Grassland", ha: [978.65, 646.45, 509.74], pct: [61.42, 40.57, 31.99] },
+      { cls: "Built-up", ha: [226.49, 706.28, 890.46], pct: [14.21, 44.33, 55.89], highlight: true },
+    ],
+  },
+  {
+    id: "mahatshula",
+    name: "Mahatshula",
+    src: SUBURB_MAPS.mahatshula,
+    alt: "Land use land cover maps of Mahatshula, 1990, 2008 and 2025",
+    fig: "Fig 6.2",
+    tbl: "Table 6.2",
+    caption:
+      "Land use / land cover maps for Mahatshula in 1990, 2008 and 2025, shown side by side in a single layout.",
+    reading:
+      "Mahatshula started from an almost undeveloped baseline (3.0% built-up in 1990) and shows the sharpest relative change of the three: built-up land grew about 16-fold to 320.5 ha (47.7%) by 2025. Unlike Cowdray Park the pace picked up rather than eased - roughly 7.3 ha a year to 2008, then 10.0 ha a year after. Grassland collapsed from 400.7 ha to 131.1 ha (-67%). Woodland rose to 323.4 ha in 2008 before falling back to 220.1 ha, so the post-2008 build-up came out of tree cover as well as open grassland.",
+    note: "Mapped area is 671.2 / 671.5 / 671.7 ha across the three epochs. Built-up (highlighted) rose from 19.9 ha to 320.5 ha.",
+    rows: [
+      { cls: "Woodland", ha: [250.55, 323.35, 220.11], pct: [37.33, 48.15, 32.77] },
+      { cls: "Grassland", ha: [400.69, 197.66, 131.07], pct: [59.7, 29.44, 19.51] },
+      { cls: "Built-up", ha: [19.91, 150.48, 320.54], pct: [2.97, 22.41, 47.72], highlight: true },
+    ],
+  },
+  {
+    id: "richmond",
+    name: "Richmond",
+    src: SUBURB_MAPS.richmond,
+    alt: "Land use land cover maps of Richmond, 1990, 2008 and 2025",
+    fig: "Fig 6.3",
+    tbl: "Table 6.3",
+    caption:
+      "Land use / land cover maps for Richmond in 1990, 2008 and 2025, shown side by side in a single layout.",
+    reading:
+      "Richmond is the smallest suburb (about 282 ha). Built-up land more than doubled, from 50.9 ha (18.1%) to 115.1 ha (41.0%), at a steady 1.6 ha a year to 2008 and 2.1 ha a year after. It is the only suburb where grassland recovered slightly after 2008 (68.2 ha to 76.5 ha), so the post-2008 growth came mainly at the expense of woodland, which dropped from 133.8 ha to 88.8 ha.",
+    note: "Mapped area is 282.19 ha in 1990 and 2008 but 280.35 ha in 2025, so 2025 shares are of a slightly smaller footprint. Built-up is highlighted.",
+    rows: [
+      { cls: "Woodland", ha: [100.0, 133.79, 88.83], pct: [35.44, 47.41, 31.68] },
+      { cls: "Grassland", ha: [131.26, 68.15, 76.47], pct: [46.52, 24.15, 27.28] },
+      { cls: "Built-up", ha: [50.93, 80.25, 115.05], pct: [18.05, 28.44, 41.04], highlight: true },
+    ],
+  },
+];
+
+const fmtHa = (n: number) =>
+  n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const fmtDelta = (n: number) => (n > 0 ? "+" : "") + fmtHa(n);
+
+/* One image that already holds all three epoch maps - rendered wide, no per-year header. */
+function TripleMapFrame({ name, src, alt }: { name: string; src?: string; alt: string }) {
+  return (
+    <div className="map-card map-card--solo map-card--wide">
+      <div className="map-card__head">
+        <span className="map-card__year">{name}</span>
+        <span className="map-card__epochs">{SUBURB_EPOCHS.join(" \u00B7 ")}</span>
+      </div>
+      <div className="map-frame">
+        {src ? (
+          <img src={src} alt={alt} className="map-img" />
+        ) : (
+          <div className="map-ph">
+            <span className="map-ph__note">Map coming soon</span>
+          </div>
+        )}
+      </div>
+      <div className="map-card__foot">
+        {src ? (
+          <a className="map-view" href={src} target="_blank" rel="noopener noreferrer">
+            View full map &#8599;
+          </a>
+        ) : (
+          <span className="map-view map-view--disabled">Awaiting upload</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SuburbTable({ rows }: { rows: SuburbRow[] }) {
+  return (
+    <div className="tbl-wrap">
+      <table className="dtable">
+        <thead>
+          <tr>
+            <th>LULC Class</th>
+            {SUBURB_EPOCHS.map((y) => (
+              <th key={y}>{y} (ha, %)</th>
+            ))}
+            <th>Net change 1990-2025 (ha)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.cls} className={r.highlight ? "dtable__row--hl" : ""}>
+              <td className="dtable__label">{r.cls}</td>
+              {r.ha.map((v, i) => (
+                <td key={i} className="dtable__num">
+                  {fmtHa(v)}
+                  <span className="dtable__pct">{r.pct[i].toFixed(1)}%</span>
+                </td>
+              ))}
+              <td className="dtable__num">{fmtDelta(r.ha[2] - r.ha[0])}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SuburbCase() {
+  const total = (s: Suburb, i: number) => s.rows.reduce((a, r) => a + r.ha[i], 0);
+  const built = (s: Suburb, i: number) => s.rows.find((r) => r.highlight)?.ha[i] ?? 0;
+
+  const compare = [
+    ...SUBURBS.map((s) => ({
+      name: s.name,
+      all: false,
+      shares: [0, 1, 2].map((i) => (built(s, i) / total(s, i)) * 100),
+    })),
+    {
+      name: "All three combined",
+      all: true,
+      shares: [0, 1, 2].map(
+        (i) =>
+          (SUBURBS.reduce((a, s) => a + built(s, i), 0) /
+            SUBURBS.reduce((a, s) => a + total(s, i), 0)) *
+          100
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <section className="case-divider" id="case-suburbs">
+        <span className="p-ref">Case Study III</span>
+        <h2>Bulawayo Suburbs - Cowdray Park, Mahatshula &amp; Richmond</h2>
+        <p>
+          A suburb-scale look at three Bulawayo neighbourhoods across 1990, 2008 and 2025 -
+          showing how built-up land has taken over grassland and woodland, and how differently
+          that conversion has played out from one suburb to the next.
+        </p>
+      </section>
+
+      <section className="stat-strip">
+        {SUBURB_STATS.map((s) => (
+          <div key={s.label} className="stat-strip__item">
+            <span className="stat-strip__value">{s.value}</span>
+            <span className="stat-strip__label">{s.label}</span>
+          </div>
+        ))}
+      </section>
+
+      <section className="psection psection--paper">
+        <p className="section-tag">&sect; Overview</p>
+        <div className="proj-body">
+          <div className="proj-grid">
+            <div>
+              <h2 className="proj-h2">Study Area</h2>
+              <p className="proj-p">
+                Three Bulawayo suburbs - Cowdray Park (about 1,593 ha), Mahatshula (about 672
+                ha) and Richmond (about 282 ha) - covering roughly 2,545 ha between them.
+                Mapping at suburb scale shows how the citywide trend in Case I plays out on the
+                ground, and how quickly open land is being converted in each place.
+              </p>
+            </div>
+            <div>
+              <h2 className="proj-h2">Method</h2>
+              <p className="proj-p">
+                Each suburb was classified for three epochs - 1990, 2008 and 2025 - into three
+                classes: woodland, grassland and built-up. Areas are reported in hectares from
+                pixel counts, alongside each class&apos;s share of the suburb&apos;s mapped area.
+                Unlike Case I there is no separate cultivation class, and each suburb&apos;s three
+                epochs are presented as a single side-by-side map layout.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {SUBURBS.map((s) => (
+        <section key={s.id} className="psection psection--paper" id={`suburb-${s.id}`}>
+          <p className="section-tag">
+            &sect; {s.fig} &mdash; {s.name}, 1990 &middot; 2008 &middot; 2025
+          </p>
+          <div className="proj-body">
+            <TripleMapFrame name={s.name} src={s.src} alt={s.alt} />
+            <p className="map-caption" style={{ marginTop: "1rem" }}>
+              <strong>{s.fig}</strong> - {s.caption}
+            </p>
+            <p className="map-caption sub-read">{s.reading}</p>
+            <p className="section-tag" style={{ padding: "0.4rem 0 0.9rem" }}>
+              &sect; {s.tbl} &mdash; {s.name} Land Cover Area by Class
+            </p>
+            <SuburbTable rows={s.rows} />
+            <p className="tbl-note">{s.note}</p>
+          </div>
+        </section>
+      ))}
+
+      <section className="psection psection--paper">
+        <p className="section-tag">&sect; Table 6.4 &mdash; Built-up Share of Each Suburb</p>
+        <div className="proj-body">
+          <div className="cmp">
+            {compare.map((c) => (
+              <div key={c.name} className={`cmp__col${c.all ? " cmp__col--all" : ""}`}>
+                <h3 className="cmp__name">{c.name}</h3>
+                {c.shares.map((v, i) => (
+                  <div key={SUBURB_EPOCHS[i]} className="cmp__row">
+                    <span>{SUBURB_EPOCHS[i]}</span>
+                    <div className="cmp__track">
+                      <div className="cmp__bar" style={{ width: `${v}%` }} />
+                    </div>
+                    <span className="cmp__val">{v.toFixed(1)}%</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          <p className="tbl-note">
+            Built-up land as a share of each suburb&apos;s mapped area. Mahatshula started lowest
+            (3.0%) and caught up fastest, reaching 47.7% by 2025, while Cowdray Park remains the
+            most built-up at 55.9%. Figures are net change between epochs, so they show how much
+            land ended up built-up, not which class each new built-up pixel came from.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}
