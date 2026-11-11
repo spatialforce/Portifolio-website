@@ -72,7 +72,7 @@ a:hover .arrow::after,.arrow:hover::after{transform:translateX(3px)}
              linear-gradient(0deg,rgba(13,16,18,.85) 0%,rgba(13,16,18,0) 26%)}
 .hero__in{position:relative;width:100%;min-width:0;box-sizing:border-box;max-width:var(--wrap);margin:0 auto;padding:0 var(--gut);pointer-events:none}
 .hero__in a{pointer-events:auto}
-.hero__name{font-size:clamp(50px,8.6vw,120px);line-height:.96;letter-spacing:-.03em;font-weight:600;margin:0 0 26px}
+.hero__name{font-size:clamp(50px,8.6vw,120px);line-height:.96;letter-spacing:-.03em;font-weight:600;margin:0 0 26px -.055em}
 .hero__lede{font-size:clamp(18px,1.6vw,21px);line-height:1.55;max-width:42ch;color:#e3e6e3;margin:0 0 32px}
 .hero__act{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px}
 .hero__act .btn{white-space:nowrap}

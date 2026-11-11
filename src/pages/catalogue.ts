@@ -80,7 +80,7 @@ export const WEBMAPS: WebMap[] = [
     short: "A 3D visualisation of earthquake locations, magnitudes and depths across the world.",
     text: "Earthquakes from around the world on a flat map or a globe. Filter by magnitude and year to see where the ground shakes most.",
     stack: ["three.js", "WebGL", "USGS API"], data: ["USGS Earthquake Hazards Program"] },
-  { slug: "event-gallery", title: "Major Natural Disasters from Space", src: BASE + "event-gallery/", img: gallery,
+  { slug: "event-gallery", title: "A Gallery of Disasters", src: BASE + "event-gallery/", img: gallery,
     short: "Tracking the spatial extent and impacts of major natural disasters using satellite data.",
     text: "Floods and fires and eruptions mapped from satellite imagery with before and after views.",
     stack: ["React", "Leaflet", "Google Earth Engine", "Python"], data: ["Copernicus Sentinel-2", "Landsat", "GHSL", "NASA GIBS"] },
