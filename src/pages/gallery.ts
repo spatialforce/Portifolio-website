@@ -41,8 +41,8 @@ export type Render = { title: string; text: string; video?: string; poster: stri
    Both loop without a jump: the model turns there and back, the fly through fades its end into its start.
    ?v= changes whenever a video file is replaced so browsers do not keep the old one. */
 export const RENDERS: Render[] = [
-  { title: "3D model", video: "/videos/kariba_3d_rotating.mp4?v=7", poster: karibaPoster, light: true, ratio: "16 / 9",
+  { title: "3D model", video: import.meta.env.BASE_URL + "videos/kariba_3d_rotating.mp4?v=7", poster: karibaPoster, light: true, ratio: "16 / 9",
     text: "A block model turning slowly so the relief reads from every side.", tools: ["Elevation model", "Hillshade", "3D render"] },
-  { title: "3D fly through", video: "/videos/terrain_3d_flyover.mp4?v=2", poster: flyoverPoster, ratio: "16 / 9",
+  { title: "3D fly through", video: import.meta.env.BASE_URL + "videos/terrain_3d_flyover.mp4?v=2", poster: flyoverPoster, ratio: "16 / 9",
     text: "A low flight over terrain with colour following elevation from valley floor to summit.", tools: ["Elevation model", "Hypsometric tints", "3D render"] },
 ];

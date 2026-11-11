@@ -17,4 +17,5 @@ function eventGallery(): Plugin {
   };
 }
 
-export default defineConfig({ plugins: [eventGallery(), react()] });
+// GitHub Pages serves the site from /Portifolio-website/, set through PAGES_BASE in the Pages workflow
+export default defineConfig({ base: process.env.PAGES_BASE || "/", plugins: [eventGallery(), react()] });

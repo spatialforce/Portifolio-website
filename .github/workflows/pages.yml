@@ -1,0 +1,53 @@
+# Builds the same site for GitHub Pages at https://spatialforce.github.io/Portifolio-website/
+# Vercel builds from main on its own and is not affected by this file.
+name: GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PAGES_BASE: /Portifolio-website/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      # The event gallery asks for /data/ and /event-gallery/ from the site root, so point it at the subfolder
+      - name: Point the event gallery at the Pages folder
+        run: |
+          find dist/event-gallery -maxdepth 2 -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i \
+            -e 's#"/data/#"/Portifolio-website/event-gallery/data/#g' \
+            -e 's#`/data/#`/Portifolio-website/event-gallery/data/#g' \
+            -e 's#"/event-gallery/#"/Portifolio-website/event-gallery/#g' {} +
+      # Pages has no rewrites, so unknown paths load the app through 404.html
+      - run: cp dist/index.html dist/404.html && touch dist/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
