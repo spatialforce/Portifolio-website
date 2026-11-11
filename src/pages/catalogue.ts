@@ -28,24 +28,24 @@ import cs2 from "../assets/casestudies/rainfall-zimbabwe/map2_mean.webp";
 // "/" on Vercel, "/Portifolio-website/" on GitHub Pages
 const BASE = import.meta.env.BASE_URL;
 
-export type Project = { title: string; slug: string; text: string; sub?: string; img?: string; place?: string; years?: string };
+export type Project = { title: string; slug: string; text: string; sub?: string; card?: string; img?: string; place?: string; years?: string };
 
 /* Case studies, in order. Each has its own page under /case-studies/<slug>. */
 export const CASESTUDIES: Project[] = [
-  { title: "A Spatial Analysis of Population Distribution, Density and Growth in Zimbabwe Between the 2012 and 2022 Population Censuses", slug: "population-zimbabwe", sub: "Census-based mapping of district population density, growth and sex ratio.", img: cs1, place: "Zimbabwe", years: "2012 and 2022",
+  { title: "A Spatial Analysis of Population Distribution, Density and Growth in Zimbabwe Between the 2012 and 2022 Population Censuses", slug: "population-zimbabwe", card: "Population Distribution and Growth in Zimbabwe", sub: "District density, growth and sex ratio from the 2012 and 2022 censuses.", img: cs1, place: "Zimbabwe", years: "2012 and 2022",
     text: "District density and growth from the 2012 and 2022 censuses, a census-scaled 300 m population grid and the sex ratio of each district." },
-  { title: "Assessing the Impact of Gold Mining on River Siltation in the Mazowe Valley from 2000 to 2025", slug: "mazowe-valley", sub: "A remote sensing assessment of land disturbance and river turbidity along the Mazowe River.", img: cs4, place: "Mazowe Valley", years: "2000 to 2025",
+  { title: "Assessing the Impact of Gold Mining on River Siltation in the Mazowe Valley from 2000 to 2025", slug: "mazowe-valley", card: "Gold Mining and River Siltation in the Mazowe Valley", sub: "Land disturbance and turbidity along 359 km of the Mazowe River.", img: cs4, place: "Mazowe Valley", years: "2000 to 2025",
     text: "Bare ground and turbidity along 359 km of the Mazowe River, with the clearest disturbance of the river corridor around Shamva." },
-  { title: "A Spatial Analysis of Land Use and Land Cover Change in Bulawayo and the Marange Diamond Fields from 1987 to 2025", slug: "land-use-land-cover", sub: "A multi-temporal Landsat classification of land cover change in an urban and a mining landscape.", img: lulc, place: "Bulawayo and Mutare", years: "1987 to 2025",
+  { title: "A Spatial Analysis of Land Use and Land Cover Change in Bulawayo and the Marange Diamond Fields from 1987 to 2025", slug: "land-use-land-cover", card: "Land Use and Land Cover Change in Bulawayo and Marange", sub: "Urban growth, cultivation and diamond mining mapped from Landsat.", img: lulc, place: "Bulawayo and Mutare", years: "1987 to 2025",
     text: "Cultivation spreading over Bulawayo's grassland and woodland, house building in three northern suburbs and diamond mining across Ward 30 of Mutare Rural District." },
-  { title: "Rainfall Variability and Drought Patterns in Zimbabwe from the 1991/92 to 2024/25 Agricultural Seasons", slug: "rainfall-zimbabwe", sub: "A climatological analysis of seasonal rainfall, variability and drought frequency by province.", img: cs2, place: "Zimbabwe", years: "1991 to 2025",
+  { title: "Rainfall Variability and Drought Patterns in Zimbabwe from the 1991/92 to 2024/25 Agricultural Seasons", slug: "rainfall-zimbabwe", card: "Rainfall Variability and Drought in Zimbabwe", sub: "Seasonal rainfall, variability and drought frequency over 34 seasons.", img: cs2, place: "Zimbabwe", years: "1991 to 2025",
     text: "Mean October to April rainfall, its variability, the 2023/24 drought, drought frequency and trend by province from 34 seasons of rainfall data." },
 ];
 
 export const PROJECTS: Project[] = [
-  { title: "Flood Susceptibility Mapping of Chimanimani District and Gweru Urban Using Weighted Overlay Analysis", slug: "flood-susceptibility-mapping", sub: "A GIS multi-criteria assessment of flood-prone areas in a mountainous district and an urban centre.", img: flood, place: "Chimanimani and Gweru",
+  { title: "Flood Susceptibility Mapping of Chimanimani District and Gweru Urban Using Weighted Overlay Analysis", slug: "flood-susceptibility-mapping", card: "Flood Susceptibility in Chimanimani and Gweru", sub: "Weighted overlay of rainfall, slope, soils, drainage and land cover.", img: flood, place: "Chimanimani and Gweru",
     text: "Weighted overlay of rainfall, slope, elevation, soils, drainage and land cover to show where floods are most likely in a mountain district and a flat city." },
-  { title: "Mapping Encroachment and Land Loss in Seven Gazetted Forests of Matabeleland North, Zimbabwe (2024)", slug: "zimbabwe-gazetted-forests", sub: "A satellite-based assessment of agricultural encroachment into protected forest reserves.", img: forest, place: "Matabeleland North",
+  { title: "Mapping Encroachment and Land Loss in Seven Gazetted Forests of Matabeleland North, Zimbabwe (2024)", slug: "zimbabwe-gazetted-forests", card: "Forest Encroachment in Matabeleland North", sub: "Clearing for cultivation in seven gazetted forests.", img: forest, place: "Matabeleland North",
     text: "How much of seven gazetted forests has been cleared for cultivation, where the clearing sits and what it means for forest protection." },
   { title: "Web mapping", slug: "web-mapping", img: quakes, place: "In the browser",
     text: "Interactive maps built on open data." },

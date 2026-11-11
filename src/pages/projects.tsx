@@ -25,7 +25,7 @@ export default function ProjectsIndex() {
               <Link to={p.href} className="wm-card__img cs-card__img">
                 <img src={p.img} alt={p.title} loading="lazy" />
               </Link>
-              <h2 className="h3"><Link to={p.href}>{p.title}</Link></h2>
+              <h2 className="h3"><Link to={p.href}>{p.card ?? p.title}</Link></h2>
               {p.sub && <p className="cs-card__sub">{p.sub}</p>}
             </article>
           ))}

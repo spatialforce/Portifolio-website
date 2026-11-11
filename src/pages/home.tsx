@@ -16,7 +16,8 @@ function Hero() {
       <div className="hero__bg"><Terrain3D /></div>
       <div className="hero__in">
         <h1 className="hero__name">Kudzanai<br />Chakavarika</h1>
-        <p className="hero__lede">GIS and remote sensing analyst in Bulawayo. I turn satellite data into maps people can read and use.</p>
+        <p className="hero__role">GIS &amp; Remote Sensing Analyst</p>
+        <p className="hero__lede">I use geospatial technology to analyse real-world challenges, uncover spatial patterns and create impactful maps and applications.</p>
         <div className="hero__act">
           <Link to="/projects" className="btn btn--light">See my case studies</Link>
           <a href="/cv.pdf" target="_blank" rel="noreferrer" className="btn btn--ghost"><i className="bi bi-download" aria-hidden="true" />Download CV</a>
@@ -224,7 +225,7 @@ export default function Home() {
               <Link to={p.href} className="wm-card__img cs-card__img">
                 <img src={p.img} alt={p.title} loading="lazy" draggable={false} />
               </Link>
-              <h3 className="h3"><Link to={p.href}>{p.title}</Link></h3>
+              <h3 className="h3"><Link to={p.href}>{p.card ?? p.title}</Link></h3>
               {p.sub && <p className="cs-card__sub">{p.sub}</p>}
             </article>
           ) }))} />

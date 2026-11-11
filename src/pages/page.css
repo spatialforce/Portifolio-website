@@ -473,3 +473,10 @@ a:hover .arrow::after,.arrow:hover::after{transform:translateX(3px)}
 .glist .wm-card .h3 a{color:inherit;text-decoration:none}
 @media (max-width:720px){.pk .wm-grid,.glist,.cs-grid{grid-template-columns:1fr;gap:44px}}
 .cs-card__sub{margin:6px 0 0;color:var(--muted,#5b6166);font-size:16px;line-height:1.5}
+/* role line under the name in the banner */
+.hero__role{font-size:clamp(20px,2vw,26px);font-weight:600;color:#fff;margin:0 0 12px}
+@media (max-width:720px){.hero__role{font-size:19px;margin-bottom:10px}}
+/* case study cards: equal frames so the grid lines up, images shown whole */
+.cs-card__img{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:#fff}
+.cs-card__img img{width:100%;height:100%;object-fit:contain}
+.cs-grid .h3{font-size:19px;line-height:1.3;margin-bottom:0}
