@@ -5,7 +5,7 @@ import SiteNav, { SiteFooter, NAME } from "./SiteChrome";
 import { CASESTUDIES, PROJECTS, STORYMAPS, WEBMAPS } from "./catalogue";
 import { GALLERY, RENDERS } from "./gallery";
 import { useReveal } from "./reveal";
-import profile from "../assets/profile_1.webp";
+import profile from "../assets/myself.webp";
 import "animate.css";
 import "./page.css";
 
