@@ -70,11 +70,13 @@ a:hover .arrow::after,.arrow:hover::after{transform:translateX(3px)}
 .hero__bg::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(90deg,rgba(13,16,18,.8) 0%,rgba(13,16,18,.35) 40%,rgba(13,16,18,0) 62%),
              linear-gradient(0deg,rgba(13,16,18,.85) 0%,rgba(13,16,18,0) 26%)}
-.hero__in{position:relative;width:100%;max-width:var(--wrap);margin:0 auto;padding:0 var(--gut);pointer-events:none}
+.hero__in{position:relative;width:100%;min-width:0;box-sizing:border-box;max-width:var(--wrap);margin:0 auto;padding:0 var(--gut);pointer-events:none}
 .hero__in a{pointer-events:auto}
 .hero__name{font-size:clamp(50px,8.6vw,120px);line-height:.96;letter-spacing:-.03em;font-weight:600;margin:0 0 26px}
 .hero__lede{font-size:clamp(18px,1.6vw,21px);line-height:1.55;max-width:42ch;color:#e3e6e3;margin:0 0 32px}
-.hero__act{display:flex;flex-wrap:wrap;gap:12px}
+.hero__act{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px}
+.hero__act .btn{white-space:nowrap}
+.hero__tag{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:#e3e6e3;white-space:nowrap}
 .hero__read{font-size:14px;color:var(--fog);margin:0;pointer-events:none}
 .hero__read b{font-weight:600;color:#e3e6e3}
 
@@ -352,7 +354,7 @@ a:hover .arrow::after,.arrow:hover::after{transform:translateX(3px)}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
   .wm-play{opacity:1}
   .hero__bg::after{background:linear-gradient(0deg,rgba(13,16,18,.94) 0%,rgba(13,16,18,.6) 45%,rgba(13,16,18,.25) 100%)}
-  .hero{justify-content:flex-end;padding-bottom:72px}
+  .hero{justify-content:center;padding:80px 0 40px}
   .hero__read{display:none}
 }
 
@@ -368,10 +370,10 @@ a:hover .arrow::after,.arrow:hover::after{transform:translateX(3px)}
   .snav__links a{padding:14px 0;font-size:19px;opacity:1;border-bottom:1px solid var(--line)}
   .snav__links .snav__cv{margin-top:16px;padding:12px 16px;text-align:center;border-bottom:1px solid #c9cccf}
 
-  .hero{min-height:560px;padding-bottom:56px}
+  .hero{min-height:560px}
   .hero__name{font-size:clamp(44px,13vw,64px);margin-bottom:18px}
   .hero__lede{font-size:17.5px;margin-bottom:24px}
-  .hero__act .btn{flex:1 1 0;min-width:140px}
+  .hero__act .btn{padding-left:28px;padding-right:28px}
 
   .band{padding:72px 0}
   .sec-top{margin-bottom:32px}

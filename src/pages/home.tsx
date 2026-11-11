@@ -20,7 +20,7 @@ function Hero() {
         <p className="hero__lede">I use geospatial technology to analyse real-world challenges, uncover spatial patterns and create impactful maps and applications.</p>
         <div className="hero__act">
           <a href="#webmaps" className="btn btn--light" onClick={(e) => { e.preventDefault(); document.getElementById("webmaps")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }}>See my work</a>
-          <a href="/cv.pdf" target="_blank" rel="noreferrer" className="btn btn--ghost"><i className="bi bi-download" aria-hidden="true" />Download CV</a>
+          <span className="hero__tag"><i className="bi bi-geo-alt" aria-hidden="true" />Based in Zimbabwe</span>
         </div>
       </div>
     </header>
