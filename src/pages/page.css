@@ -482,3 +482,6 @@ a:hover .arrow::after,.arrow:hover::after{transform:translateX(3px)}
 .cs-grid .h3{font-size:19px;line-height:1.3;margin-bottom:0}
 /* the About photo is landscape and shown whole */
 .about__photo img{aspect-ratio:auto;height:auto}
+/* wider photo column and a 4:3 frame so the landscape photo has more height */
+@media (min-width:961px){.about__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px}}
+.about__photo img{aspect-ratio:4/3;object-fit:cover;object-position:56% 50%}
