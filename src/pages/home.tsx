@@ -11,7 +11,6 @@ import "./page.css";
 
 /* ---------------------------------- hero ---------------------------------- */
 function Hero() {
-  const studies = CASESTUDIES.length + PROJECTS.filter((p) => p.img && p.slug !== "web-mapping" && p.slug !== "story-maps").length;
   return (
     <header className="hero">
       <div className="hero__bg"><Terrain3D /></div>
@@ -21,7 +20,6 @@ function Hero() {
         <p className="hero__lede">I use geospatial technology to analyse real-world challenges, uncover spatial patterns and create impactful maps and applications.</p>
         <div className="hero__act">
           <a href="#webmaps" className="btn btn--light" onClick={(e) => { e.preventDefault(); document.getElementById("webmaps")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }}>See my work</a>
-          <span className="hero__tag">{WEBMAPS.length} web maps · {studies} case studies · {STORYMAPS.length} story maps</span>
         </div>
       </div>
     </header>
