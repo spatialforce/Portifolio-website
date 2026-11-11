@@ -225,6 +225,7 @@ export default function Home() {
                 <img src={p.img} alt={p.title} loading="lazy" draggable={false} />
               </Link>
               <h3 className="h3"><Link to={p.href}>{p.title}</Link></h3>
+              {p.sub && <p className="cs-card__sub">{p.sub}</p>}
             </article>
           ) }))} />
 
