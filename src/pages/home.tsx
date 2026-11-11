@@ -288,10 +288,11 @@ export default function Home() {
             <p>I am a First Class BSc graduate in GIS and Remote Sensing in Natural Resources Management, with skills in geospatial analysis, satellite imagery, spatial data management and web development. I specialise in analysing landscape changes and transforming geospatial data into meaningful insights through maps and interactive web applications. I am currently seeking opportunities as a GIS Specialist across various sectors where I can apply my skills and contribute to solving real-world problems.</p>
 
             <dl className="tools">
-              {[["GIS & Spatial Analysis", ["ArcGIS Pro", "QGIS", "Google Earth Engine", "Python", "Spatial Analysis"]],
-                ["Remote Sensing & Data", ["Sentinel-1 & Sentinel-2", "Landsat", "SRTM", "MODIS", "Satellite Image Processing"]],
-                ["Database Management", ["PostgreSQL", "PostGIS", "Spatial Database Design", "Geospatial Data Management", "Data Integration & Querying"]],
-                ["Web GIS & Development", ["React", "Leaflet", "D3.js", "Three.js", "ArcGIS Online", "Interactive Web Mapping"]]].map(([k, v]) => (
+              {[["GIS", ["Cartography", "Spatial Modelling", "GIS Automation", "MCDA"]],
+                ["Remote Sensing", ["Image Processing", "Spectral Indices", "Time Series Analysis"]],
+                ["Database Management", ["PostGIS", "Spatial Database Design", "Geospatial Data Management"]],
+                ["Web GIS", ["React", "Leaflet", "D3.js", "Three.js", "ArcGIS Online"]],
+                ["Software", ["ArcGIS Pro", "QGIS", "Global Mapper", "Cloud based (GEE, SEPAL, Google Colab with Python)"]]].map(([k, v]) => (
                 <div key={k as string} className="tagrow"><dt>{k as string}</dt><dd><ul className="tags">{(v as string[]).map((t) => <li key={t}>{t}</li>)}</ul></dd></div>
               ))}
             </dl>
