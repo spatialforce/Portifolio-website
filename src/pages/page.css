@@ -321,6 +321,9 @@ a:hover .arrow::after,.arrow:hover::after{transform:translateX(3px)}
 /* small tags for tools and data credits (no commas in lists) */
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
 .tags li{font-size:14px;line-height:1.4;padding:4px 10px;border:1px solid var(--line);background:var(--card);color:var(--ink-2)}
+.tags li{white-space:nowrap}
+.tags .tags__own{order:1}.tags:has(.tags__own)::after{content:"";flex-basis:100%;height:0}
+@media (min-width:961px){.tags{flex-wrap:nowrap}.tags:has(.tags__own){flex-wrap:wrap}.tagrow{grid-template-columns:110px 1fr}.tags li{font-size:13.5px;padding:4px 8px}}
 .tags--dark li{background:transparent;border-color:rgba(255,255,255,.25);color:#e3e6e3}
 .tagrow{display:grid;grid-template-columns:130px 1fr;gap:12px;align-items:start;padding:12px 0;border-top:1px solid var(--line)}
 .tagrow dt{font-weight:600;font-size:16px;padding-top:3px}

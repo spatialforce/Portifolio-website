@@ -290,10 +290,10 @@ export default function Home() {
             <dl className="tools">
               {[["GIS", ["Cartography", "Spatial Modelling", "GIS Automation", "MCDA"]],
                 ["Remote Sensing", ["Image Processing", "Spectral Indices", "Time Series Analysis"]],
-                ["Database Management", ["PostGIS", "Spatial Database Design", "Geospatial Data Management"]],
+                ["Database", ["PostGIS", "Spatial Database Design", "Geospatial Data Management"]],
                 ["Web GIS", ["React", "Leaflet", "D3.js", "Three.js", "ArcGIS Online"]],
                 ["Software", ["ArcGIS Pro", "QGIS", "SNAP", "MODFLOW", "Global Mapper", "Cloud based (GEE, SEPAL, Google Colab with Python)"]]].map(([k, v]) => (
-                <div key={k as string} className="tagrow"><dt>{k as string}</dt><dd><ul className="tags">{(v as string[]).map((t) => <li key={t}>{t}</li>)}</ul></dd></div>
+                <div key={k as string} className="tagrow"><dt>{k as string}</dt><dd><ul className="tags">{(v as string[]).map((t) => <li key={t} className={t.startsWith("Cloud") ? "tags__own" : undefined}>{t}</li>)}</ul></dd></div>
               ))}
             </dl>
           </div>
