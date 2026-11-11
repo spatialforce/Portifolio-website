@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" class="gis gis-lay-left">
+<head>
+<meta charset="utf-8">
+<title>Cyclone Tracks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#dfe6ea; }
+  #cv { position:absolute; inset:0; width:100%; height:100%; }
+  #date { left:12px; bottom:40px; }
+  #date { font-weight:400; } #date b { margin-right:6px; font-weight:600; }
+  .gis-scale { color:#1b1f24; }
+  #rampt { position:relative; height:15px; }
+</style>
+</head>
+<body>
+<main class="gis-map" id="map"><canvas id="cv"></canvas>
+  <div class="gis-chip" id="date"></div>
+  <div class="gis-card gis-card--br"><h2 class="gis-h">Wind speed (km/h)</h2><div class="gis-ramp" id="ramp"></div><div class="gis-ramp-lbl" id="rampt"></div></div>
+  <div class="gis-scale" id="scale"></div>
+  <div class="gis-attr">Data from IBTrACS (NOAA) and Natural Earth. Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the tracks</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Cyclone tracks</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><p class="gis-value" id="big">&nbsp;</p><p class="gis-p gis-muted" style="margin-bottom:12px">Peak wind</p><dl class="gis-dl" id="what"></dl></section>
+    <section class="gis-sec" style="padding:0"><table class="gis-table" id="list"></table></section>
+    <section class="gis-sec gis-small gis-muted">Click any track to follow it.</section>
+  </div>
+</aside>
+<div class="gis-tip" id="tip"></div>
+<script>
+const NB = " ";
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const FAMOUS = ["Freddy", "Idai", "Chido", "Kenneth", "Eline", "Gombe", "Dineo", "Gafilo"];
+// ColorBrewer YlOrRd (sequential), sampled at 60, 120, 180 and 250 km/h
+const STOPS = [[60, [254, 217, 118]], [120, [253, 141, 60]], [180, [227, 26, 28]], [250, [128, 0, 38]]];
+const cv = document.getElementById("cv"), cx = cv.getContext("2d"), tip = document.getElementById("tip");
+let D, W = 0, H = 0, dpr = 1, k = 1, ox = 0, oy = 0, cur = null, prog = 1, anim = null, hover = null;
+const LAT0 = Math.cos(-22 * Math.PI / 180);
+
+function color(w) {
+  if (w <= STOPS[0][0]) return STOPS[0][1];
+  for (let i = 1; i < STOPS.length; i++) if (w <= STOPS[i][0]) {
+    const [a, ca] = STOPS[i - 1], [b, cb] = STOPS[i], f = (w - a) / (b - a);
+    return ca.map((v, j) => Math.round(v + (cb[j] - v) * f));
+  }
+  return STOPS[STOPS.length - 1][1];
+}
+const px = (lon) => ox + (lon - D.box[0]) * LAT0 * k;
+const py = (lat) => oy + (D.box[3] - lat) * k;
+
+function fit() {
+  const bw = (D.box[2] - D.box[0]) * LAT0, bh = D.box[3] - D.box[1];
+  k = Math.min(W / bw, H / bh); ox = (W - bw * k) / 2; oy = (H - bh * k) / 2;
+}
+
+const PLACES = [["MOZAMBIQUE", 38.2, -14.0], ["MADAGASCAR", 46.9, -19.8], ["ZIMBABWE", 29.8, -19.2], ["SOUTH AFRICA", 25.0, -29.5],
+  ["MALAWI", 33.9, -13.0], ["ZAMBIA", 26.5, -13.5], ["BOTSWANA", 24.0, -22.3], ["TANZANIA", 35.0, -7.5], ["NAMIBIA", 21.5, -25.5]];
+const SEAS = [["Indian Ocean", 63, -27], ["Mozambique Channel", 40.8, -24.5]];
+function labels() {
+  cx.textAlign = "center"; cx.textBaseline = "middle";
+  const put = (n, x, y, col) => { cx.lineWidth = 3; cx.strokeStyle = "rgba(247,246,242,.8)"; cx.strokeText(n, x, y); cx.fillStyle = col; cx.fillText(n, x, y); };
+  cx.font = "600 11px 'Source Sans 3',sans-serif"; cx.letterSpacing = "2px";
+  for (const [n, lon, lat] of PLACES) put(n, px(lon), py(lat), "#7f888d");
+  cx.letterSpacing = "0px"; cx.font = "italic 14px 'Source Sans 3',sans-serif";
+  for (const [n, lon, lat] of SEAS) put(n, px(lon), py(lat), "#5f7886");
+}
+
+function line(s, upto) {
+  cx.beginPath();
+  s.pts.forEach((p, i) => { if (p[3] <= upto) i ? cx.lineTo(px(p[0]), py(p[1])) : cx.moveTo(px(p[0]), py(p[1])); });
+}
+
+function draw() {
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx.fillStyle = "#dfe6ea"; cx.fillRect(0, 0, W, H);
+  cx.beginPath();
+  for (const r of D.land) { r.forEach(([x, y], i) => i ? cx.lineTo(px(x), py(y)) : cx.moveTo(px(x), py(y))); cx.closePath(); }
+  cx.fillStyle = "#f7f6f2"; cx.fill(); cx.lineWidth = 0.7; cx.strokeStyle = "#b9c2c7"; cx.stroke();
+  cx.lineJoin = "round"; cx.lineCap = "round";
+  const quiet = cur && prog < 1 ? 0.5 : 1;
+  for (const s of D.storms) {
+    if (s === cur) continue;
+    line(s, Infinity);
+    cx.lineWidth = s === hover ? 2.2 : 0.9;
+    cx.strokeStyle = s === hover ? "#111" : `rgba(38,62,80,${(s.hit.length ? 0.13 : 0.045) * quiet})`;
+    cx.stroke();
+  }
+  labels();
+  if (!cur) return;
+  // white edge under the chosen storm so it reads over the other tracks
+  const endH = cur.pts[cur.pts.length - 1][3] * prog;
+  cx.beginPath(); let started = false;
+  for (const p of cur.pts) { if (p[3] > endH) break; started ? cx.lineTo(px(p[0]), py(p[1])) : cx.moveTo(px(p[0]), py(p[1])); started = true; }
+  cx.lineWidth = 12; cx.strokeStyle = "rgba(255,255,255,.85)"; cx.stroke();
+  const end = cur.pts[cur.pts.length - 1][3] * prog;
+  let last = null;
+  for (let i = 1; i < cur.pts.length; i++) {
+    const a = cur.pts[i - 1], b = cur.pts[i];
+    if (a[3] > end) break;
+    const f = Math.min(1, (end - a[3]) / Math.max(1, b[3] - a[3]));
+    const x = px(a[0] + (b[0] - a[0]) * f), y = py(a[1] + (b[1] - a[1]) * f), w = a[2] + (b[2] - a[2]) * f;
+    cx.beginPath(); cx.moveTo(px(a[0]), py(a[1])); cx.lineTo(x, y);
+    cx.lineWidth = 2 + w / 32; cx.strokeStyle = `rgb(${color(w)})`; cx.stroke();
+    last = [x, y, w];
+  }
+  if (last) {
+    cx.beginPath(); cx.arc(last[0], last[1], 4 + last[2] / 25, 0, Math.PI * 2);
+    cx.fillStyle = "#fff"; cx.fill(); cx.lineWidth = 2; cx.strokeStyle = "#111"; cx.stroke();
+  }
+  const d = new Date(cur.start + "T00:00:00Z"); d.setUTCHours(end);
+  document.getElementById("date").innerHTML = `<b>${cur.name}</b>${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+  GIS.scale(document.getElementById("scale"), 111.32 / k);
+}
+
+const andList = (a) => a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
+function pick(s) {
+  cur = s;
+  const inMap = (p) => p[0] >= D.box[0] && p[0] <= D.box[2] && p[1] >= D.box[1] && p[1] <= D.box[3];
+  const first = (s.pts.find(inMap) || s.pts[0])[3], total = s.pts[s.pts.length - 1][3] || 1;
+  const p0 = first / total; prog = p0;
+  const y = s.start.slice(0, 4), m = MONTHS[+s.start.slice(5, 7) - 1];
+  document.getElementById("big").textContent = `${s.peak} km/h`;
+  document.getElementById("what").innerHTML = `<dt>Storm</dt><dd>${s.name}</dd><dt>Formed</dt><dd>${m} ${y}</dd><dt>Lasted</dt><dd>${Math.round(s.days)} days</dd>`
+    + `<dt>Landfall</dt><dd>${s.hit.length ? s.hit.join("<br>") : "None"}</dd>`;
+  document.querySelectorAll("#list tr").forEach((r) => r.classList.toggle("on", r.dataset.id === s.id));
+  cancelAnimationFrame(anim);
+  const t0 = performance.now(), dur = 2500 + s.days * 120;
+  const step = (now) => { prog = Math.min(1, p0 + (1 - p0) * (now - t0) / dur); draw(); if (prog < 1) anim = requestAnimationFrame(step); };
+  anim = requestAnimationFrame(step);
+}
+
+function nearest(mx, my) {
+  let best = null, bd = 7;
+  for (const s of D.storms) {
+    for (let i = 1; i < s.pts.length; i++) {
+      const ax = px(s.pts[i - 1][0]), ay = py(s.pts[i - 1][1]), bx = px(s.pts[i][0]), by = py(s.pts[i][1]);
+      const dx = bx - ax, dy = by - ay, l = dx * dx + dy * dy || 1;
+      const t = Math.max(0, Math.min(1, ((mx - ax) * dx + (my - ay) * dy) / l));
+      const d = Math.hypot(mx - ax - t * dx, my - ay - t * dy);
+      if (d < bd) { bd = d; best = s; }
+    }
+  }
+  return best;
+}
+
+cv.addEventListener("pointermove", (e) => {
+  const r = cv.getBoundingClientRect(), s = nearest(e.clientX - r.left, e.clientY - r.top);
+  if (s !== hover) { hover = s; if (prog >= 1) draw(); }
+  cv.style.cursor = s ? "pointer" : "default";
+  if (!s) { tip.style.display = "none"; return; }
+  tip.textContent = `${s.name} ${s.start.slice(0, 4)}`;
+  tip.style.display = "block"; tip.style.left = e.clientX + 12 + "px"; tip.style.top = e.clientY - 26 + "px";
+});
+cv.addEventListener("pointerleave", () => { tip.style.display = "none"; hover = null; if (prog >= 1) draw(); });
+cv.addEventListener("click", () => { if (hover) pick(hover); });
+
+function resize() {
+  dpr = devicePixelRatio || 1;
+  const r = document.getElementById("map").getBoundingClientRect(); W = r.width; H = r.height;
+  cv.width = W * dpr; cv.height = H * dpr;
+  if (D) { fit(); draw(); }
+}
+addEventListener("resize", resize);
+
+fetch("cyclones.json").then((r) => { if (!r.ok) throw new Error(); return r.json(); }).then((d) => {
+  D = d;
+  const famous = FAMOUS.map((n) => D.storms.filter((s) => s.name === n && s.hit.length).sort((a, b) => b.peak - a.peak)[0]).filter(Boolean);
+  document.getElementById("list").innerHTML = famous.map((s) =>
+    `<tr data-id="${s.id}" tabindex="0"><td>${s.name} ${s.start.slice(0, 4)}</td><td>${s.peak} km/h</td></tr>`).join("");
+  document.querySelectorAll("#list tr").forEach((r) => {
+    const go = () => pick(D.storms.find((s) => s.id === r.dataset.id));
+    r.onclick = go; r.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
+  // legend drawn from the same stops the tracks use
+  const lo = STOPS[0][0], hi = STOPS[STOPS.length - 1][0], at = (w) => ((w - lo) / (hi - lo) * 100).toFixed(1) + "%";
+  document.getElementById("ramp").style.background = `linear-gradient(90deg,${STOPS.map(([w, c]) => `rgb(${c}) ${at(w)}`).join(",")})`;
+  document.getElementById("rampt").innerHTML = STOPS.map(([w], i) => `<span style="position:absolute;left:${at(w)};transform:translateX(${i ? (i === STOPS.length - 1 ? "-100%" : "-50%") : "0"})">${w}</span>`).join("");
+  resize(); pick(famous[0]);
+  GIS.state(document.getElementById("loading"), null);
+}).catch(() => GIS.state(document.getElementById("loading"), "The cyclone data could not be loaded.", true));
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Zimbabwe's Lost Trees</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#f4f2ee; --ink:#1c1b19; --muted:#7a756d; --rule:#dedad2; --now:#c8312b; --old:#e39a4f; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--ink); font:15px/1.5 "DM Sans",system-ui,"Segoe UI",Arial,sans-serif; }
+  body { display:grid; grid-template-columns:minmax(0,1fr) 360px; height:100vh; overflow:hidden; }
+
+  #mapwrap { position:relative; }
+  #gl, #ov { position:absolute; inset:0; width:100%; height:100%; }
+  #ov { cursor:grab; touch-action:none; }
+  #key { position:absolute; left:28px; bottom:22px; display:flex; gap:20px; font-size:13px; color:var(--muted); }
+  #key span { display:flex; align-items:center; gap:7px; }
+  #key i { width:12px; height:12px; display:inline-block; }
+  #tip { position:absolute; pointer-events:none; background:var(--ink); color:#fff; font-size:12.5px; padding:2px 8px; display:none; white-space:nowrap; }
+
+  aside { display:flex; flex-direction:column; padding:36px 32px 24px; overflow-y:auto; }
+  h1 { font-size:26px; font-weight:600; margin:0 0 28px; letter-spacing:-.01em; }
+  #big { font-size:56px; font-weight:600; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  #big small { font-size:22px; font-weight:500; margin-left:4px; }
+  #bigt { margin:8px 0 0; color:var(--muted); }
+
+  #chart { width:100%; height:130px; display:block; margin-top:30px; cursor:ew-resize; touch-action:none; }
+  #controls { display:flex; justify-content:space-between; font-size:13.5px; color:var(--muted); margin-top:4px; }
+  #play { border:0; background:none; padding:0; font:inherit; color:var(--ink); cursor:pointer; }
+
+  #rows { list-style:none; margin:28px 0 0; padding:0; }
+  #rows li { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--rule); cursor:pointer; }
+  #rows li:hover { color:var(--now); } #rows li.on { font-weight:600; }
+  #rows li span { font-variant-numeric:tabular-nums; }
+  .src { margin-top:auto; padding-top:24px; font-size:12px; color:var(--muted); }
+  #loading { position:fixed; inset:0; z-index:9; display:flex; align-items:center; justify-content:center; background:var(--bg); color:var(--muted); }
+  #loading.gone { display:none; }
+
+  @media (max-width:980px){
+    body { display:block; height:auto; overflow:auto; }
+    #mapwrap { height:60vh; }
+    aside { padding:20px 16px; } #big { font-size:44px; }
+    #key { left:16px; bottom:10px; }
+  }
+</style>
+</head>
+<body>
+<div id="mapwrap"><canvas id="gl"></canvas><canvas id="ov"></canvas>
+  <div id="key"><span><i style="background:var(--old)"></i>Lost earlier</span><span><i style="background:var(--now)"></i><span id="ky">Lost in 2025</span></span></div>
+  <div id="tip"></div></div>
+<aside>
+  <h1>Zimbabwe's lost trees</h1>
+  <div id="big">&nbsp;</div>
+  <div id="bigt"></div>
+  <canvas id="chart" aria-label="Tree cover lost each year. Drag to move through the years."></canvas>
+  <div id="controls"><button id="play" type="button">Play</button><span id="yr">2025</span></div>
+  <ul id="rows"></ul>
+  <div class="src">Hansen et al., Global Forest Change v1.13. Map by Kudzanai Chakavarika.</div>
+</aside>
+<div id="loading">Loading&hellip;</div>
+
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// thousands with a space: 2 500
+const num = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+const km = (ha) => num(ha / 100);
+const COS = Math.cos(19 * Math.PI / 180);
+
+let D, G, year = 2025, sel = null, playing = false, dpr = 1;
+const view = { k: 1, ox: 0, oy: 0 };
+
+// ---------- map
+const glc = $("gl"), gl = glc.getContext("webgl", { premultipliedAlpha: false });
+const VS = `attribute vec2 p; uniform vec4 uV; varying vec2 uv;
+  void main(){ uv = p; vec2 s = uV.xy + p * uV.zw; gl_Position = vec4(s.x * 2.0 - 1.0, 1.0 - s.y * 2.0, 0.0, 1.0); }`;
+const FS = `precision mediump float;
+  uniform sampler2D uT; uniform sampler2D uM; uniform float uY; uniform float uSel;
+  varying vec2 uv;
+  void main(){
+    vec4 c = texture2D(uT, uv);
+    if (c.a < 0.5) discard;
+    float yr = floor(c.r * 255.0 + 0.5), fr = c.g, tc = c.b * 255.0 / 100.0;
+    vec3 bg = vec3(0.957, 0.949, 0.933);
+    // land in a calm grey, a little darker where there were trees in 2000
+    vec3 col = mix(vec3(0.89, 0.875, 0.85), vec3(0.76, 0.77, 0.72), clamp(tc / 0.6, 0.0, 1.0));
+    if (yr > 0.5 && yr <= uY) {
+      float k = clamp(0.45 + sqrt(fr) * 1.4, 0.0, 1.0);
+      vec3 lc = yr > uY - 0.5 ? vec3(0.784, 0.192, 0.169) : vec3(0.89, 0.604, 0.31);
+      col = mix(col, lc, k);
+    }
+    if (uSel > 0.5 && texture2D(uM, uv).r < 0.5) col = mix(col, bg, 0.75);
+    gl_FragColor = vec4(col, 1.0);
+  }`;
+function sh(t, s) { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; }
+const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
+gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
+const aP = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 2, gl.FLOAT, false, 0, 0);
+const U = (n) => gl.getUniformLocation(prog, n);
+gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+const texs = {};
+function tex(src, unit) {
+  gl.activeTexture(gl.TEXTURE0 + unit);
+  if (!texs[unit]) texs[unit] = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texs[unit]);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+  for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+}
+const mcv = document.createElement("canvas");
+function mask(p) {
+  mcv.width = G.w; mcv.height = G.h; const m = mcv.getContext("2d");
+  m.fillStyle = "#000"; m.fillRect(0, 0, G.w, G.h);
+  if (p) { m.fillStyle = "#fff"; for (const r of p.shape) { m.beginPath(); r.forEach(([a, b], i) => { const X = (a - G.west) / G.res, Y = (G.north - b) / G.res; i ? m.lineTo(X, Y) : m.moveTo(X, Y); }); m.closePath(); m.fill(); } }
+  tex(mcv, 1); gl.uniform1i(U("uM"), 1); gl.uniform1f(U("uSel"), p ? 1 : 0);
+}
+
+const wrap = $("mapwrap");
+const sx = (c) => view.ox + c * COS * view.k, sy = (r) => view.oy + r * view.k;
+const lx = (lon) => sx((lon - G.west) / G.res), ly = (lat) => sy((G.north - lat) / G.res);
+function fit() {
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  const r = wrap.getBoundingClientRect();
+  for (const c of [glc, $("ov")]) { c.width = r.width * dpr; c.height = r.height * dpr; }
+  const pad = 30; view.k = Math.min((r.width - pad * 2) / (G.w * COS), (r.height - pad * 2 - 30) / G.h);
+  view.ox = (r.width - G.w * COS * view.k) / 2; view.oy = (r.height - 30 - G.h * view.k) / 2;
+}
+function draw() {
+  const r = wrap.getBoundingClientRect();
+  gl.viewport(0, 0, glc.width, glc.height); gl.clearColor(0.957, 0.949, 0.933, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.uniform4f(U("uV"), view.ox / r.width, view.oy / r.height, G.w * COS * view.k / r.width, G.h * view.k / r.height);
+  gl.uniform1f(U("uY"), year - 2000); gl.uniform1i(U("uT"), 0);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  const o = $("ov").getContext("2d"); o.setTransform(dpr, 0, 0, dpr, 0, 0); o.clearRect(0, 0, r.width, r.height);
+  o.lineJoin = "round";
+  for (const p of D.provinces) {
+    o.strokeStyle = p === sel ? "#1c1b19" : "rgba(28,27,25,.28)"; o.lineWidth = p === sel ? 1.5 : 0.8;
+    for (const ring of p.shape) { o.beginPath(); ring.forEach(([a, b], i) => (i ? o.lineTo(lx(a), ly(b)) : o.moveTo(lx(a), ly(b)))); o.closePath(); o.stroke(); }
+  }
+}
+let dirty = true;
+function loop() { if (dirty) { dirty = false; draw(); } requestAnimationFrame(loop); }
+
+// ---------- side
+const series = () => (sel ? sel.loss : D.loss);
+const upto = (s) => s.slice(0, year - 2000).reduce((a, b) => a + b, 0);
+function side() {
+  $("big").innerHTML = `${km(upto(series()))}<small>km²</small>`;
+  $("bigt").textContent = `of tree cover lost${sel ? " in " + sel.name : ""}, 2001 to ${year}`;
+  $("yr").textContent = year; $("ky").textContent = `Lost in ${year}`;
+  const c = $("chart"), r = c.getBoundingClientRect(); c.width = r.width * dpr; c.height = r.height * dpr;
+  const g = c.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, r.width, r.height);
+  const s = series(), top = Math.max(...s), bw = r.width / s.length, H = r.height - 20;
+  s.forEach((v, i) => { const y = 2001 + i, h = v / top * (H - 4); g.fillStyle = y === year ? "#c8312b" : y < year ? "#e39a4f" : "#dedad2"; g.fillRect(i * bw + 1, H - h, bw - 2, h); });
+  g.fillStyle = "#7a756d"; g.font = "12px DM Sans, sans-serif";
+  g.textAlign = "left"; g.fillText("2001", 0, H + 15); g.textAlign = "right"; g.fillText("2025", r.width, H + 15);
+  $("rows").innerHTML = D.provinces.map((p) => `<li class="${p === sel ? "on" : ""}" data-n="${p.name}">${p.name}<span>${km(upto(p.loss))} km²</span></li>`).join("");
+  [...$("rows").children].forEach((li) => (li.onclick = () => choose(D.provinces.find((p) => p.name === li.dataset.n))));
+  dirty = true;
+}
+function choose(p) { sel = sel === p ? null : p; mask(sel); side(); }
+
+function seek(e) { const r = $("chart").getBoundingClientRect(); const y = 2001 + Math.max(0, Math.min(24, Math.floor((e.clientX - r.left) / r.width * 25))); if (y !== year) { year = y; side(); } }
+$("chart").addEventListener("pointerdown", (e) => { stop(); seek(e); $("chart").setPointerCapture(e.pointerId); $("chart").onpointermove = seek; });
+$("chart").addEventListener("pointerup", () => ($("chart").onpointermove = null));
+let timer = null;
+function stop() { playing = false; clearInterval(timer); $("play").textContent = "Play"; }
+$("play").onclick = () => {
+  if (playing) return stop();
+  playing = true; year = 2001; side(); $("play").textContent = "Pause";
+  timer = setInterval(() => { if (year >= 2025) return stop(); year++; side(); }, reduce ? 1400 : 600);
+};
+
+function inRing(px, py, r) { let c = false; for (let i = 0, j = r.length - 1; i < r.length; j = i++) { const [xi, yi] = r[i], [xj, yj] = r[j]; if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) c = !c; } return c; }
+function at(mx, my) {
+  const lon = G.west + (mx - view.ox) / (COS * view.k) * G.res, lat = G.north - (my - view.oy) / view.k * G.res;
+  return D.provinces.find((p) => p.shape.some((r) => inRing(lon, lat, r))) || null;
+}
+const ov = $("ov"); let drag = null, moved = false;
+ov.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, ox: view.ox, oy: view.oy }; moved = false; ov.setPointerCapture(e.pointerId); });
+ov.addEventListener("pointermove", (e) => {
+  const r = wrap.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top, tip = $("tip");
+  if (drag) { const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 4) moved = true; if (moved) { view.ox = drag.ox + dx; view.oy = drag.oy + dy; dirty = true; tip.style.display = "none"; return; } }
+  if (e.pointerType !== "mouse") return;
+  const p = at(mx, my); ov.style.cursor = p ? "pointer" : "grab";
+  if (p) { tip.textContent = `${p.name}, ${km(upto(p.loss))} km²`; tip.style.display = "block"; tip.style.left = mx + 14 + "px"; tip.style.top = my + 10 + "px"; } else tip.style.display = "none";
+});
+ov.addEventListener("pointerup", (e) => { if (!moved) { const r = wrap.getBoundingClientRect(); const p = at(e.clientX - r.left, e.clientY - r.top); if (p || sel) choose(p || sel); } drag = null; });
+ov.addEventListener("pointerleave", () => ($("tip").style.display = "none"));
+ov.addEventListener("wheel", (e) => {
+  e.preventDefault(); const r = wrap.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+  const k = Math.max(0.1, Math.min(14, view.k * Math.exp(-e.deltaY * 0.0015))), q = k / view.k;
+  view.ox = mx - (mx - view.ox) * q; view.oy = my - (my - view.oy) * q; view.k = k; dirty = true;
+}, { passive: false });
+addEventListener("resize", () => { fit(); side(); });
+addEventListener("keydown", (e) => { if (e.key === "Escape" && sel) choose(sel); });
+
+const img = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("Could not load " + src)); i.src = src; });
+Promise.all([fetch("forestloss/forest.json").then((r) => { if (!r.ok) throw new Error("The data is missing. Run tools/forestloss/build.py."); return r.json(); }), img("forestloss/lossyear.png")])
+  .then(([d, im]) => {
+    D = d; G = d.grid;
+    tex(im, 0); mask(null);
+    fit(); side();
+    document.fonts.ready.then(side);
+    $("loading").classList.add("gone");
+    requestAnimationFrame(loop);
+  }).catch((e) => { $("loading").textContent = e.message; });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+{
+    "year": 2010,
+    "baselineYear": 1990,
+    "previousYear": 2005,
+    "builtUpSurfaceKm2": 212.9552,
+    "baselineBuiltUpSurfaceKm2": 87.5115,
+    "netChangeKm2": 125.4437,
+    "periodChangeKm2": 38.2795,
+    "percentageChange": 143.35,
+    "growthRatio": 2.4335,
+    "measurement": "Built-up surface area in square kilometres",
+    "dataset": "GHS-BUILT-S_R2023A",
+    "datasetAsset": "JRC/GHSL/P2023A/GHS_BUILT_S",
+    "datasetBand": "built_surface",
+    "source": "European Commission Joint Research Centre",
+    "sourceResolutionMetres": 100,
+    "statisticsMethod": "Earth Engine sum of original GHSL built_surface band using the native image projection and nominal 100 m scale.",
+    "boundaryTreatment": "Earth Engine weighted reduction with fractional pixel coverage at the study-area boundary.",
+    "visualisationMethod": "Dark basemap. Built-up surface from GHSL with light display-only smoothing; water from JRC Global Surface Water; streets, boundaries, railway and place names from OpenStreetMap contributors.",
+    "legend": [
+        {
+            "label": "Built by 1990",
+            "color": "#54688a"
+        },
+        {
+            "label": "Built since 1990",
+            "color": "#f28c38"
+        },
+        {
+            "label": "Rivers and lakes",
+            "color": "#090c11"
+        },
+        {
+            "label": "Municipal boundary",
+            "color": "#78808c"
+        }
+    ],
+    "contextSources": [
+        "JRC Global Surface Water (water)",
+        "\u00a9 OpenStreetMap contributors (streets, boundaries, railway, place names)"
+    ],
+    "classificationPerformed": false,
+    "visualisationThresholds": {
+        "minimumBaselineFraction": 0.03,
+        "fullBaselineIntensity": 0.5,
+        "minimumPositiveChangeFraction": 0.1,
+        "fullChangeIntensity": 0.2,
+        "gamma": 0.75,
+        "displaySmoothingSigmaPx": 0.9
+    },
+    "limitations": [
+        "GHSL built-up surface values are published dataset estimates.",
+        "Intermediate epochs include spatial-temporal interpolation or extrapolation.",
+        "Net change does not identify individual building construction.",
+        "Positive changes are displayed; decreases are not separately mapped.",
+        "Display smoothing and thresholds change appearance, not statistics.",
+        "The 100 m grid does not resolve individual buildings."
+    ]
+}

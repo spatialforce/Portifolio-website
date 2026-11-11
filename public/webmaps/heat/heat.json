@@ -1,0 +1,215 @@
+{
+ "km": [
+  64,
+  40
+ ],
+ "w": 1280,
+ "h": 800,
+ "step": 0.2,
+ "cities": [
+  {
+   "slug": "harare",
+   "name": "Harare",
+   "country": "Zimbabwe",
+   "t0": 27.0,
+   "urban": 32.6,
+   "open": 32.5,
+   "diff": 0.0,
+   "passes": 492,
+   "builtKm2": 371,
+   "km": [
+    46.0,
+    53.2
+   ],
+   "w": 920,
+   "h": 1064
+  },
+  {
+   "slug": "bulawayo",
+   "name": "Bulawayo",
+   "country": "Zimbabwe",
+   "t0": 27.0,
+   "urban": 32.7,
+   "open": 31.7,
+   "diff": 1.0,
+   "passes": 199,
+   "builtKm2": 99,
+   "km": [
+    40.8,
+    41.6
+   ],
+   "w": 816,
+   "h": 832
+  },
+  {
+   "slug": "johannesburg",
+   "name": "Johannesburg",
+   "country": "South Africa",
+   "t0": 22.0,
+   "urban": 28.3,
+   "open": 28.1,
+   "diff": 0.2,
+   "passes": 386,
+   "builtKm2": 1368,
+   "km": [
+    62.72,
+    81.92
+   ],
+   "w": 784,
+   "h": 1024
+  },
+  {
+   "slug": "lusaka",
+   "name": "Lusaka",
+   "country": "Zambia",
+   "t0": 28.0,
+   "urban": 33.0,
+   "open": 33.1,
+   "diff": -0.2,
+   "passes": 415,
+   "builtKm2": 288,
+   "km": [
+    64.0,
+    40.0
+   ],
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "slug": "nairobi",
+   "name": "Nairobi",
+   "country": "Kenya",
+   "t0": 24.0,
+   "urban": 37.8,
+   "open": 37.9,
+   "diff": -0.0,
+   "passes": 247,
+   "builtKm2": 442,
+   "km": [
+    59.2,
+    41.6
+   ],
+   "w": 1184,
+   "h": 832
+  },
+  {
+   "slug": "kampala",
+   "name": "Kampala",
+   "country": "Uganda",
+   "t0": 28.0,
+   "urban": 36.5,
+   "open": 32.5,
+   "diff": 3.9,
+   "passes": 143,
+   "builtKm2": 408,
+   "km": [
+    64.0,
+    40.0
+   ],
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "slug": "addis-ababa",
+   "name": "Addis Ababa",
+   "country": "Ethiopia",
+   "t0": 19.0,
+   "urban": 34.4,
+   "open": 32.9,
+   "diff": 1.5,
+   "passes": 463,
+   "builtKm2": 333,
+   "km": [
+    64.0,
+    40.0
+   ],
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "slug": "dar-es-salaam",
+   "name": "Dar es Salaam",
+   "country": "Tanzania",
+   "t0": 31.0,
+   "urban": 40.5,
+   "open": 37.1,
+   "diff": 3.4,
+   "passes": 398,
+   "builtKm2": 494,
+   "km": [
+    118.4,
+    85.6
+   ],
+   "w": 1184,
+   "h": 856
+  },
+  {
+   "slug": "kinshasa",
+   "name": "Kinshasa",
+   "country": "DR Congo",
+   "t0": 28.0,
+   "urban": 38.9,
+   "open": 33.9,
+   "diff": 5.0,
+   "passes": 221,
+   "builtKm2": 531,
+   "km": [
+    179.2,
+    145.92
+   ],
+   "w": 1120,
+   "h": 912
+  },
+  {
+   "slug": "luanda",
+   "name": "Luanda",
+   "country": "Angola",
+   "t0": 30.0,
+   "urban": 40.5,
+   "open": 38.2,
+   "diff": 2.3,
+   "passes": 84,
+   "builtKm2": 632,
+   "km": [
+    64.0,
+    40.0
+   ],
+   "w": 1280,
+   "h": 800
+  },
+  {
+   "slug": "lagos",
+   "name": "Lagos",
+   "country": "Nigeria",
+   "t0": 28.0,
+   "urban": 39.0,
+   "open": 33.0,
+   "diff": 5.9,
+   "passes": 266,
+   "builtKm2": 1576,
+   "km": [
+    208.32,
+    62.4
+   ],
+   "w": 1736,
+   "h": 520
+  },
+  {
+   "slug": "accra",
+   "name": "Accra",
+   "country": "Ghana",
+   "t0": 31.0,
+   "urban": 41.2,
+   "open": 36.9,
+   "diff": 4.3,
+   "passes": 63,
+   "builtKm2": 814,
+   "km": [
+    64.0,
+    40.0
+   ],
+   "w": 1280,
+   "h": 800
+  }
+ ]
+}

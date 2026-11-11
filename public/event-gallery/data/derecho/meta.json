@@ -1,0 +1,82 @@
+{
+  "views": {
+    "region": {
+      "bounds": {
+        "w": -92.0,
+        "e": -91.3,
+        "s": 41.84,
+        "n": 42.18
+      },
+      "width": 1200,
+      "height": 784
+    },
+    "city": {
+      "bounds": {
+        "w": -91.78,
+        "e": -91.56,
+        "s": 41.93,
+        "n": 42.04
+      },
+      "width": 1200,
+      "height": 807
+    }
+  },
+  "classes": [
+    {
+      "name": "Light",
+      "color": "#f2d16b"
+    },
+    {
+      "name": "Moderate",
+      "color": "#ee8a2f"
+    },
+    {
+      "name": "Severe",
+      "color": "#cf2f22"
+    }
+  ],
+  "panels": [
+    {
+      "label": "Day after",
+      "when": "11 Aug",
+      "areas": {
+        "region": {
+          "damagedKm2": 85.8,
+          "vegKm2": 1922.8
+        },
+        "city": {
+          "damagedKm2": 18.7,
+          "vegKm2": 136.4
+        }
+      }
+    },
+    {
+      "label": "10 days after",
+      "when": "19-21 Aug",
+      "areas": {
+        "region": {
+          "damagedKm2": 630.5,
+          "vegKm2": 1922.8
+        },
+        "city": {
+          "damagedKm2": 80.6,
+          "vegKm2": 136.4
+        }
+      }
+    },
+    {
+      "label": "3.5 weeks after",
+      "when": "3-5 Sept",
+      "areas": {
+        "region": {
+          "damagedKm2": 1263.6,
+          "vegKm2": 1922.8
+        },
+        "city": {
+          "damagedKm2": 113.8,
+          "vegKm2": 136.4
+        }
+      }
+    }
+  ]
+}

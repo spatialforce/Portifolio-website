@@ -22,3 +22,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# ArcGIS access token
+tools/arcgis/.token
+
+# old copies of the site and raw source media, not used by the app
+src/portifolio/
+website/
+reference-portfolio.jsx
+src/new_images/
+
+# map build scripts are kept, their downloaded data and caches are not
+tools/**/cache/
+tools/**/raw/
+tools/**/out/
+tools/sitecheck/vendor/
+*.npy
+*.npz

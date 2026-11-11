@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" class="gis gis-lay-left">
+<head>
+<meta charset="utf-8">
+<title>Urban heat islands</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#eeeff1; }
+  canvas#cv { position:absolute; inset:0; width:100%; height:100%; cursor:grab; touch-action:none; }
+  canvas#cv.drag { cursor:grabbing; }
+  #read { left:16px; top:16px; font-weight:400; display:none; }
+  #read b { font-weight:600; margin-right:8px; }
+  .gis-scale { color:#1b1f24; left:auto; right:16px; bottom:34px; text-align:right; }
+  .gis-scale i { margin-left:auto; }
+  #cities td:last-child { font-variant-numeric:tabular-nums; }
+  @media (max-width:760px){ #read { left:8px; top:8px; } }
+</style>
+</head>
+<body>
+<main class="gis-map" id="map"><canvas id="cv"></canvas>
+  <div class="gis-chip" id="read"></div>
+  <div class="gis-tools gis-tools--right"><div class="gis-grp">
+    <button class="gis-btn" id="zIn" type="button" title="Zoom in" aria-label="Zoom in"><i class="bi bi-plus-lg"></i></button>
+    <button class="gis-btn" id="zOut" type="button" title="Zoom out" aria-label="Zoom out"><i class="bi bi-dash-lg"></i></button>
+    <button class="gis-btn" id="zAll" type="button" title="Whole city" aria-label="Whole city"><i class="bi bi-fullscreen"></i></button></div></div>
+  <div class="gis-card gis-card--bl" id="key"><h2 class="gis-h">Ground temperature</h2>
+    <div class="gis-ramp" id="ramp"></div><div class="gis-ramp-lbl"><span id="lo"></span><span id="hi"></span></div></div>
+  <div class="gis-scale" id="scale"></div>
+  <div class="gis-attr">Data from Landsat 8 and 9 (USGS), GHSL and Sentinel-2. Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the cities</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Urban heat islands</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><p class="gis-value" id="big">&nbsp;</p><p class="gis-p" id="what"></p>
+      <table class="gis-table gis-table--flush" style="margin-top:10px"><tr><td>Built-up land</td><td id="tu"></td></tr><tr><td>Open land</td><td id="to"></td></tr></table></section>
+    <section class="gis-sec"><div class="gis-seg gis-seg--full" id="view"><button class="gis-btn on" type="button" data-v="heat">Temperature</button><button class="gis-btn" type="button" data-v="photo">Satellite image</button></div></section>
+    <section class="gis-sec" style="padding:0"><table class="gis-table" id="cities"></table></section>
+    <section class="gis-sec gis-small gis-muted">Ground temperature on a typical clear mid-morning from 2021 to 2025.</section>
+  </div>
+</aside>
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+// ColorBrewer RdYlBu, eleven classes, cool to warm; the middle is the open land average
+const PAL = [[49, 54, 149], [69, 117, 180], [116, 173, 209], [171, 217, 233], [224, 243, 248], [255, 255, 191], [254, 224, 144], [253, 174, 97], [244, 109, 67], [215, 48, 39], [165, 0, 38]];
+const WATER = [150, 164, 178], BLANK = [205, 208, 212], PLAIN = [238, 239, 241], EDGE = [27, 31, 36];
+const signed = (d) => (d > 0 ? "+" : d < 0 ? "−" : "") + Math.abs(d).toFixed(1) + " °C";
+const cv = $("cv"), cx = cv.getContext("2d");
+let M, city = null, view = "heat", W = 0, H = 0, dpr = 1, V = { x: 0, y: 0, z: 1 }, base = 1, anim = 0;
+const layers = {}, codes = {}, photos = {};
+
+// f from 0 (coolest in this city) to 1 (hottest)
+function colour(f0) {
+  const x = Math.max(0, Math.min(1, f0)) * (PAL.length - 1), i = Math.min(PAL.length - 2, Math.floor(x)), f = x - i;
+  return PAL[i].map((v, j) => Math.round(v + (PAL[i + 1][j] - v) * f));
+}
+const img = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("Could not load " + src)); i.src = src; });
+
+// decode a city's grey PNG once and colour it against that city's open land average;
+// outside the city boundary the ground is plain, with a dark line along the edge
+async function layer(c) {
+  if (layers[c.slug]) return layers[c.slug];
+  const [p, b] = await Promise.all([img(`heat/${c.slug}.png`), img(`heat/${c.slug}_city.png`).catch(() => null)]);
+  // each city has its own grid size: read it from the image itself; cells are 50 m unless heat.json says otherwise
+  const LW = p.naturalWidth, LH = p.naturalHeight;
+  c.dim = { w: LW, h: LH, km: c.km && c.w === LW ? c.km : [LW * 0.05, LH * 0.05] };
+  const k = document.createElement("canvas"); k.width = LW; k.height = LH;
+  const g = k.getContext("2d", { willReadFrequently: true }); g.drawImage(p, 0, 0);
+  const im = g.getImageData(0, 0, LW, LH), d = im.data, code = new Uint8Array(LW * LH);
+  for (let i = 0; i < code.length; i++) code[i] = d[i * 4];
+  let inside = null;
+  if (b) { g.drawImage(b, 0, 0); const bd = g.getImageData(0, 0, LW, LH).data; inside = new Uint8Array(code.length); for (let i = 0; i < code.length; i++) inside[i] = bd[i * 4] > 127 ? 1 : 0; }
+  if (inside) {                                        // the boundary's extent, for the first view
+    let x0 = LW, y0 = LH, x1 = 0, y1 = 0;
+    for (let i = 0; i < inside.length; i++) if (inside[i]) { const x = i % LW, y = (i / LW) | 0; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 > x0) c.box = [x0, y0, x1 + 1, y1 + 1];
+  }
+  // stretch the colours over this city's own range (2nd to 98th percentile inside the boundary),
+  // so hot and cool neighbourhoods stand apart instead of the whole city reading as hot
+  const hist = new Uint32Array(256); let n = 0;
+  for (let i = 0; i < code.length; i++) { const v = code[i]; if (v > 0 && v < 255 && (!inside || inside[i])) { hist[v]++; n++; } }
+  const at = (q) => { let s = 0; for (let v = 1; v < 255; v++) { s += hist[v]; if (s >= q * n) return v; } return 254; };
+  const T = (v) => c.t0 + (v - 1) * M.step;
+  c.lo = T(at(0.02)); c.hi = T(at(0.98)); if (c.hi - c.lo < 1) c.hi = c.lo + 1;
+  const lut = Array.from({ length: 256 }, (_, v) => (v === 0 ? BLANK : v === 255 ? WATER : colour((T(v) - c.lo) / (c.hi - c.lo))));
+  // edge: inside cells within two cells of the outside
+  const edge = (i) => { const x = i % LW, y = (i / LW) | 0;
+    for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { const u = x + dx, v = y + dy; if (u >= 0 && v >= 0 && u < LW && v < LH && !inside[v * LW + u]) return true; } return false; };
+  for (let i = 0, o = 0; i < code.length; i++, o += 4) {
+    const v = code[i];
+    const q = !inside ? lut[v] : !inside[i] ? PLAIN : edge(i) ? EDGE : lut[v];
+    d[o] = q[0]; d[o + 1] = q[1]; d[o + 2] = q[2]; d[o + 3] = 255;
+  }
+  g.putImageData(im, 0, 0);
+  codes[c.slug] = code; layers[c.slug] = k;
+  return k;
+}
+
+function clamp() {
+  V.z = Math.max(base, Math.min(base * 10, V.z));
+  const hw = W / 2 / V.z, hh = H / 2 / V.z;              // keep the picture in view; centre it when it is smaller than the frame
+  V.x = 2 * hw >= M.w ? M.w / 2 : Math.max(hw, Math.min(M.w - hw, V.x));
+  V.y = 2 * hh >= M.h ? M.h / 2 : Math.max(hh, Math.min(M.h - hh, V.y));
+}
+function draw() {
+  if (!city || !layers[city.slug]) return;
+  clamp();
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx.fillStyle = `rgb(${PLAIN})`; cx.fillRect(0, 0, W, H);
+  const src = view === "photo" && photos[city.slug] ? photos[city.slug] : layers[city.slug];
+  cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = "high";
+  cx.drawImage(src, W / 2 - V.x * V.z, H / 2 - V.y * V.z, M.w * V.z, M.h * V.z);
+  GIS.scale($("scale"), M.km[0] / M.w / V.z);
+}
+// open on the whole city boundary with a margin round it
+function home() {
+  base = Math.min(W / M.w, H / M.h);
+  const b = city && city.box;
+  if (!b) { V = { x: M.w / 2, y: M.h / 2, z: base }; return; }
+  const z = Math.min(W / ((b[2] - b[0]) * 1.15), H / ((b[3] - b[1]) * 1.15));
+  V = { x: (b[0] + b[2]) / 2, y: (b[1] + b[3]) / 2, z: Math.max(base, Math.min(base * 10, z)) };
+}
+function zoomAt(sx, sy, f) {
+  const ix = V.x + (sx - W / 2) / V.z, iy = V.y + (sy - H / 2) / V.z;
+  V.z = Math.max(base, Math.min(base * 10, V.z * f));
+  V.x = ix - (sx - W / 2) / V.z; V.y = iy - (sy - H / 2) / V.z; draw();
+}
+
+function legend() {
+  if (city.lo == null) return;
+  $("lo").textContent = Math.round(city.lo) + " °C"; $("hi").textContent = Math.round(city.hi) + " °C";
+}
+function panel() {
+  $("big").textContent = signed(city.diff);
+  $("what").textContent = city.diff >= 0 ? `Built-up ${city.name} is warmer than the open land around it.` : `Built-up ${city.name} is cooler than the open land around it.`;
+  $("tu").textContent = city.urban.toFixed(1) + " °C"; $("to").textContent = city.open.toFixed(1) + " °C";
+  document.querySelectorAll("#cities tr").forEach((r) => r.classList.toggle("on", r.dataset.id === city.slug));
+}
+async function pick(c) {
+  city = c; panel(); $("read").style.display = "none";
+  try {
+    await layer(c);
+    if (view === "photo" && !photos[c.slug]) photos[c.slug] = await img(`heat/${c.slug}.jpg`);
+  } catch (e) { GIS.state($("loading"), e.message, true); return; }
+  if (city !== c) return;
+  M.w = c.dim.w; M.h = c.dim.h; M.km = c.dim.km;
+  legend(); home(); draw(); GIS.state($("loading"), null);
+}
+async function setView(v) {
+  view = v;
+  document.querySelectorAll("#view button").forEach((b) => b.classList.toggle("on", b.dataset.v === v));
+  $("key").style.display = v === "heat" ? "" : "none";
+  if (v === "photo" && city && !photos[city.slug]) { const c = city; try { photos[c.slug] = await img(`heat/${c.slug}.jpg`); } catch (e) { return; } }
+  draw();
+}
+document.querySelectorAll("#view button").forEach((b) => (b.onclick = () => setView(b.dataset.v)));
+$("zIn").onclick = () => zoomAt(W / 2, H / 2, 1.6);
+$("zOut").onclick = () => zoomAt(W / 2, H / 2, 1 / 1.6);
+$("zAll").onclick = () => { home(); draw(); };
+
+// drag to pan, wheel or pinch to zoom, hover for the temperature under the pointer
+const pts = new Map(); let pinch = 0;
+cv.addEventListener("pointerdown", (e) => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); cv.classList.add("drag"); pinch = 0; });
+cv.addEventListener("pointermove", (e) => {
+  const r = cv.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+  if (pts.has(e.pointerId)) {
+    const [px, py] = pts.get(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 1) { V.x -= (e.clientX - px) / V.z; V.y -= (e.clientY - py) / V.z; draw(); }
+    else if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinch) zoomAt((a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top, d / pinch); pinch = d; }
+    return;
+  }
+  if (!city || !codes[city.slug] || e.pointerType === "touch") return;
+  const ix = Math.floor(V.x + (sx - W / 2) / V.z), iy = Math.floor(V.y + (sy - H / 2) / V.z);
+  const v = ix < 0 || iy < 0 || ix >= M.w || iy >= M.h ? 0 : codes[city.slug][iy * M.w + ix];
+  if (v === 0) { $("read").style.display = "none"; return; }
+  const t = city.t0 + (v - 1) * M.step;
+  $("read").innerHTML = v === 255 ? "<b>Water</b>" : `<b>${t.toFixed(1)} °C</b>${signed(t - city.open)}`;
+  $("read").style.display = "block";
+});
+const up = (e) => { pts.delete(e.pointerId); pinch = 0; if (!pts.size) cv.classList.remove("drag"); };
+cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+cv.addEventListener("pointerleave", () => { $("read").style.display = "none"; });
+cv.addEventListener("wheel", (e) => { e.preventDefault(); const r = cv.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
+
+function resize() {
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  const r = $("map").getBoundingClientRect(); W = r.width; H = r.height;
+  cv.width = W * dpr; cv.height = H * dpr;
+  if (M) { const was = V.z / base; base = Math.min(W / M.w, H / M.h); V.z = base * (was || 1); draw(); }
+}
+addEventListener("resize", resize);
+
+$("ramp").style.background = `linear-gradient(90deg,${PAL.map((c) => `rgb(${c})`).join(",")})`;
+fetch("heat/heat.json").then((r) => { if (!r.ok) throw new Error("The city data is missing. Run tools/heat/build.py."); return r.json(); }).then((m) => {
+  M = m;
+  const order = [...M.cities].sort((a, b) => b.diff - a.diff);
+  $("cities").innerHTML = order.map((c) => `<tr data-id="${c.slug}" tabindex="0"><td>${c.name}</td><td>${signed(c.diff)}</td></tr>`).join("");
+  document.querySelectorAll("#cities tr").forEach((r) => { const c = M.cities.find((d) => d.slug === r.dataset.id); r.onclick = () => pick(c); r.onkeydown = (e) => { if (e.key === "Enter") pick(c); }; });
+  resize();
+  const want = new URLSearchParams(location.search).get("city");
+  pick(M.cities.find((c) => c.slug === want) || M.cities.find((c) => c.slug === "bulawayo") || order[0]);
+}).catch((e) => GIS.state($("loading"), e.message, true));
+})();
+</script>
+</body>
+</html>

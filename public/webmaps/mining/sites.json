@@ -1,0 +1,128 @@
+[
+ {
+  "id": "bikita",
+  "name": "Bikita",
+  "what": "Lithium",
+  "box": [
+   31.385,
+   -20.00935,
+   31.49,
+   -19.91065
+  ],
+  "before": 2019,
+  "after": 2026,
+  "beforeSrc": "Sentinel-2",
+  "afterSrc": "Sentinel-2",
+  "haBefore": 99,
+  "haAfter": 551,
+  "ha": 462
+ },
+ {
+  "id": "marange",
+  "name": "Marange",
+  "what": "Diamonds",
+  "box": [
+   32.27914,
+   -19.72,
+   32.48086,
+   -19.53
+  ],
+  "before": 2005,
+  "after": 2026,
+  "beforeSrc": "Landsat",
+  "afterSrc": "Sentinel-2",
+  "haBefore": 0,
+  "haAfter": 763,
+  "ha": 734
+ },
+ {
+  "id": "arcadia",
+  "name": "Arcadia",
+  "what": "Lithium",
+  "box": [
+   31.375,
+   -17.81059,
+   31.455,
+   -17.73441
+  ],
+  "before": 2019,
+  "after": 2026,
+  "beforeSrc": "Sentinel-2",
+  "afterSrc": "Sentinel-2",
+  "haBefore": 0,
+  "haAfter": 541,
+  "ha": 537
+ },
+ {
+  "id": "sabistar",
+  "name": "Sabi Star",
+  "what": "Lithium",
+  "box": [
+   31.93,
+   -19.22819,
+   31.995,
+   -19.16681
+  ],
+  "before": 2019,
+  "after": 2026,
+  "beforeSrc": "Sentinel-2",
+  "afterSrc": "Sentinel-2",
+  "haBefore": 0,
+  "haAfter": 133,
+  "ha": 132
+ },
+ {
+  "id": "kamativi",
+  "name": "Kamativi",
+  "what": "Lithium",
+  "box": [
+   27.01,
+   -18.36285,
+   27.095,
+   -18.28215
+  ],
+  "before": 2019,
+  "after": 2026,
+  "beforeSrc": "Sentinel-2",
+  "afterSrc": "Sentinel-2",
+  "haBefore": 1,
+  "haAfter": 290,
+  "ha": 279
+ },
+ {
+  "id": "manhize",
+  "name": "Manhize",
+  "what": "Iron and steel",
+  "box": [
+   30.57,
+   -18.97783,
+   30.65,
+   -18.90217
+  ],
+  "before": 2019,
+  "after": 2026,
+  "beforeSrc": "Sentinel-2",
+  "afterSrc": "Sentinel-2",
+  "haBefore": 0,
+  "haAfter": 165,
+  "ha": 155
+ },
+ {
+  "id": "hwange",
+  "name": "Hwange",
+  "what": "Coal",
+  "box": [
+   26.36,
+   -18.49988,
+   26.56,
+   -18.31012
+  ],
+  "before": 2016,
+  "after": 2026,
+  "beforeSrc": "Sentinel-2",
+  "afterSrc": "Sentinel-2",
+  "haBefore": 1622,
+  "haAfter": 3159,
+  "ha": 1477
+ }
+]

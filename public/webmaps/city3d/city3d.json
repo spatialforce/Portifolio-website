@@ -1,0 +1,201 @@
+{
+ "res": 8,
+ "years": [
+  2016,
+  2017,
+  2018,
+  2019,
+  2020,
+  2021,
+  2022,
+  2023
+ ],
+ "cities": [
+  {
+   "slug": "nairobi",
+   "name": "Nairobi",
+   "country": "Kenya",
+   "km": [
+    10,
+    7
+   ],
+   "w": 1250,
+   "h": 875,
+   "top": 99,
+   "years": [
+    {
+     "year": 2016,
+     "cells": 246027,
+     "volume": 0.1145,
+     "tall": 2468
+    },
+    {
+     "year": 2017,
+     "cells": 254898,
+     "volume": 0.1248,
+     "tall": 2961
+    },
+    {
+     "year": 2018,
+     "cells": 259763,
+     "volume": 0.1345,
+     "tall": 4435
+    },
+    {
+     "year": 2019,
+     "cells": 260255,
+     "volume": 0.1362,
+     "tall": 4378
+    },
+    {
+     "year": 2020,
+     "cells": 262584,
+     "volume": 0.1445,
+     "tall": 6485
+    },
+    {
+     "year": 2021,
+     "cells": 265979,
+     "volume": 0.1452,
+     "tall": 6065
+    },
+    {
+     "year": 2022,
+     "cells": 277207,
+     "volume": 0.1566,
+     "tall": 10742
+    },
+    {
+     "year": 2023,
+     "cells": 280223,
+     "volume": 0.1658,
+     "tall": 12567
+    }
+   ]
+  },
+  {
+   "slug": "lagos",
+   "name": "Lagos",
+   "country": "Nigeria",
+   "km": [
+    12,
+    8
+   ],
+   "w": 1500,
+   "h": 1000,
+   "top": 98,
+   "years": [
+    {
+     "year": 2016,
+     "cells": 211958,
+     "volume": 0.0876,
+     "tall": 2349
+    },
+    {
+     "year": 2017,
+     "cells": 208698,
+     "volume": 0.0852,
+     "tall": 2578
+    },
+    {
+     "year": 2018,
+     "cells": 220808,
+     "volume": 0.0914,
+     "tall": 2050
+    },
+    {
+     "year": 2019,
+     "cells": 228511,
+     "volume": 0.094,
+     "tall": 2269
+    },
+    {
+     "year": 2020,
+     "cells": 229814,
+     "volume": 0.0954,
+     "tall": 2453
+    },
+    {
+     "year": 2021,
+     "cells": 238419,
+     "volume": 0.1002,
+     "tall": 2821
+    },
+    {
+     "year": 2022,
+     "cells": 250663,
+     "volume": 0.0925,
+     "tall": 2514
+    },
+    {
+     "year": 2023,
+     "cells": 252559,
+     "volume": 0.0943,
+     "tall": 2459
+    }
+   ]
+  },
+  {
+   "slug": "johannesburg",
+   "name": "Johannesburg",
+   "country": "South Africa",
+   "km": [
+    9,
+    13
+   ],
+   "w": 1125,
+   "h": 1625,
+   "top": 98,
+   "years": [
+    {
+     "year": 2016,
+     "cells": 486794,
+     "volume": 0.2138,
+     "tall": 8540
+    },
+    {
+     "year": 2017,
+     "cells": 496678,
+     "volume": 0.2245,
+     "tall": 9649
+    },
+    {
+     "year": 2018,
+     "cells": 501866,
+     "volume": 0.2388,
+     "tall": 13236
+    },
+    {
+     "year": 2019,
+     "cells": 502860,
+     "volume": 0.2322,
+     "tall": 11924
+    },
+    {
+     "year": 2020,
+     "cells": 507827,
+     "volume": 0.2336,
+     "tall": 12378
+    },
+    {
+     "year": 2021,
+     "cells": 512991,
+     "volume": 0.2415,
+     "tall": 12469
+    },
+    {
+     "year": 2022,
+     "cells": 509803,
+     "volume": 0.2464,
+     "tall": 13577
+    },
+    {
+     "year": 2023,
+     "cells": 514489,
+     "volume": 0.2608,
+     "tall": 15162
+    }
+   ]
+  }
+ ]
+}

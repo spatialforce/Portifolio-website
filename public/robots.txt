@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://portifolio.spatialforce.co.zw/sitemap.xml
+Sitemap: https://portfolio.spatialforce.co.zw/sitemap.xml

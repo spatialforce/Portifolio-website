@@ -1,0 +1,265 @@
+{
+  "width": 800,
+  "height": 1230,
+  "bounds": {
+    "w": 149.65,
+    "e": 150.45,
+    "s": -36.1,
+    "n": -35.1
+  },
+  "towns": [
+    {
+      "name": "Batemans Bay",
+      "x": 525.0,
+      "y": 746.0
+    },
+    {
+      "name": "Moruya",
+      "x": 431.0,
+      "y": 995.1
+    },
+    {
+      "name": "Mogo",
+      "x": 491.0,
+      "y": 840.9
+    },
+    {
+      "name": "Nelligen",
+      "x": 490.0,
+      "y": 670.9
+    },
+    {
+      "name": "Braidwood",
+      "x": 149.0,
+      "y": 417.7
+    },
+    {
+      "name": "Araluen",
+      "x": 164.0,
+      "y": 669.7
+    },
+    {
+      "name": "Bawley Point",
+      "x": 743.0,
+      "y": 512.3
+    }
+  ],
+  "severity": [
+    {
+      "name": "Low",
+      "color": "#f2d16b",
+      "km2": 796
+    },
+    {
+      "name": "Moderate",
+      "color": "#ee8a2f",
+      "km2": 1152
+    },
+    {
+      "name": "High",
+      "color": "#cf2f22",
+      "km2": 1020
+    },
+    {
+      "name": "Extreme",
+      "color": "#5c0a14",
+      "km2": 1320
+    }
+  ],
+  "recoveryStops": [
+    [
+      0.3,
+      "#6b0f12"
+    ],
+    [
+      0.5,
+      "#c0392b"
+    ],
+    [
+      0.65,
+      "#e67e22"
+    ],
+    [
+      0.8,
+      "#f1c40f"
+    ],
+    [
+      0.92,
+      "#9ccc65"
+    ],
+    [
+      1.0,
+      "#2e8b3e"
+    ]
+  ],
+  "frames": [
+    {
+      "file": "recovery/00.jpg",
+      "label": "Mar 2020",
+      "from": "2020-02-01",
+      "to": "2020-05-01",
+      "recovery": 0.639
+    },
+    {
+      "file": "recovery/01.jpg",
+      "label": "Jun 2020",
+      "from": "2020-05-01",
+      "to": "2020-08-01",
+      "recovery": 0.768
+    },
+    {
+      "file": "recovery/02.jpg",
+      "label": "Sep 2020",
+      "from": "2020-08-01",
+      "to": "2020-11-01",
+      "recovery": 0.819
+    },
+    {
+      "file": "recovery/03.jpg",
+      "label": "Dec 2020",
+      "from": "2020-11-01",
+      "to": "2021-02-01",
+      "recovery": 0.877
+    },
+    {
+      "file": "recovery/04.jpg",
+      "label": "Mar 2021",
+      "from": "2021-02-01",
+      "to": "2021-05-01",
+      "recovery": 0.835
+    },
+    {
+      "file": "recovery/05.jpg",
+      "label": "Jun 2021",
+      "from": "2021-05-01",
+      "to": "2021-08-01",
+      "recovery": 0.837
+    },
+    {
+      "file": "recovery/06.jpg",
+      "label": "Sep 2021",
+      "from": "2021-08-01",
+      "to": "2021-11-01",
+      "recovery": 0.879
+    },
+    {
+      "file": "recovery/07.jpg",
+      "label": "Dec 2021",
+      "from": "2021-11-01",
+      "to": "2022-02-01",
+      "recovery": 0.883
+    },
+    {
+      "file": "recovery/08.jpg",
+      "label": "Mar 2022",
+      "from": "2022-02-01",
+      "to": "2022-05-01",
+      "recovery": 0.84
+    },
+    {
+      "file": "recovery/09.jpg",
+      "label": "Jun 2022",
+      "from": "2022-05-01",
+      "to": "2022-08-01",
+      "recovery": 0.839
+    },
+    {
+      "file": "recovery/10.jpg",
+      "label": "Sep 2022",
+      "from": "2022-08-01",
+      "to": "2022-11-01",
+      "recovery": 0.871
+    },
+    {
+      "file": "recovery/11.jpg",
+      "label": "Dec 2022",
+      "from": "2022-11-01",
+      "to": "2023-02-01",
+      "recovery": 0.903
+    },
+    {
+      "file": "recovery/12.jpg",
+      "label": "Mar 2023",
+      "from": "2023-02-01",
+      "to": "2023-05-01",
+      "recovery": 0.882
+    },
+    {
+      "file": "recovery/13.jpg",
+      "label": "Jun 2023",
+      "from": "2023-05-01",
+      "to": "2023-08-01",
+      "recovery": 0.871
+    },
+    {
+      "file": "recovery/14.jpg",
+      "label": "Sep 2023",
+      "from": "2023-08-01",
+      "to": "2023-11-01",
+      "recovery": 0.928
+    },
+    {
+      "file": "recovery/15.jpg",
+      "label": "Dec 2023",
+      "from": "2023-11-01",
+      "to": "2024-02-01",
+      "recovery": 0.929
+    },
+    {
+      "file": "recovery/16.jpg",
+      "label": "Mar 2024",
+      "from": "2024-02-01",
+      "to": "2024-05-01",
+      "recovery": 0.867
+    },
+    {
+      "file": "recovery/17.jpg",
+      "label": "Jun 2024",
+      "from": "2024-05-01",
+      "to": "2024-08-01",
+      "recovery": 0.856
+    },
+    {
+      "file": "recovery/18.jpg",
+      "label": "Sep 2024",
+      "from": "2024-08-01",
+      "to": "2024-11-01",
+      "recovery": 0.907
+    },
+    {
+      "file": "recovery/19.jpg",
+      "label": "Dec 2024",
+      "from": "2024-11-01",
+      "to": "2025-02-01",
+      "recovery": 0.948
+    },
+    {
+      "file": "recovery/20.jpg",
+      "label": "Mar 2025",
+      "from": "2025-02-01",
+      "to": "2025-05-01",
+      "recovery": 0.901
+    },
+    {
+      "file": "recovery/21.jpg",
+      "label": "Jun 2025",
+      "from": "2025-05-01",
+      "to": "2025-08-01",
+      "recovery": 0.87
+    },
+    {
+      "file": "recovery/22.jpg",
+      "label": "Sep 2025",
+      "from": "2025-08-01",
+      "to": "2025-11-01",
+      "recovery": 0.925
+    },
+    {
+      "file": "recovery/23.jpg",
+      "label": "Dec 2025",
+      "from": "2025-11-01",
+      "to": "2026-02-01",
+      "recovery": 0.97
+    }
+  ]
+}

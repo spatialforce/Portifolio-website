@@ -1,0 +1,60 @@
+---
+title: "Case study standards"
+subtitle: "Rules that apply to every case study on the portfolio"
+date: 2026-11-11
+format: html
+---
+
+# Purpose
+
+The case studies are serious pieces of geospatial analysis. They sit under the Work section of the site, which is renamed Case studies. Each one should read like a short report written in Word: plain, direct and checked. These rules apply to every case study without exception.
+
+# Accuracy
+
+Every figure in a case study must come from a named, open dataset or a published source. Before a figure is written down it is cross checked against at least one other independent study, report or official statistic found online. If the two disagree, the case study says so in one plain sentence and gives both values with their sources. A figure that cannot be checked is either left out or clearly described as an estimate from this analysis.
+
+Each case study keeps a short verification note in its build folder listing every figure used, where it came from and what it was checked against. References are listed at the end of the case study in a consistent author and year style with links.
+
+Nothing is rounded, cropped or coloured in a way that makes a result look bigger or smaller than it is. Areas are computed in an equal area projection. Uncertainty and the limits of the data are stated in the discussion.
+
+# Scope and title
+
+Each case study is a full piece of analysis with at least four to five maps, supporting statistics in tables and graphs, and recommendations drawn from the results. A topic that only gives one map is not a case study.
+
+The title is a proper report title that names the subject, the analysis and the place, for example "Population Distribution, Density and Growth in Zimbabwe: A Spatial Analysis of the 2012 and 2022 Censuses". Casual titles such as "Where Zimbabwe's people live" or bare labels such as "Land cover of Zimbabwe" are not used.
+
+# Structure
+
+Each case study follows the order of a normal report, using plain headings:
+
+Title, Introduction, Objectives, Study area, Data and methods, Results, Discussion, Recommendations, Conclusion, References.
+
+Objectives are written as short numbered sentences, which is the only place a numbered list is used. Everything else is written as normal paragraphs. There are no bullet points, no text split up with dots or separators, no pull quotes and no callout boxes.
+
+# Writing
+
+The writing is simple and straight forward, in full sentences and in the past tense for methods and results. No marketing language, no exclamation marks and no over explaining. Thousands are written with a space, for example 2 500. Units are always given. Place names are written in full the first time they appear.
+
+# Maps
+
+All maps are made in Python with common libraries such as geopandas, rasterio, xarray, matplotlib, cartopy, plotly and contextily. Each case study uses a map type that suits its subject, and across the twenty studies the map types vary. The reference styles are:
+
+A dark map where values glow on a black background, as in the population density map of Asia from Kontour data.
+
+A shaded relief map where colour is draped over a hillshade so the land looks three dimensional, as in the historical Yellowstone geology map.
+
+A classified map such as land cover laid over a grey hillshade, with the surrounding land in grey and a small set of place names, as in the ESA land cover map of Austria.
+
+Other suitable types include choropleth maps, graduated symbols, flow lines, small multiples over time, change maps and true 3D surfaces. Every map has a title, a legend, a scale bar or graticule, a north arrow where the orientation is not obvious and a short source line. Colour ramps are established ones such as viridis, magma, YlOrBr or the official class colours of the dataset. Maps are exported as high resolution images that fill their frame.
+
+# Tables
+
+Tables look like a plain Word table: a header row, thin black lines, normal text size and no colour fills, icons or bars inside cells. Numbers are right aligned with consistent decimal places and units in the header.
+
+# Graphs
+
+Graphs look like a plain Excel chart: a line, column or scatter chart with labelled axes, units, a simple legend when needed and light gridlines. No 3D effects, gradients, shadows or decoration.
+
+# Not allowed
+
+Large numbers in big type at the top of the page, such as a percentage change or a count of years. Horizontal bars that show the share or size of each variable as a percentage or in hectares. Bullet point text. Badges, icons beside headings, coloured boxes, animated counters or any other decoration. Over engineered page layouts. Each case study is one plain page of headings, paragraphs, maps, tables and graphs.

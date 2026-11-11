@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" class="gis gis-lay-float">
+<head>
+<meta charset="utf-8">
+<title>Elephant Tracks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#0b0a09; }
+  #map { position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:grab; }
+  #date { flex:none; width:120px; font-weight:600; }
+  #season { display:block; font-weight:400; font-size:var(--gis-t-small); color:var(--gis-fg2); }
+  #tl { position:relative; flex:1; height:36px; cursor:pointer; }
+  #tl canvas { position:absolute; inset:0; width:100%; height:100%; }
+  #list li { display:grid; grid-template-columns:14px 1fr auto; gap:0 8px; }
+  #list li small { grid-column:2 / 4; color:var(--gis-fg2); font-size:var(--gis-t-small); font-weight:400; }
+  @media (max-width:760px){ #speed { display:none; } #date { width:auto; } }
+</style>
+</head>
+<body>
+<main class="gis-map" id="stage"><canvas id="map"></canvas>
+  <div class="gis-tools"><div class="gis-grp">
+    <button class="gis-btn" id="zIn" type="button" title="Zoom in" aria-label="Zoom in"><i class="bi bi-plus-lg"></i></button>
+    <button class="gis-btn" id="zOut" type="button" title="Zoom out" aria-label="Zoom out"><i class="bi bi-dash-lg"></i></button>
+    <button class="gis-btn" id="zAll" type="button" title="Whole park" aria-label="Whole park"><i class="bi bi-fullscreen"></i></button></div></div>
+  <div class="gis-timebar"><button class="gis-btn gis-btn--icon" id="play" type="button" aria-label="Play"><i class="bi bi-play-fill" id="ico"></i></button>
+    <div id="date">&nbsp;<span id="season"></span></div>
+    <div id="tl"><canvas id="tlc"></canvas></div>
+    <div class="gis-seg" id="speed"><button class="gis-btn" type="button" data-s="4">Slow</button><button class="gis-btn on" type="button" data-s="14">Normal</button><button class="gis-btn" type="button" data-s="45">Fast</button></div></div>
+  <div class="gis-attr">Image from Copernicus Sentinel-2. Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar-reverse"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the collars</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Elephant tracks</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset-reverse"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><div class="gis-seg gis-seg--full" id="park"><button class="gis-btn on" type="button" data-p="etosha">Etosha</button><button class="gis-btn" type="button" data-p="kruger">Kruger</button></div></section>
+    <section class="gis-sec"><label class="gis-check"><input type="checkbox" id="all" checked> Show every path</label>
+      <label class="gis-check" style="margin-top:4px"><input type="checkbox" id="edge" checked> Park edge <i class="gis-sw gis-sw--line" style="background:repeating-linear-gradient(90deg,#1b1f24 0 5px,transparent 5px 9px);height:2px;margin-left:auto"></i></label></section>
+    <ul class="gis-list" id="list"></ul>
+  </div>
+  <footer class="gis-panel__ft" id="note"></footer>
+</aside>
+<div class="gis-tip" id="tip"></div>
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+// Matplotlib tab20: the ten light members, then five bright ones (all read on the dark image)
+const COLS = ["#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5", "#c49c94", "#f7b6d2", "#c7c7c7", "#dbdb8d", "#9edae5", "#ff7f0e", "#17becf", "#bcbd22", "#e377c2", "#d62728"];
+const TRAIL = 14 * 12;                 // two weeks of 2-hourly positions
+
+const cv = $("map"), x = cv.getContext("2d");
+let P, park, A, img, W, H, dpr = 1, view = { k: 1, ox: 0, oy: 0 }, t = 0, playing = !reduce, speed = reduce ? 4 : 14, last = 0;
+let focus = null, hov = null, every = null;
+
+const bin = (u) => fetch(u).then((r) => { if (!r.ok) throw new Error("Missing " + u + ". Run tools/elephants/build.py."); return r.arrayBuffer(); });
+const pic = (u) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("Missing " + u)); i.src = u; });
+const cache = {};
+
+async function load(name) {
+  if (!cache[name]) {
+    const [b, im] = await Promise.all([bin(`elephants/${name}.bin`), pic(`elephants/${name}.jpg`)]);
+    cache[name] = { xy: new Uint16Array(b), img: im };
+  }
+  park = P[name]; A = cache[name].xy; img = cache[name].img;
+  t = 0; focus = null; every = null;
+  [...$("park").children].forEach((b) => b.classList.toggle("on", b.dataset.p === name));
+  $("list").innerHTML = park.animals.map((a, i) => `<li data-i="${i}" tabindex="0"><i class="gis-sw" style="background:${COLS[i % COLS.length]}"></i>${a.id} <span class="gis-end">${a.sex}</span>
+    <small>${a.perday} km a day in ${a.range.toLocaleString("en-US").replace(/,/g, " ")} km²</small></li>`).join("");
+  const who = park.credit.split(" (")[0].split(/,| and /)[0], yr = (park.credit.match(/\((\d{4})\)/) || [])[1];
+  $("note").textContent = `Collar data from Movebank (${who} et al. ${yr})`;
+  fit(); timeline(); setPlaying(!reduce);
+}
+// position of elephant i at slot s, or null
+function pos(i, s) {
+  const o = (i * park.slots + s) * 2, X = A[o];
+  return X === 65535 ? null : [X, A[o + 1]];
+}
+function near(i, s) {           // last fix within a day
+  for (let k = 0; k < 12; k++) { const p = pos(i, s - k); if (p) return p; if (s - k <= 0) break; }
+  return null;
+}
+
+function fit() {
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  const r = $("stage").getBoundingClientRect(); W = r.width; H = r.height;
+  cv.width = W * dpr; cv.height = H * dpr;
+  view.k = Math.max(W / park.w, H / park.h);
+  view.ox = (W - park.w * view.k) / 2; view.oy = (H - park.h * view.k) / 2;
+  every = null;
+}
+const sx = (v) => view.ox + v * view.k, sy = (v) => view.oy + v * view.k;
+
+// every path, drawn once
+function allPaths() {
+  const c = document.createElement("canvas"); c.width = W * dpr; c.height = H * dpr;
+  const g = c.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.lineWidth = 0.8; g.lineJoin = "round";
+  park.animals.forEach((a, i) => {
+    g.strokeStyle = COLS[i % COLS.length]; g.globalAlpha = focus === null || focus === i ? 0.28 : 0.05;
+    g.beginPath(); let pen = false;
+    for (let s = 0; s < park.slots; s++) { const p = pos(i, s); if (!p) { pen = false; continue; } pen ? g.lineTo(sx(p[0]), sy(p[1])) : g.moveTo(sx(p[0]), sy(p[1])); pen = true; }
+    g.stroke();
+  });
+  return c;
+}
+
+function draw() {
+  x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  x.fillStyle = "#0b0a09"; x.fillRect(0, 0, W, H);
+  x.globalAlpha = park.name === "Kruger" ? 0.85 : 0.62; x.drawImage(img, sx(0), sy(0), park.w * view.k, park.h * view.k); x.globalAlpha = 1;
+  x.fillStyle = "rgba(11,10,9,.18)"; x.fillRect(0, 0, W, H);
+
+  if ($("edge").checked) {
+    x.strokeStyle = "rgba(255,255,255,.55)"; x.lineWidth = 1.2; x.setLineDash([5, 4]);
+    for (const r of park.edge) { x.beginPath(); r.forEach(([a, b], i) => (i ? x.lineTo(sx(a), sy(b)) : x.moveTo(sx(a), sy(b)))); x.stroke(); }
+    x.setLineDash([]);
+  }
+  if ($("all").checked) { if (!every) every = allPaths(); x.setTransform(1, 0, 0, 1, 0, 0); x.drawImage(every, 0, 0); x.setTransform(dpr, 0, 0, dpr, 0, 0); }
+
+  const s0 = Math.floor(t);
+  x.lineCap = "round"; x.lineJoin = "round";
+  park.animals.forEach((a, i) => {
+    const dim = focus !== null && focus !== i, col = COLS[i % COLS.length];
+    // trail, fading with age, in short pieces
+    const piece = 12;
+    for (let q = TRAIL; q > 0; q -= piece) {
+      x.globalAlpha = (1 - q / TRAIL) * (dim ? 0.15 : 0.85); x.strokeStyle = col; x.lineWidth = dim ? 1 : 1.8;
+      x.beginPath(); let pen = false;
+      for (let s = s0 - q; s <= Math.min(s0, s0 - q + piece); s++) {
+        if (s < 0) continue; const p = pos(i, s);
+        if (!p) { pen = false; continue; } pen ? x.lineTo(sx(p[0]), sy(p[1])) : x.moveTo(sx(p[0]), sy(p[1])); pen = true;
+      }
+      x.stroke();
+    }
+    x.globalAlpha = 1;
+    const p = near(i, s0); if (!p) return;
+    const X = sx(p[0]), Y = sy(p[1]), r = i === focus || i === hov ? 6 : 4.5;
+    x.globalAlpha = dim ? 0.3 : 1;
+    x.fillStyle = "rgba(11,10,9,.6)"; x.beginPath(); x.arc(X, Y, r + 2.5, 0, 7); x.fill();
+    x.fillStyle = col; x.beginPath(); x.arc(X, Y, r, 0, 7); x.fill();
+    if (i === focus || i === hov) { x.font = "600 13px Source Sans 3, sans-serif"; x.fillStyle = "#fff"; x.fillText(a.id, X + 10, Y + 4); }
+    x.globalAlpha = 1;
+  });
+}
+
+// timeline with the rainy months shaded
+const dateAt = (s) => new Date(new Date(park.start).getTime() + s * park.step * 3600e3);
+const wet = (m) => { const [a, b] = park.rain; return a <= b ? m + 1 >= a && m + 1 <= b : m + 1 >= a || m + 1 <= b; };
+function timeline() {
+  const c = $("tlc"), r = c.getBoundingClientRect(); c.width = r.width * dpr; c.height = r.height * dpr;
+  const g = c.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, r.width, r.height);
+  const n = park.slots, px = (s) => (s / n) * r.width;
+  g.fillStyle = "#e6e8eb"; g.fillRect(0, 9, r.width, 8);
+  // rain shading, a month at a time
+  const d0 = dateAt(0), d1 = dateAt(n);
+  for (let d = new Date(d0.getFullYear(), d0.getMonth(), 1); d < d1; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
+    if (!wet(d.getMonth())) continue;
+    const a = (d - d0) / 3600e3 / park.step, b = (new Date(d.getFullYear(), d.getMonth() + 1, 1) - d0) / 3600e3 / park.step;
+    g.fillStyle = "#6baed6"; g.fillRect(px(Math.max(0, a)), 9, px(Math.min(n, b)) - px(Math.max(0, a)), 8);
+  }
+  g.fillStyle = "#4d5560"; g.font = "12px 'Source Sans 3', sans-serif"; g.textAlign = "center";
+  for (let y = d0.getFullYear() + 1; y <= d1.getFullYear(); y++) {
+    const s = (new Date(y, 0, 1) - d0) / 3600e3 / park.step; if (s > 0 && s < n) { g.fillRect(px(s) - 0.5, 5, 1, 16); g.fillText(y, px(s), 33); }
+  }
+  g.fillStyle = "#1b1f24"; g.fillRect(px(t) - 1.5, 2, 3, 22);
+  const d = dateAt(t);
+  $("date").firstChild.textContent = `${MON[d.getMonth()]} ${d.getFullYear()}`;
+  $("season").textContent = wet(d.getMonth()) ? "Rainy season" : "Dry season";
+}
+$("tl").addEventListener("pointerdown", (e) => {
+  const r = $("tl").getBoundingClientRect();
+  const seek = (ev) => { t = Math.max(0, Math.min(park.slots - 1, (ev.clientX - r.left) / r.width * park.slots)); timeline(); };
+  seek(e); setPlaying(false);
+  const mv = (ev) => seek(ev), up = () => { removeEventListener("pointermove", mv); removeEventListener("pointerup", up); };
+  addEventListener("pointermove", mv); addEventListener("pointerup", up);
+});
+
+function setPlaying(p) { playing = p; $("ico").className = p ? "bi bi-pause-fill" : "bi bi-play-fill"; $("play").setAttribute("aria-label", p ? "Pause" : "Play"); $("play").title = p ? "Pause" : "Play"; }
+function zoomBy(f) {
+  const k = Math.max(0.004, Math.min(0.2, view.k * f)), q = k / view.k;
+  view.ox = W / 2 - (W / 2 - view.ox) * q; view.oy = H / 2 - (H / 2 - view.oy) * q; view.k = k; every = null;
+}
+$("zIn").onclick = () => zoomBy(1.6); $("zOut").onclick = () => zoomBy(1 / 1.6); $("zAll").onclick = () => fit();
+$("play").onclick = () => { if (!playing && t >= park.slots - 1) t = 0; setPlaying(!playing); };
+$("speed").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; speed = +b.dataset.s; [...$("speed").children].forEach((c) => c.classList.toggle("on", c === b)); };
+$("park").onclick = (e) => { const b = e.target.closest("button"); if (b && P[b.dataset.p] !== park) load(b.dataset.p); };
+$("all").onchange = () => (every = null);
+function pick(i) {
+  focus = focus === i ? null : i; every = null;
+  [...$("list").children].forEach((li, j) => li.classList.toggle("on", j === focus));
+}
+$("list").onclick = (e) => { const li = e.target.closest("li"); if (li) pick(+li.dataset.i); };
+$("list").onkeydown = (e) => { const li = e.target.closest("li"); if (li && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); pick(+li.dataset.i); } };
+$("list").onmouseover = (e) => { const li = e.target.closest("li"); hov = li ? +li.dataset.i : null; };
+$("list").onmouseleave = () => (hov = null);
+
+function nearest(cx, cy) {
+  let best = null, bd = 14;
+  park.animals.forEach((a, i) => { const p = near(i, Math.floor(t)); if (!p) return; const d = Math.hypot(sx(p[0]) - cx, sy(p[1]) - cy); if (d < bd) { bd = d; best = i; } });
+  return best;
+}
+let drag = null, moved = false;
+cv.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, ox: view.ox, oy: view.oy }; moved = false; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove", (e) => {
+  if (drag) {
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+    if (moved) { view.ox = drag.ox + dx; view.oy = drag.oy + dy; every = null; return; }
+  }
+  if (e.pointerType !== "mouse") return;
+  const i = nearest(e.clientX, e.clientY), tip = $("tip");
+  hov = i; cv.style.cursor = i !== null ? "pointer" : "grab";
+  if (i !== null) { const a = park.animals[i]; tip.textContent = `${a.id} (${a.sex.toLowerCase()})`; tip.style.display = "block"; tip.style.left = e.clientX + 14 + "px"; tip.style.top = e.clientY + 10 + "px"; }
+  else tip.style.display = "none";
+});
+cv.addEventListener("pointerup", (e) => { if (!moved) { const i = nearest(e.clientX, e.clientY); if (i !== null || focus !== null) pick(i === null ? focus : i); } drag = null; });
+cv.addEventListener("pointerleave", () => { hov = null; $("tip").style.display = "none"; });
+cv.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const k = Math.max(0.004, Math.min(0.2, view.k * Math.exp(-e.deltaY * 0.0015))), q = k / view.k;
+  view.ox = e.clientX - (e.clientX - view.ox) * q; view.oy = e.clientY - (e.clientY - view.oy) * q; view.k = k; every = null;
+}, { passive: false });
+addEventListener("keydown", (e) => { if (e.key === " " && e.target.tagName !== "INPUT") { e.preventDefault(); $("play").click(); } if (e.key === "Escape" && focus !== null) pick(focus); });
+addEventListener("resize", () => { fit(); timeline(); });
+
+function frame(now) {
+  const dt = last ? Math.min(0.1, (now - last) / 1000) : 0; last = now;
+  if (playing && park) {
+    t = Math.min(park.slots - 1, t + dt * speed * 24 / park.step);
+    if (t >= park.slots - 1) setPlaying(false);
+    timeline();
+  }
+  if (park) draw();
+  requestAnimationFrame(frame);
+}
+
+fetch("elephants/parks.json").then((r) => { if (!r.ok) throw new Error("The elephant data is missing. Run tools/elephants/build.py."); return r.json(); })
+  .then(async (d) => { P = d; const h = location.hash.slice(1).split(",");
+    if (h.includes("all")) $("all").checked = true;
+    await load(h.includes("kruger") ? "kruger" : "etosha"); GIS.state($("loading"), null); requestAnimationFrame(frame); })
+  .catch((e) => GIS.state($("loading"), e.message, true));
+})();
+</script>
+</body>
+</html>

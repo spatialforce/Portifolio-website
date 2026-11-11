@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" class="gis">
+<head>
+<meta charset="utf-8">
+<title>Mining Footprint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { display:grid; grid-template-columns:1fr 1fr; gap:2px; background:#000; }
+  .pane { position:relative; background:#111; overflow:hidden; }
+  .pane canvas { position:absolute; inset:0; width:100%; height:100%; cursor:none; touch-action:none; }
+  .pane .gis-chip { left:50%; top:12px; transform:translateX(-50%); }
+  .pane .gis-attr { max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  @media (max-width:760px){ .gis-map { grid-template-columns:1fr; grid-template-rows:1fr 1fr; } }
+</style>
+</head>
+<body>
+<main class="gis-map" id="map">
+  <div class="pane" id="pb"><canvas></canvas><div class="gis-chip yr"></div>
+    <div class="gis-tools"><div class="gis-grp">
+      <button class="gis-btn" id="zIn" type="button" title="Zoom in" aria-label="Zoom in"><i class="bi bi-plus-lg"></i></button>
+      <button class="gis-btn" id="zOut" type="button" title="Zoom out" aria-label="Zoom out"><i class="bi bi-dash-lg"></i></button>
+      <button class="gis-btn" id="zAll" type="button" title="Whole site" aria-label="Whole site"><i class="bi bi-fullscreen"></i></button></div></div></div>
+  <div class="pane" id="pa"><canvas></canvas><div class="gis-chip yr"></div>
+    <div class="gis-attr">Images from Sentinel-2 and Landsat. Water from JRC. Map by Kudzanai Chakavarika</div>
+    <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar-reverse"></i></button></div>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the sites</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Mining footprint</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset-reverse"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><p class="gis-value" id="now"></p><p class="gis-p" id="nowt"></p></section>
+    <section class="gis-sec" style="padding:0"><table class="gis-table" id="sites"></table></section>
+    <section class="gis-sec"><h2 class="gis-h">Legend</h2><ul class="gis-legend" id="legend"></ul>
+      <div class="gis-ramp" id="ramp" style="margin-top:6px"></div></section>
+  </div>
+</aside>
+<script>
+const NB = " ";
+const fmt = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, NB);
+const CLASSES = [null, ["Water", [35, 57, 74]], ["Woodland", [44, 58, 45]], ["Fields and grass", [64, 62, 50]],
+  ["Sparse", [78, 73, 63]], ["Bare ground", [100, 92, 81]]];
+// mining intensity: the bright end of Matplotlib inferno
+const RAMP = [[227, 89, 51], [249, 142, 9], [249, 203, 53], [252, 255, 164]];
+const ramp = (t) => {
+  const x = Math.min(0.999, Math.max(0, t)) * (RAMP.length - 1), i = Math.floor(x), f = x - i, a = RAMP[i], b = RAMP[i + 1];
+  return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+};
+
+const panes = ["pb", "pa"].map((id) => {
+  const el = document.getElementById(id), cv = el.querySelector("canvas");
+  return { el, cv, cx: cv.getContext("2d"), yr: el.querySelector(".yr"), pic: null };
+});
+let sites = [], cur = null, view = { s: 1, x: 0, y: 0 }, ghost = null, dpr = 1, W = 0, H = 0;
+
+const img = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("Missing " + src + ". Run tools/mining/build.py.")); i.src = src; });
+
+// Paint a class PNG (red = class, green = intensity) into a finished map with a glow under the mining.
+function paint(png) {
+  const w = png.width, h = png.height, src = document.createElement("canvas");
+  src.width = w; src.height = h;
+  const g = src.getContext("2d"); g.drawImage(png, 0, 0);
+  const d = g.getImageData(0, 0, w, h).data;
+  const base = new ImageData(w, h), hot = new ImageData(w, h);
+  for (let k = 0; k < d.length; k += 4) {
+    const c = d[k];
+    if (c === 6) {
+      const [r, gg, b] = ramp(d[k + 1] / 255);
+      hot.data[k] = r; hot.data[k + 1] = gg; hot.data[k + 2] = b; hot.data[k + 3] = 255;
+      base.data[k] = 60; base.data[k + 1] = 20; base.data[k + 2] = 14; base.data[k + 3] = 255;
+    } else {
+      const col = CLASSES[c] ? CLASSES[c][1] : [17, 17, 16];
+      base.data[k] = col[0]; base.data[k + 1] = col[1]; base.data[k + 2] = col[2]; base.data[k + 3] = 255;
+    }
+  }
+  const out = document.createElement("canvas"); out.width = w; out.height = h;
+  const o = out.getContext("2d");
+  o.putImageData(base, 0, 0);
+  const hc = document.createElement("canvas"); hc.width = w; hc.height = h;
+  hc.getContext("2d").putImageData(hot, 0, 0);
+  o.save(); o.globalCompositeOperation = "screen"; o.globalAlpha = 0.85;
+  o.filter = "blur(7px)"; o.drawImage(hc, 0, 0);
+  o.filter = "blur(2px)"; o.drawImage(hc, 0, 0); o.restore();
+  o.drawImage(hc, 0, 0);
+  return out;
+}
+
+async function load(s) {
+  if (!s.pics) {
+    const [b, a] = await Promise.all([img(`mining/${s.id}_before.png`), img(`mining/${s.id}_after.png`)]);
+    s.pics = [paint(b), paint(a)];
+  }
+  cur = s; fit();
+  panes[0].pic = s.pics[0]; panes[1].pic = s.pics[1];
+  panes[0].yr.textContent = s.before;
+  panes[1].yr.textContent = s.after;
+  document.getElementById("now").textContent = `${fmt(s.ha)} ha`;
+  document.getElementById("nowt").textContent = `New mining ground at ${s.name} since ${s.before}`;
+  document.querySelectorAll("#sites tr").forEach((li) => li.classList.toggle("on", li.dataset.id === s.id));
+  draw();
+}
+
+// Cover the frame: the image always fills it, whatever the screen shape.
+const minScale = () => Math.max(W / cur.pics[0].width, H / cur.pics[0].height);
+function fit() { view.s = minScale(); view.x = (W - cur.pics[0].width * view.s) / 2; view.y = (H - cur.pics[0].height * view.s) / 2; }
+function clamp() {
+  const iw = cur.pics[0].width * view.s, ih = cur.pics[0].height * view.s;
+  view.x = iw <= W ? (W - iw) / 2 : Math.min(0, Math.max(W - iw, view.x));
+  view.y = ih <= H ? (H - ih) / 2 : Math.min(0, Math.max(H - ih, view.y));
+}
+
+function ring(cx, x, y) {
+  cx.beginPath(); cx.arc(x, y, 5, 0, Math.PI * 2);
+  cx.lineWidth = 3; cx.strokeStyle = "#000"; cx.stroke();
+  cx.lineWidth = 1.5; cx.strokeStyle = "#fff"; cx.stroke();
+}
+
+function draw() {
+  if (!cur) return;
+  panes.forEach((p, i) => {
+    const cx = p.cx;
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx.fillStyle = "#111110"; cx.fillRect(0, 0, W, H);
+    cx.imageSmoothingEnabled = view.s < 1.5;
+    cx.drawImage(p.pic, view.x, view.y, p.pic.width * view.s, p.pic.height * view.s);
+    if (ghost) ring(cx, ghost.x, ghost.y);
+  });
+}
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  const r = panes[0].el.getBoundingClientRect(); W = r.width; H = r.height;
+  panes.forEach((p) => { p.cv.width = W * dpr; p.cv.height = H * dpr; });
+  if (cur) { fit(); draw(); }
+}
+
+panes.forEach((p, i) => {
+  let last = null;
+  const pos = (e) => { const r = p.cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  p.cv.addEventListener("pointerdown", (e) => { p.cv.setPointerCapture(e.pointerId); last = pos(e); });
+  p.cv.addEventListener("pointermove", (e) => {
+    const [x, y] = pos(e);
+    if (last) { view.x += x - last[0]; view.y += y - last[1]; clamp(); last = [x, y]; }
+    ghost = { pane: i, x, y }; draw();
+  });
+  const up = () => { last = null; };
+  p.cv.addEventListener("pointerup", up); p.cv.addEventListener("pointercancel", up);
+  p.cv.addEventListener("pointerleave", () => { if (!last) { ghost = null; draw(); } });
+  p.cv.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const [x, y] = pos(e), min = minScale();
+    const k = Math.min(Math.max(view.s * Math.exp(-e.deltaY * 0.0015), min), min * 10) / view.s;
+    view.x = x - (x - view.x) * k; view.y = y - (y - view.y) * k; view.s *= k; clamp();
+    ghost = { pane: i, x, y }; draw();
+  }, { passive: false });
+});
+addEventListener("resize", resize);
+function zoomBy(f) {
+  if (!cur) return;
+  const min = minScale(), k = Math.min(Math.max(view.s * f, min), min * 10) / view.s;
+  view.x = W / 2 - (W / 2 - view.x) * k; view.y = H / 2 - (H / 2 - view.y) * k; view.s *= k; clamp(); draw();
+}
+document.getElementById("zIn").onclick = () => zoomBy(1.6);
+document.getElementById("zOut").onclick = () => zoomBy(1 / 1.6);
+document.getElementById("zAll").onclick = () => { if (cur) { fit(); draw(); } };
+// legend from the same class table and ramp the frames are painted with
+document.getElementById("legend").innerHTML = CLASSES.filter(Boolean).map(([n, c]) => `<li><i class="gis-sw" style="background:rgb(${c})"></i>${n}</li>`).join("")
+  + `<li><i class="gis-sw" style="background:rgb(${RAMP[1]})"></i>Mining ground</li>`;
+document.getElementById("ramp").style.background = `linear-gradient(90deg,${RAMP.map((c) => `rgb(${c})`).join(",")})`;
+
+
+fetch("mining/sites.json").then((r) => { if (!r.ok) throw new Error("The data is missing. Run tools/mining/build.py."); return r.json(); })
+  .then(async (d) => {
+    sites = d;
+    document.getElementById("sites").innerHTML = d.map((s) =>
+      `<tr data-id="${s.id}" tabindex="0"><td>${s.name} (${s.what.toLowerCase()})</td><td>${fmt(s.ha)} ha</td></tr>`).join("");
+    document.querySelectorAll("#sites tr").forEach((li) => {
+      const go = () => load(sites.find((s) => s.id === li.dataset.id)).catch(() => { document.getElementById("nowt").textContent = "This site is not ready yet."; });
+      li.onclick = go; li.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+    });
+    resize(); await load(d[0]);
+    GIS.state(document.getElementById("loading"), null);
+  })
+  .catch((e) => GIS.state(document.getElementById("loading"), e.message, true));
+</script>
+</body>
+</html>

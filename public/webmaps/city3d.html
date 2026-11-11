@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" class="gis">
+<head>
+<meta charset="utf-8">
+<title>Cities in 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#0d1117; }
+  #stage canvas { display:block; width:100%; height:100%; outline:none; }
+  #read { left:16px; top:16px; font-weight:400; display:none; }
+  #read b { font-weight:600; margin-right:6px; }
+  #stats td:last-child { font-variant-numeric:tabular-nums; }
+  @media (max-width:760px){ #read { left:8px; top:8px; } }
+</style>
+<script type="importmap">{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+</head>
+<body>
+<main class="gis-map" id="stage">
+  <div class="gis-chip" id="read"></div>
+  <div class="gis-tools gis-tools--bl"><div class="gis-grp">
+    <button class="gis-btn" id="zIn" type="button" title="Zoom in" aria-label="Zoom in"><i class="bi bi-plus-lg"></i></button>
+    <button class="gis-btn" id="zOut" type="button" title="Zoom out" aria-label="Zoom out"><i class="bi bi-dash-lg"></i></button>
+    <button class="gis-btn" id="zAll" type="button" title="Whole area" aria-label="Whole area"><i class="bi bi-fullscreen"></i></button>
+    <button class="gis-btn" id="tilt" type="button" title="Look straight down" aria-label="Look straight down"><i class="bi bi-badge-3d"></i></button></div></div>
+  <div class="gis-card gis-card--tr" style="width:220px"><h2 class="gis-h">Building height</h2>
+    <div class="gis-ramp" id="ramp"></div><div class="gis-ramp-lbl"><span>3 m</span><span id="keyHi"></span></div></div>
+  <div class="gis-attr">Data from Google Open Buildings 2.5D and Copernicus Sentinel-2. Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar-reverse"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the city</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Cities in 3D</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset-reverse"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><div class="gis-seg gis-seg--full" id="cities"></div></section>
+    <section class="gis-sec"><p class="gis-value" id="big">&nbsp;</p><p class="gis-p" id="what"></p></section>
+    <section class="gis-sec" style="padding:0"><table class="gis-table" id="stats"></table></section>
+    <section class="gis-sec gis-small gis-muted">Heights are modelled from satellite imagery for 2021 to 2023 and shown at true scale, rounded to storeys of 3 m. Towers over about 100 m are shown shorter than they are. Drag to turn and right drag to pan.</section>
+  </div>
+</aside>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+const $ = (id) => document.getElementById(id);
+const NB = " ", fmt = (n, d = 0) => Number(n).toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, NB);
+// height ramp, low to tall: slate, steel blue, sand, orange, red
+const RAMP = [[58, 72, 96], [86, 140, 186], [236, 226, 196], [244, 160, 88], [222, 52, 62]];
+
+let M, city = null, mesh = null, ground = null, cur = null;
+const stage = $("stage");
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0d1117);
+scene.fog = new THREE.Fog(0x0d1117, 9000, 26000);
+const camera = new THREE.PerspectiveCamera(40, 1, 5, 60000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.maxPolarAngle = Math.PI * 0.47; controls.screenSpacePanning = false;
+
+// one box with its base at 0 and top at 1; each instance is a block: centre, width, depth and height
+const box = new THREE.BoxGeometry(1, 1, 1); box.translate(0, 0.5, 0);
+const uni = { uTop: { value: 100 }, uRamp: { value: RAMP.map((c) => new THREE.Vector3(...c.map((v) => v / 255))) } };
+const mat = new THREE.ShaderMaterial({
+  uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {}]),
+  vertexShader: `
+    attribute vec4 aBox; attribute float aH;
+    uniform float uTop; uniform vec3 uRamp[5];
+    varying vec3 vCol; varying float vShade;
+    #include <fog_pars_vertex>
+    vec3 ramp(float t) { t = clamp(t, 0.0, 1.0) * 4.0; float f = fract(t); int i = int(floor(t));
+      vec3 a = i == 0 ? uRamp[0] : i == 1 ? uRamp[1] : i == 2 ? uRamp[2] : i == 3 ? uRamp[3] : uRamp[4];
+      vec3 b = i == 0 ? uRamp[1] : i == 1 ? uRamp[2] : i == 2 ? uRamp[3] : uRamp[4];
+      return mix(a, b, f); }
+    void main() {
+      vec3 p = position;
+      p.x *= aBox.z; p.z *= aBox.w; p.y *= aH;
+      p.xz += aBox.xy;
+      vec3 n = normalize(normal);
+      vShade = 0.55 + 0.45 * max(dot(n, normalize(vec3(0.45, 0.85, 0.3))), 0.0) + (n.y > 0.5 ? 0.08 : 0.0);
+      vCol = ramp(sqrt(max(aH - 3.0, 0.0) / (uTop - 3.0)));
+      vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+      gl_Position = projectionMatrix * mvPosition;
+      #include <fog_vertex>
+    }`,
+  fragmentShader: `
+    varying vec3 vCol; varying float vShade;
+    #include <common>
+    #include <fog_pars_fragment>
+    void main() { gl_FragColor = vec4(vCol * vShade, 1.0);
+    #include <fog_fragment>
+    }`,
+  fog: true,
+});
+Object.assign(mat.uniforms, uni);
+
+const img = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("Could not load " + src)); i.src = src; });
+
+async function load(c) {
+  const [buf, pic] = await Promise.all([
+    fetch(`city3d/${c.slug}.bin`).then((r) => { if (!r.ok) throw new Error(`The ${c.name} buildings are missing. Run tools/city3d/blocks.py.`); return r.arrayBuffer(); }),
+    img(`city3d/${c.slug}.jpg`).catch(() => null)]);
+  const R = new Uint16Array(buf), n = R.length / 5, W = c.w, H = c.h, cell = M.res;
+  const boxes = new Float32Array(n * 4), hs = new Float32Array(n), grid = new Uint16Array(W * H);
+  for (let k = 0; k < n; k++) {
+    const x = R[k * 5], y = R[k * 5 + 1], w = R[k * 5 + 2], d = R[k * 5 + 3], h = R[k * 5 + 4] / 10;
+    // a thin gap between blocks so neighbouring blocks read apart
+    boxes[k * 4] = (x + w / 2 - W / 2) * cell; boxes[k * 4 + 1] = (y + d / 2 - H / 2) * cell;
+    boxes[k * 4 + 2] = w * cell - 0.6; boxes[k * 4 + 3] = d * cell - 0.6; hs[k] = h;
+    for (let v = y; v < y + d; v++) grid.fill(Math.round(h), v * W + x, v * W + x + w);
+  }
+  const geo = new THREE.InstancedBufferGeometry();
+  geo.index = box.index; geo.setAttribute("position", box.getAttribute("position")); geo.setAttribute("normal", box.getAttribute("normal"));
+  geo.setAttribute("aBox", new THREE.InstancedBufferAttribute(boxes, 4));
+  geo.setAttribute("aH", new THREE.InstancedBufferAttribute(hs, 1));
+  geo.instanceCount = n;
+  let tex = null;
+  if (pic) { tex = new THREE.Texture(pic); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.needsUpdate = true; }
+  return { geo, tex, W, H, cell, grid };
+}
+
+function show(c, d) {
+  if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); }
+  if (ground) { scene.remove(ground); ground.geometry.dispose(); ground.material.dispose(); }
+  mesh = new THREE.Mesh(d.geo, mat); mesh.frustumCulled = false; scene.add(mesh);
+  ground = new THREE.Mesh(new THREE.PlaneGeometry(d.W * d.cell, d.H * d.cell), new THREE.MeshBasicMaterial({ color: d.tex ? 0x8a8f96 : 0x1a2029, map: d.tex }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -0.3; scene.add(ground);
+  uni.uTop.value = Math.max(40, c.top);
+  $("keyHi").textContent = c.top + " m";
+  cur = d; home();
+}
+
+function home() {
+  if (!cur) return;
+  const span = Math.max(cur.W, cur.H) * cur.cell;
+  controls.target.set(0, 0, 0);
+  camera.position.set(span * 0.22, span * 0.3, span * 0.45);
+  controls.update();
+}
+
+function panel(c) {
+  $("big").textContent = fmt(c.volume) + " million m³";
+  $("what").textContent = `of buildings in central ${c.name}, ${c.km[0]} by ${c.km[1]} km.`;
+  $("stats").innerHTML = `<tr><td>Land under buildings</td><td>${fmt(c.landKm2, 1)} km²</td></tr>
+    <tr><td>Share of the area built on</td><td>${Math.round(c.landKm2 / (c.km[0] * c.km[1]) * 100)}%</td></tr>
+    <tr><td>Tallest block</td><td>${c.top} m</td></tr>`;
+}
+
+async function pick(c) {
+  city = c;
+  document.querySelectorAll("#cities button").forEach((b) => b.classList.toggle("on", b.dataset.c === c.slug));
+  GIS.state($("loading"), `Loading ${c.name}`);
+  try { const d = await load(c); if (city !== c) return; show(c, d); }
+  catch (e) { GIS.state($("loading"), e.message, true); return; }
+  panel(c); GIS.state($("loading"), null);
+}
+
+const dolly = (f) => { const v = camera.position.clone().sub(controls.target).multiplyScalar(f); camera.position.copy(controls.target).add(v); controls.update(); };
+$("zIn").onclick = () => dolly(1 / 1.4); $("zOut").onclick = () => dolly(1.4); $("zAll").onclick = home;
+$("tilt").onclick = () => { const d = camera.position.distanceTo(controls.target); camera.position.set(controls.target.x, controls.target.y + d, controls.target.z + 1); controls.update(); };
+
+// height under the pointer, read from the ground grid
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
+renderer.domElement.addEventListener("pointermove", (e) => {
+  if (!cur || e.buttons || e.pointerType === "touch") { $("read").style.display = "none"; return; }
+  const r = renderer.domElement.getBoundingClientRect();
+  mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  if (!ray.ray.intersectPlane(plane, hit)) return;
+  const x = Math.floor(hit.x / cur.cell + cur.W / 2), y = Math.floor(hit.z / cur.cell + cur.H / 2);
+  const h = x >= 0 && y >= 0 && x < cur.W && y < cur.H ? cur.grid[y * cur.W + x] : 0;
+  if (!h) { $("read").style.display = "none"; return; }
+  $("read").innerHTML = `<b>${h} m</b>about ${Math.round(h / 3)} storeys`; $("read").style.display = "block";
+});
+renderer.domElement.addEventListener("pointerleave", () => { $("read").style.display = "none"; });
+
+function resize() {
+  const r = stage.getBoundingClientRect();
+  renderer.setSize(r.width, r.height, false); camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix();
+}
+addEventListener("resize", resize);
+function frame() { controls.update(); renderer.render(scene, camera); requestAnimationFrame(frame); }
+
+$("ramp").style.background = `linear-gradient(90deg,${RAMP.map((c) => `rgb(${c})`).join(",")})`;
+resize(); requestAnimationFrame(frame);
+fetch("city3d/city3d.json").then((r) => { if (!r.ok) throw new Error("The city data is missing. Run tools/city3d/blocks.py."); return r.json(); }).then((m) => {
+  M = m;
+  const ready = M.cities.filter((c) => c.blocks);
+  $("cities").innerHTML = ready.map((c) => `<button class="gis-btn" type="button" data-c="${c.slug}">${c.name}</button>`).join("");
+  document.querySelectorAll("#cities button").forEach((b) => (b.onclick = () => pick(ready.find((c) => c.slug === b.dataset.c))));
+  const want = new URLSearchParams(location.search).get("city");
+  pick(ready.find((c) => c.slug === want) || ready[0]);
+}).catch((e) => GIS.state($("loading"), e.message, true));
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+/* Case study pages: one plain report column, Word-style tables. */
+.cs{max-width:860px;margin:0 auto;padding:120px 24px 80px;color:#1b1b1b;font-size:17px;line-height:1.65}
+.cs h1{font-size:30px;line-height:1.25;font-weight:600;margin:0 0 10px}
+.cs__by{color:#555;font-size:15px;margin:0 0 40px}
+.cs h2{font-size:22px;font-weight:600;margin:44px 0 12px}
+.cs h3{font-size:18px;font-weight:600;margin:28px 0 8px}
+.cs p{margin:0 0 14px}
+.cs ol{margin:0 0 14px;padding-left:24px}
+.cs ol li{margin:0 0 6px}
+.cs figure{margin:28px 0}
+.cs figure img{display:block;width:100%;height:auto;border:1px solid #d0d0d0}
+.cs figcaption,.cs__cap{font-size:15px;color:#444;margin:8px 0 0}
+.cs__cap{margin:28px 0 6px;font-weight:600;color:#1b1b1b}
+.cs__tw{overflow-x:auto;margin:0 0 10px}
+.cs table{border-collapse:collapse;width:100%;font-size:15px}
+.cs th,.cs td{border:1px solid #000;padding:5px 9px;text-align:left;vertical-align:top}
+.cs th{font-weight:600}
+.cs td.n,.cs th.n{text-align:right;white-space:nowrap}
+.cs tr.t td{font-weight:600}
+.cs__ref p{padding-left:28px;text-indent:-28px;font-size:15.5px}
+.cs__ref a{word-break:break-all}
+.cs__one{max-width:520px;margin:0 auto}
+.cs__wide{width:min(1100px,calc(100vw - 32px));margin-left:calc(50% - min(550px,calc(50vw - 16px)))}
+.cs__row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:start;width:min(1080px,calc(100vw - 32px));margin:28px 0 28px calc(50% - min(540px,calc(50vw - 16px)))}
+.cs__row figure{margin:0}
+.cs__row figcaption{font-size:14px}
+.cs__row--2{grid-template-columns:repeat(2,1fr);gap:20px}
+@media (max-width:640px){.cs__row{grid-template-columns:1fr;width:auto;margin:28px 0}.cs{padding:96px 16px 60px;font-size:16px}.cs h1{font-size:24px}.cs table{font-size:13.5px}.cs th,.cs td{padding:4px 6px}}
+.cs .cs__src{font-size:14px;color:#555;margin:0 0 20px}
+.cs td:first-child{white-space:nowrap}

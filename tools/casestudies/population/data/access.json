@@ -1,0 +1,106 @@
+{
+ "national": [
+  {
+   "class": "Under 30",
+   "people": 4680028,
+   "share": 30.835972714280725
+  },
+  {
+   "class": "30 to 60",
+   "people": 3276407,
+   "share": 21.587733418021937
+  },
+  {
+   "class": "60 to 120",
+   "people": 4239957,
+   "share": 27.93641370558543
+  },
+  {
+   "class": "120 to 180",
+   "people": 1907740,
+   "share": 12.569800562291917
+  },
+  {
+   "class": "180 to 300",
+   "people": 927012,
+   "share": 6.107937118711854
+  },
+  {
+   "class": "Over 300",
+   "people": 146026,
+   "share": 0.962142481108138
+  }
+ ],
+ "province": [
+  {
+   "province": "Bulawayo",
+   "people": 665365,
+   "over2h": 916,
+   "share_over2h": 0.13771954036578038,
+   "mean_min": 22.84854354577906
+  },
+  {
+   "province": "Harare",
+   "people": 2410075,
+   "over2h": 128,
+   "share_over2h": 0.005304106469074808,
+   "mean_min": 29.84672664531563
+  },
+  {
+   "province": "Manicaland",
+   "people": 2036137,
+   "over2h": 295382,
+   "share_over2h": 14.506969520462764,
+   "mean_min": 68.30307617912315
+  },
+  {
+   "province": "Mashonaland Central",
+   "people": 1384074,
+   "over2h": 339746,
+   "share_over2h": 24.54682585722904,
+   "mean_min": 83.26846237622462
+  },
+  {
+   "province": "Mashonaland East",
+   "people": 1748567,
+   "over2h": 237048,
+   "share_over2h": 13.556696990951506,
+   "mean_min": 67.7180482536316
+  },
+  {
+   "province": "Mashonaland West",
+   "people": 1893807,
+   "over2h": 572675,
+   "share_over2h": 30.23935361170574,
+   "mean_min": 92.16859645286104
+  },
+  {
+   "province": "Masvingo",
+   "people": 1638793,
+   "over2h": 393426,
+   "share_over2h": 24.0070629800504,
+   "mean_min": 90.51194061205969
+  },
+  {
+   "province": "Matabeleland North",
+   "people": 826373,
+   "over2h": 371169,
+   "share_over2h": 44.91544641756603,
+   "mean_min": 119.80316414301208
+  },
+  {
+   "province": "Matabeleland South",
+   "people": 761592,
+   "over2h": 256527,
+   "share_over2h": 33.682956682844406,
+   "mean_min": 100.42816645334344
+  },
+  {
+   "province": "Midlands",
+   "people": 1812388,
+   "over2h": 468107,
+   "share_over2h": 25.828219610625318,
+   "mean_min": 84.46589897731427
+  }
+ ]
+}

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" class="gis">
+<head>
+<meta charset="utf-8">
+<title>Growing Cities</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#06080b; color:#eceff2; }
+  #gl { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+  #grid { position:absolute; inset:0; display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); grid-template-rows:repeat(2, minmax(0, 1fr)); gap:6px; padding:6px 6px 24px; }
+  .tile { position:relative; border:1px solid #1d232b; cursor:pointer; background:transparent; }
+  .tile .lb, .tile .st, .tile #chart { z-index:3; }
+  .tile:hover, .tile:focus-visible { border-color:#8a929c; }
+  .tile .lb, .tile .st { position:absolute; z-index:3; left:8px; right:8px; pointer-events:none; text-shadow:0 1px 3px #000; }
+  .tile .lb { top:6px; }
+  .tile .st { bottom:6px; display:flex; justify-content:space-between; align-items:baseline; }
+  .tile .nm { font-size:14px; font-weight:600; }
+  .tile .ct { font-size:12px; color:#c3c9d0; }
+  .tile .st b { font-size:14px; font-weight:600; }
+  .tile .st span { font-weight:600; }
+  #grid.focus { grid-template-columns:1fr; grid-template-rows:1fr; }
+  #grid.focus .tile { display:none; } #grid.focus .tile.on { display:block; }
+  .tile.on .nm { font-size:18px; }
+  #chart { position:absolute; z-index:3; right:12px; top:12px; width:360px; height:200px; display:none; background:rgba(6,8,11,.92); border:1px solid #2a313a; }
+  .tile.on #chart { display:block; }
+  @media (max-width:900px){ #grid { grid-template-columns:repeat(2, minmax(0, 1fr)); grid-template-rows:none; overflow-y:auto; } .tile { aspect-ratio:1; } #grid.focus .tile.on { aspect-ratio:auto; } }
+  @media (max-width:760px){ #chart { width:240px; height:140px; } }
+</style>
+</head>
+<body>
+<main class="gis-map" id="map"><canvas id="gl"></canvas><div id="grid"></div>
+  <div class="gis-attr">Data from GHSL (European Commission JRC). Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar-reverse"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the cities</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Growing cities</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset-reverse"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><p class="gis-value" id="year">1975</p>
+      <div class="gis-row" style="margin-top:8px"><button class="gis-btn gis-btn--icon" id="play" type="button" aria-label="Play"><i class="bi bi-play-fill" id="ico"></i></button>
+        <input class="gis-range gis-grow" id="slider" type="range" min="1975" max="2020" step="0.1" value="1975" aria-label="Year"></div></section>
+    <section class="gis-sec"><h2 class="gis-h">Year first built up</h2><div class="gis-ramp" id="ramp"></div><div class="gis-ramp-lbl"><span>1975</span><span>2020</span></div>
+</section>
+    <section class="gis-sec gis-small gis-muted">Each map is 80 km across. Click a city to see its growth.</section>
+  </div>
+</aside>
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => Math.round(n).toLocaleString("en-US").replace(/,/g, " ");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// magma samples at 0.375, 0.625 and 0.875: the shader and the legend both use these
+const MAGMA = [[129, 37, 129], [229, 89, 100], [254, 194, 135]];
+
+const glc = $("gl");
+const gl = glc.getContext("webgl", { premultipliedAlpha: false, alpha: true, antialias: false });
+if (!gl) { GIS.state($("loading"), "This map needs WebGL.", true); return; }
+const VS = "attribute vec2 p; varying vec2 uv; void main(){ uv = vec2(p.x * 0.5 + 0.5, 0.5 - p.y * 0.5); gl_Position = vec4(p, 0.0, 1.0); }";
+const FS = `
+precision mediump float;
+uniform sampler2D uT; uniform float uE;   // uE: epochs since 1975, 0 to 9
+varying vec2 uv;
+float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+void main(){
+  vec4 c = texture2D(uT, uv);
+  float e = floor(c.r * 255.0 + 0.5);            // epoch the cell was first built, 1 = 1975 ... 10 = 2020
+  float d = c.g;                                  // share built in 2020
+  vec3 bg = vec3(0.043, 0.055, 0.071);
+  if (e < 0.5 || d < 0.04) { gl_FragColor = vec4(bg, 1.0); return; }   // leave out scattered rural roofs
+  // a cell built by epoch e appeared some time in the five years before it
+  float at = e <= 1.5 ? -1.0 : e - 2.0 + hash(floor(uv * 800.0));
+  float show = smoothstep(at, at + 0.12, uE);
+  // colour by when it was built, along Matplotlib magma: the old core violet, the newest edges pale orange
+  float k = clamp((e - 1.0) / 9.0, 0.0, 1.0);
+  vec3 c0 = vec3(${MAGMA[0].map((v) => (v / 255).toFixed(4))}), c1 = vec3(${MAGMA[1].map((v) => (v / 255).toFixed(4))}), c2 = vec3(${MAGMA[2].map((v) => (v / 255).toFixed(4))});
+  vec3 col = k < 0.5 ? mix(c0, c1, k * 2.0) : mix(c1, c2, (k - 0.5) * 2.0);
+  col *= 0.45 + 0.75 * pow(d, 0.55);
+  // just built: a short flash
+  col += vec3(1.0, 0.85, 0.6) * (1.0 - smoothstep(0.0, 0.45, uE - at)) * 0.6;
+  gl_FragColor = vec4(mix(bg, col, show), 1.0);
+}`;
+function sh(t, s) { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; }
+const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
+gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+const aP = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 2, gl.FLOAT, false, 0, 0);
+const uE = gl.getUniformLocation(prog, "uE");
+gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+
+let M, tiles = [], year = 1975, playing = !reduce, last = 0, focus = null;
+
+const img = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("Could not load " + src)); i.src = src; });
+function texture(im) {
+  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im);
+  for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+  return t;
+}
+const areaAt = (c, y) => { const f = (y - 1975) / 5, i = Math.min(8, Math.floor(f)), w = f - i; return c.area[i] + (c.area[Math.min(9, i + 1)] - c.area[i]) * w; };
+
+function chart(t) {
+  const cv = t.el.querySelector("#chart"); if (!cv) return;
+  const r = cv.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+  cv.width = r.width * dpr; cv.height = r.height * dpr;
+  const x = cv.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const W = r.width, H = r.height, a = t.c.area;
+  // round top of the axis: 1, 2 or 5 times a power of ten
+  const raw = Math.max(...a) * 1.08, p = Math.pow(10, Math.floor(Math.log10(raw)));
+  const top = [1, 2, 2.5, 5, 10].map((m) => m * p).find((v) => v >= raw);
+  const L = 46, R = 14, T = 38, B = 26;
+  const px = (f) => L + f / 9 * (W - L - R), py = (v) => T + (1 - v / top) * (H - T - B);
+  const f = (year - 1975) / 5, now = areaAt(t.c, year);
+  x.font = "600 13px 'Source Sans 3', sans-serif"; x.fillStyle = "#eceff2"; x.textAlign = "left";
+  x.fillText("Built-up land (km²)", 12, 20);
+  x.textAlign = "right"; x.fillText(fmt(now) + " km²", W - 12, 20);
+  x.font = "12px 'Source Sans 3', sans-serif";
+  for (const v of [0, top / 2, top]) {
+    x.strokeStyle = v ? "#2a313a" : "#56606b"; x.lineWidth = 1; x.beginPath(); x.moveTo(L, Math.round(py(v)) + .5); x.lineTo(W - R, Math.round(py(v)) + .5); x.stroke();
+    x.fillStyle = "#c3c9d0"; x.fillText(fmt(v), L - 8, py(v) + 4);
+  }
+  x.textAlign = "center"; for (const i of [0, 3, 6, 9]) x.fillText(1975 + i * 5, px(i), H - 8);
+  const pts = a.map((v, i) => [px(i), py(v)]);
+  // the whole curve faint, the years so far filled and solid
+  x.strokeStyle = "rgba(254,194,135,.35)"; x.lineWidth = 1.5; x.beginPath(); pts.forEach(([u, v], i) => (i ? x.lineTo(u, v) : x.moveTo(u, v))); x.stroke();
+  const done = pts.slice(0, Math.floor(f) + 1).concat([[px(f), py(now)]]);
+  x.fillStyle = `rgba(${MAGMA[1]},.32)`; x.beginPath(); x.moveTo(px(0), py(0)); done.forEach(([u, v]) => x.lineTo(u, v)); x.lineTo(px(f), py(0)); x.closePath(); x.fill();
+  x.strokeStyle = `rgb(${MAGMA[2]})`; x.lineWidth = 2.5; x.lineJoin = "round"; x.beginPath(); done.forEach(([u, v], i) => (i ? x.lineTo(u, v) : x.moveTo(u, v))); x.stroke();
+  x.fillStyle = "#fff"; x.beginPath(); x.arc(px(f), py(now), 4.5, 0, 7); x.fill();
+}
+
+function labels() {
+  $("year").textContent = Math.floor(year);
+  for (const t of tiles) {
+    const a = areaAt(t.c, year);
+    t.km.textContent = fmt(a) + " km²";
+    t.x.textContent = year > 1976 ? "×" + (a / t.c.area[0]).toFixed(1) : "";
+  }
+  if (focus) chart(focus);
+}
+function draw() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  if (glc.width !== Math.round(innerWidth * dpr) || glc.height !== Math.round(innerHeight * dpr)) { glc.width = Math.round(innerWidth * dpr); glc.height = Math.round(innerHeight * dpr); }
+  gl.disable(gl.SCISSOR_TEST); gl.viewport(0, 0, glc.width, glc.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.enable(gl.SCISSOR_TEST);
+  gl.uniform1f(uE, (year - 1975) / 5);
+  for (const t of tiles) {
+    const r = t.el.getBoundingClientRect();
+    if (!r.width || r.bottom < 0 || r.top > innerHeight) continue;
+    const s = Math.max(r.width, r.height), x = r.left + (r.width - s) / 2, y = r.top + (r.height - s) / 2;
+    const gx = Math.round(x * dpr), gy = Math.round((innerHeight - y - s) * dpr), gs = Math.round(s * dpr);
+    gl.viewport(gx, gy, gs, gs);
+    gl.scissor(Math.max(0, Math.round(r.left * dpr)), Math.max(0, Math.round((innerHeight - r.bottom) * dpr)), Math.round(r.width * dpr), Math.round(r.height * dpr));
+    gl.bindTexture(gl.TEXTURE_2D, t.tex);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+}
+function setPlaying(p) { playing = p; $("ico").className = p ? "bi bi-pause-fill" : "bi bi-play-fill"; $("play").setAttribute("aria-label", p ? "Pause" : "Play"); $("play").title = p ? "Pause" : "Play"; }
+$("ramp").style.background = `linear-gradient(90deg,${MAGMA.map((c) => `rgb(${c})`).join(",")})`;
+$("play").onclick = () => { if (!playing && year >= 2020) year = 1975; setPlaying(!playing); };
+$("slider").oninput = () => { setPlaying(false); year = +$("slider").value; labels(); };
+function frame(now) {
+  const dt = last ? Math.min(0.1, (now - last) / 1000) : 0; last = now;
+  if (playing) { year = Math.min(2020, year + dt * 2.6); $("slider").value = year; labels(); if (year >= 2020) setPlaying(false); }
+  draw();
+  requestAnimationFrame(frame);
+}
+function setFocus(t) {
+  focus = focus === t ? null : t;
+  $("grid").classList.toggle("focus", !!focus);
+  tiles.forEach((u) => u.el.classList.toggle("on", u === focus));
+  labels();
+}
+addEventListener("keydown", (e) => { if (e.key === "Escape" && focus) setFocus(focus); if (e.key === " " && e.target.tagName !== "INPUT") { e.preventDefault(); $("play").click(); } });
+
+fetch("cities/cities.json").then((r) => { if (!r.ok) throw new Error("The city data is missing. Run tools/cities/build.py."); return r.json(); }).then(async (m) => {
+  M = m;
+  // fastest growing first
+  const order = M.cities.slice().sort((a, b) => b.area[9] / b.area[0] - a.area[9] / a.area[0]);
+  const ims = await Promise.all(order.map((c) => img(`cities/${c.slug}.png`)));
+  $("grid").innerHTML = order.map((c) => `<div class="tile" data-s="${c.slug}" tabindex="0" role="button" aria-label="${c.name}"><div class="lb"><div class="nm">${c.name}</div><div class="ct">${c.country}</div></div>
+    <canvas id="chart"></canvas><div class="st"><b></b><span></span></div></div>`).join("");
+  tiles = [...$("grid").children].map((el, i) => ({ el, c: order[i], tex: texture(ims[i]), km: el.querySelector(".st b"), x: el.querySelector(".st span") }));
+  tiles.forEach((t) => { t.el.onclick = () => setFocus(t); t.el.onkeydown = (e) => { if (e.key === "Enter") setFocus(t); }; });
+  setPlaying(playing); labels();
+  GIS.state($("loading"), null);
+  requestAnimationFrame(frame);
+}).catch((e) => GIS.state($("loading"), e.message, true));
+})();
+</script>
+</body>
+</html>

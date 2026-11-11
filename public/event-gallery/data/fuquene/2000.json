@@ -1,0 +1,1 @@
+{"year": 2000, "W": 1000, "H": 998, "dates": ["2000-02-04"], "scenes": [{"id": "LE07_L2SP_008056_20000204_02_T1", "date": "2000-02-04", "platform": "landsat-7", "pixels": 990161}], "stats": {"open": 13.6, "plants": 5.7, "openPct": 71, "plantsPct": 29, "footprint": 19.3}}

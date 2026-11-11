@@ -1,0 +1,1 @@
+{"year": 2015, "W": 1000, "H": 998, "dates": ["2015-01-04"], "scenes": [{"id": "LC08_L2SP_008056_20150104_02_T1", "date": "2015-01-04", "platform": "landsat-8", "pixels": 997974}], "stats": {"open": 5.7, "plants": 12.6, "openPct": 29, "plantsPct": 65, "footprint": 19.3}}

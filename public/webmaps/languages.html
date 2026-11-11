@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" class="gis gis-lay-left">
+<head>
+<meta charset="utf-8">
+<title>Southern African Languages</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#0c0b0a; }
+  #map { position:absolute; inset:0; width:100%; height:100%; touch-action:none; }
+  #qwrap { position:relative; }
+  #hits { position:absolute; left:0; right:0; top:100%; z-index:3; margin:0; padding:0; list-style:none; background:var(--gis-bg); border:1px solid var(--gis-line); border-top:0; display:none; max-height:240px; overflow-y:auto; }
+  #hits li { padding:5px 8px; cursor:pointer; display:flex; gap:8px; }
+  #hits li:hover, #hits li.on { background:var(--gis-bg2); }
+  #hits li span { color:var(--gis-fg2); margin-left:auto; }
+  #keys li { cursor:pointer; }
+  #card { display:none; }
+  #card.on { display:block; }
+  #card .hd { display:flex; align-items:flex-start; gap:8px; }
+  #card h2 { flex:1; margin:0; font-size:var(--gis-t-title); font-weight:600; }
+  #card .fam { color:var(--gis-fg2); margin:0 0 8px; }
+  #card .dia { margin-top:8px; color:var(--gis-fg2); }
+  #card .say { margin-top:10px; }
+  #card .say button { display:flex; width:100%; align-items:center; gap:8px; padding:4px 0; border:0; background:none; text-align:left; cursor:pointer; }
+  #card .say button:hover b { text-decoration:underline; }
+  #card .say span { color:var(--gis-fg2); margin-left:auto; }
+  #card .cr { margin-top:6px; font-size:var(--gis-t-meta); color:var(--gis-fg2); }
+</style>
+</head>
+<body>
+<main class="gis-map" id="stage"><canvas id="map"></canvas>
+  <div class="gis-tools gis-tools--right"><div class="gis-grp">
+    <button class="gis-btn" id="zIn" type="button" title="Zoom in" aria-label="Zoom in"><i class="bi bi-plus-lg"></i></button>
+    <button class="gis-btn" id="zOut" type="button" title="Zoom out" aria-label="Zoom out"><i class="bi bi-dash-lg"></i></button>
+    <button class="gis-btn" id="zAll" type="button" title="Full extent" aria-label="Full extent"><i class="bi bi-fullscreen"></i></button></div></div>
+  <div class="gis-attr">Data from Glottolog and Wikidata. Audio from Lingua Libre. Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the languages</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Languages of Southern Africa</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><div id="qwrap"><input class="gis-input" id="q" type="search" placeholder="Find a language" autocomplete="off" aria-label="Find a language"><ul id="hits"></ul></div></section>
+    <section class="gis-sec" id="card"><div class="hd"><h2 id="cname"></h2><button class="gis-btn gis-btn--icon gis-btn--bare" id="x" type="button" title="Clear selection" aria-label="Clear selection"><i class="bi bi-x-lg"></i></button></div><div id="ci"></div></section>
+    <section class="gis-sec"><div class="gis-seg gis-seg--full" id="by" style="margin-bottom:10px"><button class="gis-btn on" type="button" data-b="group">Groups</button><button class="gis-btn" type="button" data-b="status">Endangerment</button></div>
+      <ul class="gis-legend" id="keys"></ul>
+      <ul class="gis-legend" style="margin-top:4px"><li><i class="gis-sw gis-sw--pt" style="background:#0c0b0a;box-shadow:inset 0 0 0 2px #7f7f7f"></i>Extinct or urban language</li></ul>
+      <p class="gis-p gis-small gis-muted" style="margin-top:10px">Click a group to show only that group. Area edges are approximate.</p></section>
+  </div>
+</aside>
+<div class="gis-tip" id="tip"></div>
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => (n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + " million" : Math.round(n).toLocaleString("en-US").replace(/,/g, " "));
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+// groups: Matplotlib tab20 (qualitative), the greys kept for the "other" classes
+const GCOL = {
+  "Nguni": "#ff7f0e", "Sotho-Tswana": "#d62728", "Shona": "#2ca02c", "Tsonga and Chopi": "#bcbd22", "Other Southern Bantu": "#ffbb78",
+  "Nyanja and Sena": "#1f77b4", "Makua and Lomwe": "#9467bd", "Bemba and Luba": "#e377c2", "Tonga and Lozi": "#98df8a",
+  "Angola and Namibia": "#8c564b", "Other Bantu": "#7f7f7f", "Khoe": "#dbdb8d", "Tuu and Kx'a": "#ff9896",
+  "Afrikaans": "#aec7e8", "Contact languages": "#c7c7c7",
+};
+const STATUS = ["Not endangered", "Threatened", "Shifting", "Moribund", "Nearly extinct", "Extinct"];
+// endangerment: ColorBrewer YlOrRd, five classes; not endangered and unknown stay neutral grey
+const SCOL = { "Not endangered": "#4b4f57", "Threatened": "#ffffb2", "Shifting": "#fecc5c", "Moribund": "#fd8d3c", "Nearly extinct": "#f03b20", "Extinct": "#bd0026", "": "#2c2c2c" };
+
+const cv = $("map"), x = cv.getContext("2d");
+let D, W, H, dpr = 1, fitK = 1, view = { cx: 0, cy: 0, k: 1 }, by = "group", hidden = new Set(), sel = null, hov = null;
+const sx = (a) => W / 2 + (a - view.cx) * view.k, sy = (b) => H / 2 - (b - view.cy) * view.k;
+const mx = (p) => view.cx + (p - W / 2) / view.k, my = (p) => view.cy - (p - H / 2) / view.k;
+const colour = (L) => (by === "group" ? GCOL[L.group] : SCOL[L.status || ""]);
+const shown = (L) => !hidden.has(by === "group" ? L.group : L.status || "");
+
+function fit() {
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  const rr = $("stage").getBoundingClientRect(); W = rr.width; H = rr.height;
+  cv.width = W * dpr; cv.height = H * dpr;
+  const xs = D.languages.flatMap((L) => L.area.flat()), b = [Math.min(...xs.map((p) => p[0])), Math.min(...xs.map((p) => p[1])), Math.max(...xs.map((p) => p[0])), Math.max(...xs.map((p) => p[1]))];
+  view.k = Math.min((W - 40) / (b[2] - b[0]), (H - 40) / (b[3] - b[1]));
+  fitK = view.k;
+  view.cx = (b[0] + b[2]) / 2; view.cy = (b[1] + b[3]) / 2;
+}
+function path(r) { x.beginPath(); r.forEach((p, i) => (i ? x.lineTo(sx(p[0]), sy(p[1])) : x.moveTo(sx(p[0]), sy(p[1])))); x.closePath(); }
+
+let dirty = true;
+function draw() {
+  if (dirty) {
+    dirty = false;
+    x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    x.fillStyle = "#0c0b0a"; x.fillRect(0, 0, W, H);
+    x.fillStyle = "#1a1816"; x.strokeStyle = "#2b2825"; x.lineWidth = 0.8;
+    for (const r of D.land) { path(r); x.fill(); x.stroke(); }
+
+    const focus = sel || hov;
+    for (const L of D.languages) {
+      const on = shown(L);
+      x.globalAlpha = !on ? 0.08 : L.status === "Extinct" && by === "group" ? 0.3 : focus && focus !== L ? 0.62 : 0.88;
+      x.fillStyle = colour(L);
+      for (const r of L.area) { path(r); x.fill(); }
+    }
+    x.globalAlpha = 1;
+    x.strokeStyle = "rgba(12,11,10,.75)"; x.lineWidth = 0.9;
+    for (const L of D.languages) for (const r of L.area) { path(r); x.stroke(); }
+    x.fillStyle = "#0c0b0a"; for (const r of D.lakes) { path(r); x.fill(); }
+    for (const L of D.languages) {
+      if (!L.point || !shown(L)) continue;
+      x.beginPath(); x.arc(sx(L.x), sy(L.y), L === focus ? 6 : 4.5, 0, 7);
+      x.fillStyle = "#0c0b0a"; x.fill(); x.lineWidth = 2; x.strokeStyle = colour(L); x.stroke();
+    }
+    if (focus && !focus.point) { x.strokeStyle = "#fff"; x.lineWidth = 2; for (const r of focus.area) { path(r); x.stroke(); } }
+
+    // names: the larger languages first, skipping any that would overlap
+    const boxes = [];
+    for (const L of D.order) {
+      if (!shown(L)) continue;
+      const s = Math.round(Math.max(10.5, Math.min(19, 9 + Math.log10(L.speakers + 10) * 1.6 + view.k * 3)));
+      if (L !== focus && view.k < 1.6 && L.speakers < 150000 && !(L.point && view.k > 0.75) && L !== hov) continue;
+      x.font = `${L.status === "Extinct" ? "italic " : ""}600 ${s}px Source Sans 3, sans-serif`;
+      const w = x.measureText(L.name).width, X = sx(L.x), Y = sy(L.y) - (L.point ? 10 : 0);
+      const bx = [X - w / 2 - 3, Y - s * 0.8, X + w / 2 + 3, Y + s * 0.35];
+      if (L !== focus && boxes.some((b) => !(bx[2] < b[0] || bx[0] > b[2] || bx[3] < b[1] || bx[1] > b[3]))) continue;
+      boxes.push(bx);
+      x.textAlign = "center"; x.lineWidth = 3; x.strokeStyle = "rgba(12,11,10,.7)"; x.strokeText(L.name, X, Y);
+      x.fillStyle = L === focus ? "#fff" : "rgba(255,255,255,.92)"; x.fillText(L.name, X, Y);
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+function inRing(px, py, r) {
+  let c = false;
+  for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const [xi, yi] = r[i], [xj, yj] = r[j];
+    if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) c = !c;
+  }
+  return c;
+}
+const at = (cx, cy) => {
+  const a = mx(cx), b = my(cy);
+  return D.languages.find((L) => L.point && shown(L) && Math.hypot(sx(L.x) - cx, sy(L.y) - cy) < 8)
+    || D.languages.find((L) => !L.point && shown(L) && L.area.some((r) => inRing(a, b, r))) || null;
+};
+
+function keys() {
+  const list = by === "group" ? D.groups : STATUS;
+  const n = {}; for (const L of D.languages) { const k = by === "group" ? L.group : L.status; n[k] = (n[k] || 0) + 1; }
+  $("keys").innerHTML = list.filter((k) => n[k]).map((k) => `<li data-k="${esc(k)}" tabindex="0" class="${hidden.has(k) ? "off" : ""}"><i class="gis-sw" style="background:${by === "group" ? GCOL[k] : SCOL[k]}"></i>${esc(k)}<span class="gis-end">${n[k]}</span></li>`).join("");
+}
+$("keys").onclick = (e) => {
+  const li = e.target.closest("li"); if (!li) return;
+  const k = li.dataset.k, all = [...$("keys").children].map((l) => l.dataset.k);
+  // first click shows only that one; clicking the only one shown brings all back
+  if (hidden.size === 0) all.forEach((a) => a !== k && hidden.add(a));
+  else if (!hidden.has(k) && hidden.size === all.length - 1) hidden.clear();
+  else hidden.has(k) ? hidden.delete(k) : hidden.add(k);
+  keys(); dirty = true;
+};
+$("keys").onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.target.click(); } };
+$("by").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; by = b.dataset.b; hidden.clear(); [...$("by").children].forEach((c) => c.classList.toggle("on", c === b)); keys(); dirty = true; };
+
+const PLAY = '<i class="bi bi-play-fill"></i>';
+let audio = null;
+function card(L) {
+  sel = L; dirty = true;
+  if (!L) { $("card").classList.remove("on"); return; }
+  const rows = [["Spoken in", L.countries.join("\n") || "Unknown"], ["Speakers", L.speakers ? fmt(L.speakers) : "Unknown"], ["Status", L.status || "Unknown"]];
+  if (L.dialects.length) rows.push(["Dialects", L.dialects.slice(0, 4).join("\n")]);
+  $("cname").textContent = L.name;
+  let h = `<div class="fam">${esc(L.family)}</div><dl class="gis-dl">${rows.map(([a, b]) => `<dt>${a}</dt><dd>${esc(b).replace(/\n/g, "<br>")}</dd>`).join("")}</dl>`;
+  if (L.audio) h += `<div class="say"><h3 class="gis-h">Hear it</h3>${L.audio.map(([g, w, src], i) => `<button type="button" data-i="${i}">${PLAY}<b>${esc(w)}</b><span>${esc(g)}</span></button>`).join("")}
+    <div class="cr">Recorded by ${esc(L.speaker)} on Lingua Libre (CC BY-SA 4.0)</div></div>`;
+  $("ci").innerHTML = h; $("card").classList.add("on");
+  $("ci").querySelectorAll(".say button").forEach((b) => (b.onclick = () => { if (audio) audio.pause(); audio = new Audio("languages/" + L.audio[+b.dataset.i][2]); audio.play(); }));
+}
+$("x").onclick = () => card(null);
+
+// search
+let hits = [], hi = 0;
+function search() {
+  const q = $("q").value.trim().toLowerCase();
+  hits = !q ? [] : D.languages.filter((L) => L.name.toLowerCase().includes(q) || L.dialects.some((d) => d.toLowerCase().startsWith(q)))
+    .sort((a, b) => (b.name.toLowerCase().startsWith(q) - a.name.toLowerCase().startsWith(q)) || b.speakers - a.speakers).slice(0, 8);
+  hi = 0;
+  $("hits").style.display = hits.length ? "block" : "none";
+  $("hits").innerHTML = hits.map((L, i) => `<li class="${i === hi ? "on" : ""}" data-i="${i}">${esc(L.name)}<span>${esc(L.countries[0] || "")}</span></li>`).join("");
+}
+function go(L) {
+  $("q").value = ""; search(); $("q").blur();
+  if (!L) return;
+  view.k = Math.max(view.k, Math.min(fitK * 1.8, 1.1)); view.cx = L.x; view.cy = L.y;
+  card(L);
+}
+$("q").oninput = search;
+$("q").onkeydown = (e) => {
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); hi = (hi + (e.key === "ArrowDown" ? 1 : hits.length - 1)) % Math.max(1, hits.length); [...$("hits").children].forEach((li, i) => li.classList.toggle("on", i === hi)); }
+  if (e.key === "Enter") go(hits[hi]);
+  if (e.key === "Escape") go(null);
+};
+$("hits").onclick = (e) => { const li = e.target.closest("li"); if (li) go(hits[+li.dataset.i]); };
+
+// pan, zoom, hover, click
+let drag = null, moved = false;
+cv.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy }; moved = false; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove", (e) => {
+  if (drag) {
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+    if (moved) { view.cx = drag.cx - dx / view.k; view.cy = drag.cy + dy / view.k; dirty = true; $("tip").style.display = "none"; return; }
+  }
+  if (e.pointerType !== "mouse") return;
+  const L = at(e.clientX, e.clientY);
+  if (L !== hov) { hov = L; dirty = true; }
+  cv.style.cursor = L ? "pointer" : "grab";
+  const t = $("tip");
+  if (L) { t.textContent = L.name; t.style.display = "block"; t.style.left = e.clientX + 14 + "px"; t.style.top = e.clientY + 10 + "px"; } else t.style.display = "none";
+});
+cv.addEventListener("pointerup", (e) => { if (!moved) card(at(e.clientX, e.clientY)); drag = null; });
+cv.addEventListener("pointerleave", () => { hov = null; dirty = true; $("tip").style.display = "none"; });
+cv.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const a = mx(e.clientX), b = my(e.clientY);
+  view.k = Math.max(0.2, Math.min(8, view.k * Math.exp(-e.deltaY * 0.0015)));
+  view.cx = a - (e.clientX - W / 2) / view.k; view.cy = b + (e.clientY - H / 2) / view.k; dirty = true;
+}, { passive: false });
+addEventListener("keydown", (e) => { if (e.key === "Escape" && document.activeElement !== $("q")) card(null); });
+addEventListener("resize", () => { fit(); dirty = true; });
+function zoomBy(f) { view.k = Math.max(0.2, Math.min(8, view.k * f)); dirty = true; }
+$("zIn").onclick = () => zoomBy(1.6); $("zOut").onclick = () => zoomBy(1 / 1.6); $("zAll").onclick = () => { fit(); dirty = true; };
+
+fetch("languages/languages.json").then((r) => { if (!r.ok) throw new Error("The language data is missing. Run tools/languages/build.py."); return r.json(); }).then((d) => {
+  D = d;
+  D.order = D.languages.slice().sort((a, b) => b.speakers - a.speakers);
+  fit(); keys();
+  document.fonts.ready.then(() => (dirty = true));
+  GIS.state($("loading"), null);
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h) go(D.languages.find((L) => L.id === h || L.name.toLowerCase() === h.toLowerCase()));
+  requestAnimationFrame(draw);
+}).catch((e) => GIS.state($("loading"), e.message, true));
+})();
+</script>
+</body>
+</html>

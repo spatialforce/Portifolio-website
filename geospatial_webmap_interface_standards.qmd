@@ -1,0 +1,736 @@
+---
+title: "Geospatial Web Mapping Interface — Design and Implementation Standards"
+subtitle: "Project-wide interface rules for all web maps and geospatial tools"
+author: "Project Design Specification"
+format:
+  gfm:
+    toc: true
+    toc-depth: 3
+---
+
+# Purpose and scope
+
+This document defines the mandatory visual, interaction, cartographic, and implementation standards for this geospatial web mapping project.
+
+The project already contains **12 working web maps**. The priority is not to rebuild their mapping functionality or replace their analytical work. The priority is to bring the user interface, map controls, navigation, legends, panels, typography, and supporting interactions to a consistent, professional standard.
+
+Treat this document as a project-wide design and engineering specification. Apply it whenever creating a new interface, modifying an existing map, refactoring a component, or adding a new tool.
+
+## The intended result
+
+Build an interface that feels like a mature, carefully engineered geospatial information system.
+
+It should communicate:
+
+- Professional geospatial software, not a generic web startup.
+- High information density without visual clutter.
+- Precise alignment, restrained typography, and consistent spacing.
+- Familiar, purposeful mapping controls.
+- Strong cartographic discipline.
+- Clear hierarchy between the map, tools, data, legends, and supporting information.
+- A coherent visual language across all 12 maps.
+
+The interface should feel dependable, technical, quiet, and intentional. It should not compete with the map for attention.
+
+**The map and its information are the product. The interface exists to make them easy to understand and operate.**
+
+# 1. Non-negotiable design principles
+
+## 1.1 No generic AI-generated dashboard aesthetic
+
+Do not automatically apply fashionable SaaS dashboard conventions.
+
+Avoid:
+
+- Large hero sections inside operational mapping interfaces.
+- Oversized page titles.
+- Excessive rounded cards and pill-shaped controls.
+- Gradients used as decoration.
+- Random accent colours.
+- Glassmorphism, blur effects, and translucent floating panels without a functional reason.
+- Heavy drop shadows around every component.
+- Excessive borders and nested containers.
+- Large empty spaces that reduce the amount of useful information visible.
+- Decorative icons beside every heading.
+- Unnecessary animations and transitions.
+- Emoji as interface icons.
+- Repeated cards for information that belongs in a compact list, table, toolbar, or panel.
+
+Do not make the application look like a landing page, analytics template, AI chatbot interface, or consumer mobile app.
+
+Use visual restraint. Every interface element must have a purpose.
+
+## 1.2 Compact, information-efficient layouts
+
+Geospatial software often needs to display several things at once: the map, layer controls, legends, search, measurement tools, data information, and metadata.
+
+Design for useful information density.
+
+- Keep toolbars compact.
+- Use appropriately sized controls.
+- Keep panel headers short.
+- Use compact lists and tables where suitable.
+- Avoid excessive padding.
+- Avoid large gaps between related controls.
+- Keep labels close to their controls.
+- Make important tools accessible without covering large portions of the map.
+- Use collapsible panels when they genuinely improve map visibility.
+- Preserve enough space for the map to remain the dominant working area.
+
+Do not confuse compactness with cramped design. Maintain readable text, usable click targets, and clear separation between unrelated functions.
+
+## 1.3 Consistency is mandatory
+
+A user should recognise the same application regardless of which of the 12 maps they open.
+
+Maintain consistent:
+
+- Header structure.
+- Navigation behaviour.
+- Toolbar placement.
+- Panel widths.
+- Typography.
+- Icon family and icon sizing.
+- Button dimensions.
+- Form controls.
+- Borders and dividers.
+- Spacing scale.
+- Layer list behaviour.
+- Legend presentation.
+- Loading, empty, and error states.
+- Mobile and tablet behaviour.
+
+A new map should inherit the existing design system rather than introduce a new visual identity.
+
+# 2. Use established design systems and libraries
+
+Do not invent a visual language from scratch for every component.
+
+Before building an interface element, inspect the project's existing dependencies and determine whether a mature, maintained library already provides an appropriate solution.
+
+Prefer established, documented components and conventions over custom styling.
+
+Depending on the current project stack, evaluate suitable options such as:
+
+- **React UI systems:** Material UI, Ant Design, Bootstrap, or another established component library already used by the project.
+- **GIS-oriented interface components:** existing components supplied by the mapping framework or its ecosystem.
+- **Icons:** Font Awesome, Bootstrap Icons, Material Symbols, or an existing consistent icon package.
+- **Mapping:** the project's existing Leaflet, OpenLayers, MapLibre, or other mapping framework and its established controls.
+- **Charts:** established charting libraries already present in the project.
+- **Colour science:** ColorBrewer, CARTOColors, cmocean, Scientific Colour Maps, and established Matplotlib colour maps where appropriate.
+
+These are examples to evaluate, not instructions to install all of them.
+
+### Implementation rules
+
+1. Inspect `package.json` and the existing source code before adding dependencies.
+2. Reuse components and libraries already installed wherever possible.
+3. Do not install a new package merely to style one small button.
+4. Do not mix several competing icon libraries.
+5. Do not create a custom component if a suitable existing component already solves the problem.
+6. Do not replace working map controls with decorative imitations.
+7. Use documented APIs and supported component properties.
+8. Avoid unnecessary dependencies that increase bundle size or complicate maintenance.
+
+If a suitable existing library provides a mature visual treatment, use it consistently rather than recreating it with ad hoc CSS.
+
+# 3. Typography
+
+Typography is a major part of the application's identity. Poor font choices and inconsistent font sizing immediately make a geospatial application feel like a hastily assembled template.
+
+Use a restrained, professional typographic system.
+
+## 3.1 Font selection
+
+- Prefer a well-established, highly legible interface typeface.
+- Use one primary UI font family throughout the application.
+- Use a second font only when there is a clear functional reason, such as displaying code or tabular numeric values.
+- Suitable candidates include Inter, IBM Plex Sans, Source Sans 3, and system UI fonts.
+- Inspect existing fonts before introducing another.
+- Avoid decorative, playful, handwritten, or unusually geometric display fonts.
+- Avoid using a different font for every section.
+
+## 3.2 Font hierarchy
+
+Use a small, controlled type scale.
+
+Suggested starting points:
+
+| Element | Suggested size |
+|---|---:|
+| Main application title | 15–18 px |
+| Panel title | 12–14 px |
+| Standard interface text | 12–14 px |
+| Secondary labels | 11–12 px |
+| Metadata | 10–12 px |
+| Compact toolbar labels | 11–12 px |
+| Data table content | 11–13 px |
+
+These are starting values, not absolute rules. Adjust for legibility and the project's existing framework.
+
+Use font weight deliberately:
+
+- Regular for most interface text.
+- Medium for panel headings, selected items, and important labels.
+- Semibold sparingly.
+- Avoid making every label bold.
+
+Do not use oversized headings in map workspaces. The map should receive the visual emphasis.
+
+# 4. Colour system
+
+Colour must be controlled, consistent, and purposeful.
+
+Do not invent colour palettes or colour ramps simply because a particular combination looks attractive.
+
+## 4.1 Interface colours
+
+Establish a small interface palette with defined roles:
+
+- Primary application background.
+- Map workspace background.
+- Panel background.
+- Toolbar background.
+- Primary text.
+- Secondary text.
+- Muted text.
+- Borders and dividers.
+- Selected and active states.
+- Focus states.
+- Warning, error, and success states.
+
+Use neutral, restrained interface colours. Maintain strong text contrast and make active controls easy to identify.
+
+Avoid:
+
+- Randomly introducing new accent colours.
+- Multiple competing accent colours.
+- Purple-to-blue gradients as a default visual identity.
+- Excessive saturated backgrounds.
+- Different colours for components that perform the same function.
+- Decorative colour that communicates no information.
+
+Create design tokens or CSS variables for the palette. Components should use those shared tokens instead of hard-coded, inconsistent values.
+
+## 4.2 Cartographic colour ramps
+
+This is a critical requirement.
+
+**Never invent a new map colour ramp when an established, scientifically recognised or cartographically established colour scheme is appropriate.**
+
+Select colour schemes from reputable, established sources, including:
+
+- ColorBrewer.
+- CARTOColors.
+- cmocean.
+- Scientific Colour Maps.
+- Established Matplotlib colormaps.
+- Well-documented palettes from the relevant scientific or GIS library.
+
+Select the palette according to the data type and the meaning of the map.
+
+| Data type | Appropriate palette approach |
+|---|---|
+| Sequential numerical data | Established sequential palette |
+| Diverging data around a meaningful midpoint | Established diverging palette |
+| Categorical land-cover classes | Distinct, established qualitative palette |
+| Elevation | Recognised terrain or elevation colour scheme |
+| Bathymetry and water depth | Established oceanographic palette |
+| Vegetation indices | Scientifically appropriate vegetation palette |
+| Temperature | Established thermal palette |
+| Probability or suitability | Sequential palette with clear low-to-high progression |
+| Change or anomaly | Diverging palette where a meaningful midpoint exists |
+
+Do not select a palette solely because it looks attractive.
+
+Consider perceptual ordering, colour-vision accessibility, contrast, the number of classes, and the data's analytical meaning.
+
+### Preserve established classification colours
+
+If the source dataset, published methodology, analytical model, or existing project already defines class colours, preserve those colours unless there is a documented reason to change them.
+
+For categorical land-cover maps, do not randomly change the colour assigned to a class between maps.
+
+For example, if water is represented by a particular blue and built-up land by a particular colour in an established project legend, maintain that convention across related maps.
+
+Do not silently change class colours during a UI redesign.
+
+### No arbitrary colour-ramp generation
+
+Do not:
+
+- Generate arbitrary hex values for raster classes.
+- Create gradients by manually guessing intermediate colours.
+- Randomly assign colours to land-cover classes.
+- Use a generic rainbow ramp without analytical justification.
+- Change a scientifically meaningful ramp to match the interface accent colour.
+- Recolour a map simply to make the screenshot more visually dramatic.
+
+Where a palette must be selected, identify its source and explain why it is appropriate.
+
+# 5. Legends and cartographic presentation
+
+A legend is an analytical component, not a decorative UI element.
+
+It must accurately describe the map currently displayed.
+
+## 5.1 Legend accuracy
+
+- Derive legend entries from the actual map renderer, layer style, class definitions, or data configuration.
+- Do not manually create a legend that disagrees with the map.
+- Preserve the exact class names used by the analytical output.
+- Preserve class order.
+- Preserve class colours.
+- Display the correct units.
+- Display meaningful numerical ranges and class boundaries.
+- Distinguish between categorical and continuous legends.
+- Show NoData or unclassified values only where relevant.
+- Do not invent labels, ranges, or units.
+- Do not round values in a way that changes their meaning.
+
+If the map uses five classes, the legend must represent those five classes. If it uses a continuous raster ramp, the legend must show that ramp and its actual minimum, maximum, and units where available.
+
+## 5.2 Legend design
+
+Use compact, readable legends.
+
+- Keep the legend close to the relevant layer or map.
+- Use small, consistent colour swatches.
+- Align labels and swatches precisely.
+- Avoid large decorative legend cards.
+- Use subtle separators when necessary.
+- Allow long labels to wrap sensibly.
+- Make legends collapsible when they occupy significant map space.
+- Keep numerical values legible.
+- Do not let the legend obscure important geographic features.
+
+A legend should look like a functional part of a GIS application.
+
+## 5.3 Scale, north arrow, coordinates, and attribution
+
+Where relevant, use established mapping-library controls for:
+
+- Scale bars.
+- North arrows.
+- Coordinate display.
+- Mouse-position information.
+- Attribution.
+- Zoom level.
+- Map projection information.
+
+Do not add these elements automatically to every map. Include them when they improve interpretation or meet the map's requirements.
+
+Their values must be genuine and derived from the map state. Never display decorative or fabricated coordinate information.
+
+# 6. Icons and controls
+
+Icons should be familiar, consistent, and functional.
+
+## 6.1 Icon rules
+
+- Use one established icon family throughout the application.
+- Prefer recognisable GIS and general interface symbols.
+- Use consistent stroke weight, visual size, and alignment.
+- Use icons for functions users can understand from their appearance.
+- Provide tooltips for less obvious tools.
+- Use text labels where an icon alone could be ambiguous.
+- Use accessible labels for icon-only buttons.
+- Use the same icon for the same action throughout the project.
+
+Appropriate icon categories include:
+
+- Layers.
+- Basemaps.
+- Search.
+- Zoom in and zoom out.
+- Full screen.
+- Measure distance.
+- Measure area.
+- Identify feature.
+- Draw.
+- Print or export.
+- Download.
+- Filter.
+- Information.
+- Settings.
+- Legend.
+- Locate.
+- Clear selection.
+- Expand and collapse.
+
+Do not use emoji, random SVG artwork, or AI-generated icons as interface controls.
+
+Do not draw a new icon when a suitable icon already exists in the project's chosen icon library.
+
+## 6.2 Toolbar behaviour
+
+Toolbars should be compact and logically organised.
+
+- Group related tools.
+- Maintain consistent control dimensions.
+- Use separators only when they clarify functional groups.
+- Show selected and active states clearly.
+- Provide hover and focus states.
+- Provide tooltips.
+- Avoid excessively large buttons.
+- Avoid placing every available action in one crowded toolbar.
+- Use menus for secondary or infrequently used actions.
+
+Controls must work. A button must not be presented as functional if it has no implemented action.
+
+# 7. Application layout and navigation
+
+## 7.1 Overall structure
+
+Use a clear geospatial workspace hierarchy:
+
+1. Application header and primary navigation.
+2. Map workspace.
+3. Contextual toolbars.
+4. Layer, legend, or information panels.
+5. Supporting status and attribution information.
+
+The exact arrangement can vary depending on the map's purpose, but the hierarchy must remain consistent.
+
+Do not redesign the entire application for each map.
+
+## 7.2 Header
+
+Keep the header compact.
+
+It should contain only genuinely useful elements, such as:
+
+- Project or application identity.
+- Primary navigation.
+- Map title or current workspace context.
+- Relevant account or utility controls, if the application requires them.
+
+Avoid oversized branding, unnecessary marketing text, and decorative header elements.
+
+## 7.3 Navigation
+
+Navigation must be predictable.
+
+- Keep map navigation consistent across all 12 maps.
+- Use concise, understandable names.
+- Make the active map or section obvious.
+- Avoid excessive nested menus.
+- Avoid decorative navigation cards.
+- Preserve direct access to the maps.
+- Do not rename existing maps without a clear reason.
+
+If the project has a map catalogue, make it compact, organised, and easy to scan.
+
+## 7.4 Panels
+
+Panels should feel like functional GIS workspaces.
+
+- Use clear panel headers.
+- Keep panel widths controlled.
+- Use consistent internal spacing.
+- Separate unrelated groups of controls.
+- Provide collapse and expand behaviour where useful.
+- Keep panel content scrollable when necessary.
+- Do not use multiple nested cards to contain simple controls.
+- Ensure panels do not unnecessarily cover the map.
+
+# 8. Map-first interface behaviour
+
+The map must remain the central working area.
+
+- Maximise usable map space.
+- Avoid unnecessary overlays.
+- Keep controls positioned consistently.
+- Do not allow panels to cover important map controls.
+- Ensure the map resizes correctly when panels open or close.
+- Preserve zoom, extent, and layer state when appropriate.
+- Avoid reinitialising the map unnecessarily during ordinary UI updates.
+- Keep map interactions responsive.
+- Make active layers and selected features visually clear.
+
+Do not sacrifice mapping functionality for visual effects.
+
+If the existing map already works correctly, preserve its implementation and improve the surrounding interface without introducing regressions.
+
+# 9. Data visualisation and charts
+
+Charts must communicate data accurately.
+
+Use established charting libraries already present in the project where possible.
+
+- Use meaningful axis labels.
+- Display units.
+- Use appropriate number formatting.
+- Avoid unnecessary 3D charts.
+- Avoid decorative gradients.
+- Avoid excessive gridlines.
+- Use consistent typography.
+- Use established palettes.
+- Make legends and series labels accurate.
+- Do not fabricate values to populate a chart.
+- Do not smooth, interpolate, or transform data without explaining the method.
+- Keep chart styling consistent with the rest of the application.
+
+Where a chart represents map data, its values and labels must correspond to the actual underlying data.
+
+# 10. Interaction, usability, and accessibility
+
+Professional appearance must not come at the expense of usability.
+
+Implement:
+
+- Visible keyboard focus states.
+- Meaningful hover states.
+- Clear active and selected states.
+- Accessible labels.
+- Sufficient colour contrast.
+- Keyboard-operable controls where applicable.
+- Readable text at normal browser zoom.
+- Clear error messages.
+- Loading indicators for real operations.
+- Empty states that explain what is missing.
+- Confirmation for destructive actions where appropriate.
+
+Do not use colour alone to communicate critical information.
+
+Avoid animations that delay interaction. Use short, subtle transitions only when they communicate a state change.
+
+# 11. Responsive design
+
+The interface must remain usable on desktop, tablet, and mobile.
+
+Desktop is the primary environment for detailed geospatial analysis, but smaller screens must not be neglected.
+
+- Preserve access to core map controls.
+- Collapse side panels sensibly on narrow screens.
+- Prevent toolbars from overflowing.
+- Keep legends readable.
+- Ensure buttons remain usable.
+- Avoid fixed-width layouts that break on smaller screens.
+- Ensure the map resizes after responsive layout changes.
+- Do not simply shrink the desktop interface until it becomes unusable.
+
+# 12. Technical implementation standards
+
+A professional interface must also be technically sound.
+
+## 12.1 Protect existing functionality
+
+The project already contains 12 web maps. Treat their existing analytical and mapping functionality as valuable working components.
+
+Before making changes:
+
+1. Inspect the project structure.
+2. Identify the framework and dependencies.
+3. Identify the routing and navigation system.
+4. Identify shared components.
+5. Identify each map's entry point.
+6. Identify map libraries and layer implementations.
+7. Identify existing styles and design tokens.
+8. Identify how legends and colour ramps are defined.
+9. Identify data sources and analytical logic.
+10. Identify functionality that must not change.
+
+Do not rewrite a working map simply because a new implementation seems easier.
+
+Do not remove working features, data layers, controls, calculations, or interactions during a visual redesign.
+
+## 12.2 Separate interface code from analytical code
+
+Keep the presentation layer separate from geospatial processing and data logic wherever practical.
+
+A visual redesign must not silently change:
+
+- Raster processing.
+- Vector processing.
+- Coordinate reference systems.
+- Projection transformations.
+- Spatial queries.
+- Classification methods.
+- Statistical calculations.
+- Data filtering.
+- Feature attributes.
+- Layer sources.
+- Map extents.
+- Analytical outputs.
+
+If a change to analytical behaviour is necessary, explain it and obtain approval before proceeding.
+
+## 12.3 Shared components
+
+Create or maintain reusable components for common interface elements, such as:
+
+- Application header.
+- Navigation.
+- Map toolbar.
+- Layer panel.
+- Legend.
+- Search.
+- Measurement controls.
+- Information panel.
+- Status display.
+- Modal and confirmation dialog.
+
+Use shared components so that the same control does not look or behave differently on different maps.
+
+Avoid unnecessary abstraction. Reuse should make the project easier to maintain, not harder to understand.
+
+## 12.4 CSS discipline
+
+- Prefer shared design tokens.
+- Use a consistent spacing scale.
+- Use predictable naming conventions.
+- Avoid duplicated CSS.
+- Avoid excessive `!important`.
+- Avoid global styles that unintentionally affect map libraries.
+- Scope component styles appropriately.
+- Do not use arbitrary values for every margin, radius, and font size.
+- Remove obsolete styles after a verified migration.
+- Check for conflicts with Leaflet, OpenLayers, MapLibre, or whichever mapping framework the project uses.
+
+Do not add a large volume of CSS to imitate a component that an existing library already provides.
+
+## 12.5 Performance
+
+- Avoid unnecessary React re-renders.
+- Avoid re-creating map instances on ordinary component updates.
+- Clean up event listeners.
+- Dispose of map resources correctly.
+- Lazy-load heavy map modules where appropriate.
+- Avoid unnecessarily large icon or UI packages.
+- Keep map interactions responsive.
+- Preserve existing caching and data-loading behaviour.
+- Avoid loading all 12 maps simultaneously if the application only needs to display one at a time.
+
+# 13. What must never happen during redesign
+
+The following are unacceptable unless explicitly requested:
+
+1. Replacing an existing analytical map with a decorative mock-up.
+2. Inventing data, legends, class names, or colour values.
+3. Changing a classification scheme without permission.
+4. Replacing established cartographic palettes with arbitrary gradients.
+5. Adding random colours to make the interface look more exciting.
+6. Converting every section into a rounded card.
+7. Increasing whitespace without a functional reason.
+8. Using oversized typography in operational map interfaces.
+9. Mixing unrelated icon styles.
+10. Adding decorative animations that interfere with mapping.
+11. Replacing functional controls with non-functional visual elements.
+12. Removing metadata, attribution, or analytical context.
+13. Breaking map responsiveness or existing routes.
+14. Changing map functionality during a task that only requests UI improvements.
+15. Creating a different design language for every map.
+16. Adding dependencies without checking whether the project already has a suitable solution.
+17. Guessing the meaning of a layer or its symbology.
+18. Changing data or map styling merely to match an arbitrary interface colour.
+
+# 14. Required workflow before changing any interface
+
+Follow this workflow for every substantial UI task.
+
+## Phase 1 — Inspect
+
+Examine the existing implementation before writing code.
+
+Identify:
+
+- Current visual structure.
+- Existing shared components.
+- Existing CSS and design tokens.
+- Installed UI and icon libraries.
+- Mapping library controls.
+- Existing legend implementation.
+- Existing map symbology.
+- Current responsive behaviour.
+- Any known bugs or constraints.
+
+Do not assume the project is empty or needs a complete redesign.
+
+## Phase 2 — Plan
+
+Briefly state:
+
+- What currently needs improvement.
+- Which components will be modified.
+- Which existing libraries or components will be reused.
+- What will remain unchanged.
+- Whether any dependency is genuinely required.
+
+Do not propose a full rewrite when a focused improvement is sufficient.
+
+## Phase 3 — Implement
+
+- Reuse the existing project architecture.
+- Apply shared design tokens.
+- Use established components and icon sets.
+- Preserve existing map and analytical functionality.
+- Keep the interface compact and map-focused.
+- Maintain consistent styling across all maps.
+
+## Phase 4 — Verify
+
+After implementation:
+
+- Check the map loads.
+- Check all existing layers.
+- Check legends against the actual map symbology.
+- Check tooltips and controls.
+- Check navigation and routes.
+- Check panel collapse and expansion.
+- Check responsive behaviour.
+- Check the browser console.
+- Check that existing analytical outputs have not changed.
+- Check that no controls are merely decorative.
+
+## Phase 5 — Report
+
+Provide a concise summary of:
+
+- What changed.
+- Which files were modified.
+- Which shared components were introduced or reused.
+- What functionality was preserved.
+- What was tested.
+- Any remaining issues.
+
+Do not claim that something works unless it has actually been checked.
+
+# 15. Visual quality checklist
+
+Before considering a UI task complete, evaluate it against this checklist.
+
+| Quality criterion | Required outcome |
+|---|---|
+| Overall appearance | Mature professional geospatial software |
+| Information density | Compact but readable |
+| Typography | Restrained and consistent |
+| Icons | One coherent established icon family |
+| Colours | Controlled, purposeful, and consistent |
+| Map palettes | Established and appropriate to the data |
+| Legends | Derived from actual map symbology |
+| Toolbars | Compact, grouped, and functional |
+| Panels | Clear, efficient, and map-conscious |
+| Spacing | Consistent and deliberate |
+| Cards | Used only when structurally useful |
+| Shadows and gradients | Minimal and functional, not decorative |
+| Navigation | Predictable across all maps |
+| Responsiveness | Functional at desktop, tablet, and mobile sizes |
+| Performance | No unnecessary map reinitialisation or rendering overhead |
+| Existing functionality | Preserved and verified |
+
+# 16. Final instruction
+
+Do not interpret a request to improve the interface as permission to reinvent the entire application.
+
+Do not default to contemporary startup design trends or generic AI-generated dashboard patterns.
+
+Think like a geospatial software engineer working on a mature mapping system: every panel, icon, label, colour, legend, and interaction should have a clear reason to exist.
+
+Use established design systems, mature UI components, recognised cartographic standards, documented colour libraries, and consistent GIS interaction patterns.
+
+The objective is not to make the interface look fashionable. It is to make it look **credible, precise, compact, familiar, technically mature, and purpose-built for geospatial work**.
+
+When uncertain about a visual decision, prefer the established, documented, restrained solution over an invented one.
+
+**Preserve the science. Respect the cartography. Keep the interface compact. Make the map the centre of attention.**

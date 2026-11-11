@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en" class="gis gis-lay-float-left">
+<head>
+<meta charset="utf-8">
+<title>Africa river flow network</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#05080d; }
+  .gis-map canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+  #hit { position:absolute; inset:0; touch-action:none; cursor:grab; }
+  #hit.drag { cursor:grabbing; }
+  #fx { pointer-events:none; }
+  .gis-scale { color:#e9eef4; }
+  body.drop #pRiver, body.drop #card { display:none !important; }
+  body:not(.drop) #pPlace, body:not(.drop) #dcard { display:none !important; }
+  .card { display:none; }
+  .card.open { display:block; }
+  .card .hd { display:flex; align-items:flex-start; gap:8px; }
+  .card h2 { flex:1; margin:0; font-size:var(--gis-t-title); font-weight:600; }
+  #cEnds, #dto { margin:0 0 8px; color:var(--gis-fg2); }
+  #cCountries { margin:8px 0 0; }
+  #flowKey { display:block; width:100%; height:66px; background:#05080d; }
+</style>
+</head>
+<body>
+<main class="gis-map" id="stage">
+  <canvas id="land"></canvas><canvas id="gl"></canvas><canvas id="labels"></canvas><canvas id="fx"></canvas>
+  <div id="hit"></div>
+  <div class="gis-tools gis-tools--right"><div class="gis-grp">
+    <button class="gis-btn" id="zIn" type="button" title="Zoom in" aria-label="Zoom in"><i class="bi bi-plus-lg"></i></button>
+    <button class="gis-btn" id="zOut" type="button" title="Zoom out" aria-label="Zoom out"><i class="bi bi-dash-lg"></i></button>
+    <button class="gis-btn" id="zAll" type="button" title="All of Africa" aria-label="All of Africa"><i class="bi bi-fullscreen"></i></button></div></div>
+  <div class="gis-scale" id="scale"></div>
+  <div class="gis-attr">Data from HydroSHEDS and Natural Earth. Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the rivers</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Africa river flow network</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><div class="gis-seg gis-seg--full" id="modes"><button class="gis-btn on" type="button" data-m="explore">River systems</button><button class="gis-btn" type="button" data-m="drop">Trace flow</button></div>
+      <p class="gis-p gis-small gis-muted" id="sub" style="margin-top:8px"></p>
+      <div class="gis-field" id="pRiver" style="margin-top:10px"><label class="gis-label" for="riverSel">Go to a river</label><select class="gis-select" id="riverSel"></select></div>
+      <div class="gis-field" id="pPlace" style="margin-top:10px"><label class="gis-label" for="placeSel">Start from</label><select class="gis-select" id="placeSel"></select></div></section>
+    <section class="gis-sec card" id="card"><div class="hd"><h2 id="cName"></h2><button class="gis-btn gis-btn--icon gis-btn--bare" id="close" type="button" title="Clear selection" aria-label="Clear selection"><i class="bi bi-x-lg"></i></button></div>
+      <p id="cEnds"></p>
+      <table class="gis-table gis-table--flush"><tr><td>Longest course</td><td id="cKm"></td></tr><tr><td>Basin</td><td id="cBasin"></td></tr><tr><td>Flow at the mouth</td><td id="cFlow"></td></tr></table>
+      <dl class="gis-dl" id="cCountries" style="margin-top:12px"></dl></section>
+    <section class="gis-sec card" id="dcard"><div class="hd"><h2 id="dkm">0 km</h2><button class="gis-btn gis-btn--icon gis-btn--bare" id="dclose" type="button" title="Clear trace" aria-label="Clear trace"><i class="bi bi-x-lg"></i></button></div>
+      <p id="dto">downstream so far</p>
+      <dl class="gis-dl"><dt>Rivers</dt><dd id="drv"></dd><dt>Countries</dt><dd id="dct"></dd></dl></section>
+    <section class="gis-sec"><h2 class="gis-h">Mean flow (m³/s)</h2><canvas id="flowKey" height="66"></canvas>
+      <ul class="gis-legend" style="margin-top:6px"><li><i class="gis-sw" style="background:#23476b"></i>Lake</li></ul></section>
+  </div>
+</aside>
+<div class="gis-tip" id="tip"></div>
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => Math.round(n).toLocaleString("en-US").replace(/,/g, " ");
+const BASE = "rivers/";
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- view: km on an equal area map of Africa ---------------- */
+const V = { cx: 0, cy: 0, k: 0.1, dpr: 1, W: 0, H: 0, home: null };
+const toScreen = (x, y) => [V.W / 2 + (x - V.cx) * V.k, V.H / 2 - (y - V.cy) * V.k];
+const toKm = (sx, sy) => [V.cx + (sx - V.W / 2) / V.k, V.cy - (sy - V.H / 2) / V.k];
+
+/* ---------------- WebGL ---------------- */
+const glc = $("gl");
+const gl = glc.getContext("webgl", { premultipliedAlpha: true, alpha: true, antialias: true });
+if (!gl) { GIS.state($("loading"), "This map needs WebGL, which your browser does not support.", true); return; }
+const VS = `
+attribute vec2 aPos; attribute vec2 aNrm; attribute vec4 aInfo;   // info: side, flow 0..1, distance km, system
+uniform vec3 uView; uniform vec2 uRes; uniform float uWidth;
+varying float vEdge; varying float vFlow; varying float vDist; varying float vSys;
+void main(){
+  vec2 s = vec2(uRes.x * 0.5 + (aPos.x - uView.x) * uView.z, uRes.y * 0.5 - (aPos.y - uView.y) * uView.z);
+  float hw = (0.35 + 2.9 * pow(aInfo.y, 1.6)) * uWidth * clamp(pow(uView.z / 0.12, 0.35), 0.8, 2.6);
+  s += vec2(aNrm.x, -aNrm.y) * aInfo.x * hw;
+  gl_Position = vec4(s / uRes * 2.0 - 1.0, 0.0, 1.0); gl_Position.y = -gl_Position.y;
+  vEdge = aInfo.x; vFlow = aInfo.y; vDist = aInfo.z; vSys = aInfo.w;
+}`;
+const FS = `
+precision highp float;
+uniform float uTime; uniform float uSpacing; uniform float uSel; uniform float uHov; uniform float uAlpha;
+varying float vEdge; varying float vFlow; varying float vDist; varying float vSys;
+void main(){
+  float edge = 1.0 - smoothstep(0.35, 1.0, abs(vEdge));
+  // light moving downstream: distance to the sea falls as time goes on
+  float ph = fract(vDist / uSpacing + uTime);
+  float pulse = smoothstep(0.0, 0.06, ph) * (1.0 - smoothstep(0.06, 0.32, ph));
+  float f = pow(vFlow, 1.4);
+  vec3 water = vec3(0.5, 0.74, 1.0);
+  vec3 col = water * ((0.07 + 0.55 * f) + pulse * (0.07 + 0.55 * f));
+  float sel = step(-0.5, uSel), me = 1.0 - step(0.5, abs(vSys - uSel)), hov = 1.0 - step(0.5, abs(vSys - uHov));
+  vec3 gold = vec3(1.0, 0.83, 0.55);
+  col = mix(col, gold * (0.7 + pulse * 0.35) * (0.5 + 0.5 * vFlow), sel * me);
+  col *= mix(1.0, 0.22, sel * (1.0 - me));
+  col *= 1.0 + 0.6 * hov * (1.0 - me);
+  float a = edge * uAlpha;
+  gl_FragColor = vec4(col * a, a);
+}`;
+function sh(t, src) { const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+const prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
+const A = { pos: gl.getAttribLocation(prog, "aPos"), nrm: gl.getAttribLocation(prog, "aNrm"), info: gl.getAttribLocation(prog, "aInfo") };
+const U = {}; ["uView", "uRes", "uWidth", "uTime", "uSpacing", "uSel", "uHov", "uAlpha"].forEach((n) => (U[n] = gl.getUniformLocation(prog, n)));
+const uintIdx = gl.getExtension("OES_element_index_uint");
+
+let R = null;           // rivers: per vertex km coords, flow, distance, system; per line ranges
+let S = null;           // systems
+let LAND = null;
+let sel = -1, hov = -1;
+
+function buildMesh() {
+  const { nl, nv, len, sys, X, Y, D, F } = R;
+  const pos = new Float32Array(nv * 4), nrm = new Float32Array(nv * 4), info = new Float32Array(nv * 8);
+  const idx = new Uint32Array((nv - nl) * 6);
+  let v = 0, t = 0;
+  for (let l = 0, o = 0; l < nl; l++) {
+    const n = len[l];
+    for (let i = 0; i < n; i++) {
+      const p = o + i, a = o + Math.max(0, i - 1), b = o + Math.min(n - 1, i + 1);
+      let dx = X[b] - X[a], dy = Y[b] - Y[a]; const L = Math.hypot(dx, dy) || 1; dx /= L; dy /= L;
+      for (let s = 0; s < 2; s++) {
+        const q = (p * 2 + s);
+        pos[q * 2] = X[p]; pos[q * 2 + 1] = Y[p];
+        nrm[q * 2] = -dy; nrm[q * 2 + 1] = dx;
+        info[q * 4] = s ? 1 : -1; info[q * 4 + 1] = F[p]; info[q * 4 + 2] = D[p]; info[q * 4 + 3] = sys[l];
+      }
+      if (i < n - 1) { const q = p * 2; idx.set([q, q + 1, q + 2, q + 1, q + 3, q + 2], t); t += 6; }
+    }
+    o += n;
+  }
+  const buf = (data, attr, size) => { const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW); gl.enableVertexAttribArray(attr); gl.vertexAttribPointer(attr, size, gl.FLOAT, false, 0, 0); };
+  buf(pos, A.pos, 2); buf(nrm, A.nrm, 2); buf(info, A.info, 4);
+  const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx.subarray(0, t), gl.STATIC_DRAW);
+  R.count = t;
+}
+
+/* ---------------- loading ---------------- */
+async function load() {
+  const getBin = async () => {
+    for (let a = 0; a < 3; a++) {
+      const r = await fetch(BASE + "rivers.bin", { cache: a ? "reload" : "default" });
+      if (!r.ok) break;
+      const b = await r.arrayBuffer();
+      if (b.byteLength > 16) return b;
+    }
+    throw new Error("The river data could not be loaded. Please refresh the page.");
+  };
+  const [bin, sys, land] = await Promise.all([getBin(),
+    fetch(BASE + "systems.json").then((r) => r.json()), fetch(BASE + "land.json").then((r) => r.json())]);
+  const h = new Uint32Array(bin, 0, 4), nl = h[0], nv = h[1];
+  let o = 16;
+  const len = new Uint32Array(bin, o, nl); o += nl * 4;
+  const sysA = new Uint32Array(bin, o, nl); o += nl * 4;
+  const qx = new Uint16Array(bin, o, nv); o += nv * 2;
+  const qy = new Uint16Array(bin, o, nv); o += nv * 2;
+  const qd = new Uint16Array(bin, o, nv); o += nv * 2;
+  const qf = new Uint8Array(bin, o, nv);
+  const [x0, y0] = sys.bounds, sc = sys.scale;
+  const X = new Float32Array(nv), Y = new Float32Array(nv), D = new Float32Array(nv), F = new Float32Array(nv);
+  for (let i = 0; i < nv; i++) {
+    X[i] = x0 + qx[i] / sc; Y[i] = y0 + qy[i] / sc; D[i] = qd[i];
+    const flow = Math.pow(10, (qf[i] - 80) / 40);                       // m3/s
+    F[i] = Math.min(1, Math.max(0, Math.log10(flow + 1) / 4.3));          // 0 to 1, the Congo's mouth near 1
+  }
+  R = { nl, nv, len, sys: sysA, X, Y, D, F };
+  S = sys.systems; LAND = land;
+  buildMesh(); index(); labelsPrep();
+  const [bx0, by0, bx1, by1] = sys.bounds;
+  V.home = { cx: (bx0 + bx1) / 2, cy: (by0 + by1) / 2, w: bx1 - bx0, h: by1 - by0 };
+  resize(); home();
+  chips();
+}
+
+/* ---------------- picking: a coarse grid of segments ---------------- */
+let grid = null; const CELL = 60;
+function index() {
+  grid = new Map();
+  for (let l = 0, o = 0; l < R.nl; l++) {
+    for (let i = 0; i < R.len[l] - 1; i++) {
+      const p = o + i, gx = Math.floor((R.X[p] + R.X[p + 1]) / 2 / CELL), gy = Math.floor((R.Y[p] + R.Y[p + 1]) / 2 / CELL);
+      const k = gx + "," + gy; if (!grid.has(k)) grid.set(k, []); grid.get(k).push(p, l);
+    }
+    o += R.len[l];
+  }
+}
+function pick(sx, sy) {
+  const [x, y] = toKm(sx, sy), tol = 9 / V.k;
+  let best = -1, bd = tol * tol;
+  const r = Math.ceil(tol / CELL), gx = Math.floor(x / CELL), gy = Math.floor(y / CELL);
+  for (let i = -r; i <= r; i++) for (let j = -r; j <= r; j++) {
+    const c = grid.get((gx + i) + "," + (gy + j)); if (!c) continue;
+    for (let k = 0; k < c.length; k += 2) {
+      const p = c[k], ax = R.X[p], ay = R.Y[p], bx = R.X[p + 1], by = R.Y[p + 1];
+      const vx = bx - ax, vy = by - ay, t = Math.max(0, Math.min(1, ((x - ax) * vx + (y - ay) * vy) / (vx * vx + vy * vy || 1)));
+      const d = (ax + vx * t - x) ** 2 + (ay + vy * t - y) ** 2 - R.F[p] * 4 * tol * tol * 0.15;   // big rivers win ties
+      if (d < bd) { bd = d; best = R.sys[c[k + 1]]; }
+    }
+  }
+  return best;
+}
+
+/* ---------------- labels: the big named rivers, placed on their main stem ---------------- */
+let LBL = [];
+function labelsPrep() {
+  const info = new Map();
+  for (let l = 0, o = 0; l < R.nl; l++) {
+    const s = R.sys[l], meta = S[s];
+    if (meta && meta.name) {
+      for (let i = 0; i < R.len[l]; i++) {
+        const p = o + i, e = info.get(s) || { box: [1e9, 1e9, -1e9, -1e9], fmax: 0, best: null, bs: 1e9 };
+        e.box = [Math.min(e.box[0], R.X[p]), Math.min(e.box[1], R.Y[p]), Math.max(e.box[2], R.X[p]), Math.max(e.box[3], R.Y[p])];
+        e.fmax = Math.max(e.fmax, R.F[p]); info.set(s, e);
+      }
+    }
+    o += R.len[l];
+  }
+  // second pass: a point on the main stem about 40% of the way from the mouth
+  for (let l = 0, o = 0; l < R.nl; l++) {
+    const s = R.sys[l], e = info.get(s);
+    if (e) for (let i = 0; i < R.len[l]; i++) {
+      const p = o + i; if (R.F[p] < e.fmax - 0.12) continue;
+      const score = Math.abs(R.D[p] - S[s].km * 0.4);
+      if (score < e.bs) { e.bs = score; e.best = [R.X[p], R.Y[p], i < R.len[l] - 1 ? Math.atan2(R.Y[p + 1] - R.Y[p], R.X[p + 1] - R.X[p]) : 0]; }
+    }
+    o += R.len[l];
+  }
+  LBL = [...info.entries()].map(([s, e]) => ({ s, name: S[s].name, basin: S[s].basin, box: e.box, at: e.best })).filter((d) => d.at).sort((a, b) => b.basin - a.basin);
+}
+const lctx = $("labels").getContext("2d");
+function drawLabels() {
+  const c = lctx, d = V.dpr;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, V.W * d, V.H * d); c.setTransform(d, 0, 0, d, 0, 0);
+  const n = Math.round(10 + Math.max(0, Math.log2(V.k / V.base)) * 14);
+  c.font = '600 13px "Source Sans 3", system-ui, sans-serif'; c.textAlign = "center"; c.textBaseline = "middle";
+  const placed = [];
+  for (const L of LBL.slice(0, n)) {
+    const [sx, sy] = toScreen(L.at[0], L.at[1]);
+    if (sx < -50 || sy < -20 || sx > V.W + 50 || sy > V.H + 20) continue;
+    const w = c.measureText(L.name).width + 10;
+    if (placed.some(([x, y, ww]) => Math.abs(x - sx) < (w + ww) / 2 && Math.abs(y - sy) < 18)) continue;
+    placed.push([sx, sy, w]);
+    const on = L.s === sel;
+    c.lineWidth = 3.5; c.strokeStyle = "rgba(5,8,13,.85)"; c.strokeText(L.name, sx, sy - 12);
+    c.fillStyle = on ? "#f2d39a" : sel >= 0 ? "rgba(200,210,222,.45)" : "rgba(214,224,236,.85)"; c.fillText(L.name, sx, sy - 12);
+  }
+}
+
+/* ---------------- land ---------------- */
+const lc = $("land").getContext("2d");
+function drawLand() {
+  const c = lc, d = V.dpr;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = "#05080d"; c.fillRect(0, 0, V.W * d, V.H * d);
+  c.setTransform(V.k * d, 0, 0, -V.k * d, (V.W / 2 - V.cx * V.k) * d, (V.H / 2 + V.cy * V.k) * d);
+  const path = (rs) => { c.beginPath(); for (const r of rs) { c.moveTo(r[0][0], r[0][1]); for (let i = 1; i < r.length; i++) c.lineTo(r[i][0], r[i][1]); c.closePath(); } };
+  path(LAND.land); c.fillStyle = "#0e1520"; c.fill(); c.lineWidth = 0.8 / V.k; c.strokeStyle = "rgba(160,180,205,.16)"; c.stroke();
+  path(LAND.lakes); c.fillStyle = "#23476b"; c.fill(); c.strokeStyle = "rgba(140,190,240,.35)"; c.stroke();
+}
+
+/* ---------------- view controls ---------------- */
+function resize() {
+  V.dpr = Math.min(devicePixelRatio || 1, 2);
+  const r = $("stage").getBoundingClientRect(); V.W = r.width; V.H = r.height;
+  for (const id of ["land", "gl", "labels"]) { const c = $(id); c.width = Math.round(V.W * V.dpr); c.height = Math.round(V.H * V.dpr); }
+  gl.viewport(0, 0, glc.width, glc.height);
+  if (V.home) V.base = Math.min(V.W / V.home.w, V.H / V.home.h) * 0.92;
+  dirty = true;
+}
+let dirty = true, anim = null;
+function flyTo(cx, cy, k, ms = 900) {
+  const s = { cx: V.cx, cy: V.cy, k: V.k, t0: performance.now() };
+  anim = (now) => {
+    const u = Math.min(1, (now - s.t0) / ms), e = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+    const lk = Math.log(s.k) + (Math.log(k) - Math.log(s.k)) * e;
+    V.k = Math.exp(lk); V.cx = s.cx + (cx - s.cx) * e; V.cy = s.cy + (cy - s.cy) * e; dirty = true;
+    if (u >= 1) anim = null;
+  };
+}
+function home(animate) {
+  const h = V.home;
+  const k = Math.min(V.W / h.w, V.H / h.h) * 0.94; V.base = k;
+  const cx = h.cx, cy = h.cy;
+  animate ? flyTo(cx, cy, k) : (V.cx = cx, V.cy = cy, V.k = k, dirty = true);
+}
+function zoomAt(sx, sy, f) {
+  const [x, y] = toKm(sx, sy);
+  V.k = Math.max(V.base * 0.8, Math.min(V.base * 40, V.k * f));
+  V.cx = x - (sx - V.W / 2) / V.k; V.cy = y + (sy - V.H / 2) / V.k; dirty = true;
+}
+
+/* ---------------- selecting a river ---------------- */
+function select(s) {
+  sel = s;
+  $("riverSel").value = [...$("riverSel").options].some((o) => +o.value === s) ? String(s) : "";
+  if (s < 0 || !S[s]) { $("card").classList.remove("open"); return; }
+  const m = S[s];
+  $("cName").textContent = m.name || "Unnamed river";
+  $("cEnds").textContent = "Flows into " + m.ends;
+  $("cKm").textContent = fmt(m.km) + " km";
+  $("cBasin").textContent = fmt(m.basin) + " km²";
+  $("cFlow").textContent = m.flow >= 10 ? fmt(m.flow) + " m³/s" : m.flow + " m³/s";
+  const cs = m.countries || [];
+  $("cCountries").innerHTML = cs.length ? `<dt>Countries</dt><dd>${cs.join("<br>")}</dd>` : "";
+  $("card").classList.add("open");
+  const L = LBL.find((d) => d.s === s);
+  let box = L && L.box;
+  if (!box) { box = [1e9, 1e9, -1e9, -1e9]; for (let l = 0, o = 0; l < R.nl; l++) { if (R.sys[l] === s) for (let i = 0; i < R.len[l]; i++) { const p = o + i; box = [Math.min(box[0], R.X[p]), Math.min(box[1], R.Y[p]), Math.max(box[2], R.X[p]), Math.max(box[3], R.Y[p])]; } o += R.len[l]; } }
+  const w = box[2] - box[0] + 200, h = box[3] - box[1] + 200;
+  const k = Math.max(V.base, Math.min(V.base * 12, Math.min((V.W - 40) / w, (V.H - 60) / h)));
+  flyTo((box[0] + box[2]) / 2, (box[1] + box[3]) / 2, k);
+}
+function chips() {
+  const list = ["Nile", "Congo", "Niger", "Zambezi", "Orange", "Limpopo", "Okavango", "Volta", "Senegal", "Save"];
+  const found = list.map((n) => LBL.find((d) => d.name === n)).filter(Boolean);
+  $("riverSel").innerHTML = `<option value="">Choose a river</option>` + found.map((d) => `<option value="${d.s}">${d.name}</option>`).join("");
+  $("riverSel").onchange = () => select($("riverSel").value === "" ? -1 : +$("riverSel").value);
+}
+
+/* ---------------- drop the rain ---------------- */
+const PLACES = [["Harare", 31.05, -17.83], ["Bulawayo", 28.58, -20.15], ["Kampala", 32.58, 0.35], ["Johannesburg", 28.05, -26.2], ["Addis Ababa", 38.76, 9.01], ["Maun", 23.42, -19.98], ["Kinshasa", 15.33, -4.38], ["Bamako", -8.0, 12.64]];
+const R0 = 6371.0072;
+function laea(lon, lat) {
+  const l = (lon - 20) * Math.PI / 180, p = lat * Math.PI / 180, k = Math.sqrt(2 / (1 + Math.cos(p) * Math.cos(l)));
+  return [R0 * k * Math.cos(p) * Math.sin(l), R0 * k * Math.sin(p)];
+}
+let mode = "explore", DM = null, DN = null, dgrid = null, drop = null, dropLoading = null;
+/* The flow data (4 MB, and a 3039 x 3142 basin image) is fetched and unpacked in a background worker,
+   so the map never freezes. It starts quietly once the map is up, so Trace flow is usually ready at once. */
+const DROP_WORKER = `
+self.onmessage = async (ev) => {
+  try {
+    const base = ev.data;
+    const getBin = async () => {
+      for (let a = 0; a < 3; a++) { const r = await fetch(base + "drop/net.bin", { cache: a ? "reload" : "default" }); if (!r.ok) break; const b = await r.arrayBuffer(); if (b.byteLength > 16) return b; }
+      throw new Error("The flow data could not be loaded.");
+    };
+    const getImg = async () => { const r = await fetch(base + "drop/basins.png"); if (!r.ok) throw new Error("Could not load the basins"); return createImageBitmap(await r.blob()); };
+    const [meta, bin, img] = await Promise.all([fetch(base + "drop/meta.json").then((r) => r.json()), getBin(), getImg()]);
+    const h = new Uint32Array(bin, 0, 4), C = h[0], NV = h[1];
+    let o = 16;
+    const take = (T, n, bytes) => { const a = new T(bin.slice(o, o + n * bytes)); o += n * bytes; return a; };
+    const vlen = take(Uint16Array, C, 2), nxt = take(Int32Array, C, 4), clen = take(Uint16Array, C, 2), cname = take(Uint16Array, C, 2), cend = take(Uint8Array, C, 1);
+    const qx = take(Uint16Array, NV, 2), qy = take(Uint16Array, NV, 2), cc = take(Uint8Array, NV, 1);
+    const st = new Uint32Array(C + 1); for (let i = 0; i < C; i++) st[i + 1] = st[i] + vlen[i];
+    const [x0, y0] = meta.bounds, sc = meta.scale, X = new Float32Array(NV), Y = new Float32Array(NV);
+    for (let i = 0; i < NV; i++) { X[i] = x0 + qx[i] / sc; Y[i] = y0 + qy[i] / sc; }
+    const cv = new OffscreenCanvas(img.width, img.height), x = cv.getContext("2d", { willReadFrequently: true });
+    x.drawImage(img, 0, 0);
+    const grid = x.getImageData(0, 0, img.width, img.height).data;
+    self.postMessage({ meta, DN: { st, nxt, cname, cend, X, Y, cc }, grid },
+      [st.buffer, nxt.buffer, cname.buffer, cend.buffer, X.buffer, Y.buffer, cc.buffer, grid.buffer]);
+  } catch (e) { self.postMessage({ error: String(e && e.message || e) }); }
+};`;
+function loadDrop() {
+  if (dropLoading) return dropLoading;
+  dropLoading = new Promise((ok, no) => {
+    let w;
+    try { w = new Worker(URL.createObjectURL(new Blob([DROP_WORKER], { type: "text/javascript" }))); }
+    catch (e) { no(e); return; }
+    w.onmessage = (ev) => {
+      w.terminate();
+      if (ev.data.error) { no(new Error(ev.data.error)); return; }
+      DM = ev.data.meta; DN = ev.data.DN; dgrid = ev.data.grid; ok();
+    };
+    w.onerror = (e) => { w.terminate(); no(new Error(e.message || "The flow data could not be loaded.")); };
+    w.postMessage(new URL(".", location.href).href);
+  });
+  dropLoading.catch(() => { dropLoading = null; });
+  return dropLoading;
+}
+function trace(x, y) {
+  const G = DM.grid, gc = Math.floor((x - G.x0) / G.cell), gr = Math.floor((G.y1 - y) / G.cell);
+  if (gc < 0 || gr < 0 || gc >= G.w || gr >= G.h) return null;
+  const go = (gr * G.w + gc) * 4;
+  let k = ((dgrid[go] << 16) | (dgrid[go + 1] << 8) | dgrid[go + 2]) - 1;
+  if (k < 0) return null;
+  let best = DN.st[k], bd = Infinity;
+  for (let v = DN.st[k]; v < DN.st[k + 1]; v++) { const d = (DN.X[v] - x) ** 2 + (DN.Y[v] - y) ** 2; if (d < bd) { bd = d; best = v; } }
+  const px = [x], py = [y], cum = [0], ctry = [], rivers = [];
+  let d = 0, end = "", steps = 0;
+  const push = (vx, vy, c) => { d += Math.hypot(vx - px[px.length - 1], vy - py[py.length - 1]); px.push(vx); py.push(vy); cum.push(d);
+    if (c < 255) { const n = DM.countries[c]; if (!ctry.includes(n)) ctry.push(n); } };
+  for (let v = best; v < DN.st[k + 1]; v++) push(DN.X[v], DN.Y[v], DN.cc[v]);
+  while (k >= 0 && steps++ < 20000) {
+    const nm = DM.names[DN.cname[k]]; if (nm && !rivers.includes(nm)) rivers.push(nm);
+    if (DN.cend[k]) end = DM.ends[DN.cend[k] - 1];
+    const nx = DN.nxt[k]; if (nx < 0) break;
+    for (let v = DN.st[nx]; v < DN.st[nx + 1]; v++) push(DN.X[v], DN.Y[v], DN.cc[v]);
+    k = nx;
+  }
+  return { px, py, cum, total: d, ctry, rivers, end };
+}
+async function letFall(x, y) {
+  if (!DN) {
+    $("sub").textContent = "Loading the flow data";
+    try { await loadDrop(); } catch (e) { $("sub").textContent = e.message; return; }
+    if (mode === "drop") $("sub").textContent = "Click the map to follow the water to the sea.";
+  }
+  const t = trace(x, y);
+  if (!t) return;
+  drop = { ...t, t0: performance.now(), dur: reduce ? 1 : 4500 + Math.min(14000, t.total * 2.6) };
+  $("dcard").classList.add("open");
+  $("drv").innerHTML = t.rivers.length ? t.rivers.join("<br>") : "Small streams";
+  $("dct").innerHTML = t.ctry.join("<br>") || "None";
+  let a = Infinity, b = Infinity, c = -Infinity, e = -Infinity;
+  for (let i = 0; i < t.px.length; i++) { a = Math.min(a, t.px[i]); b = Math.min(b, t.py[i]); c = Math.max(c, t.px[i]); e = Math.max(e, t.py[i]); }
+  const w = c - a + 300, h = e - b + 300;
+  const k = Math.max(V.base, Math.min(V.base * 14, Math.min((V.W - 40) / w, (V.H - 60) / h)));
+  flyTo((a + c) / 2, (b + e) / 2, k, 1100);
+}
+const fxc = $("fx").getContext("2d");
+function drawDrop(now) {
+  const c = fxc, d = V.dpr;
+  if ($("fx").width !== Math.round(V.W * d)) { $("fx").width = Math.round(V.W * d); $("fx").height = Math.round(V.H * d); }
+  c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, V.W * d, V.H * d);
+  if (!drop || mode !== "drop") return;
+  c.setTransform(d, 0, 0, d, 0, 0);
+  const u = Math.max(0, Math.min(1, (now - drop.t0) / drop.dur)), e = 1 - Math.pow(1 - u, 2.2), dist = drop.total * e;
+  let i = 1; while (i < drop.cum.length && drop.cum[i] < dist) i++;
+  const f = i < drop.cum.length ? (dist - drop.cum[i - 1]) / Math.max(1e-6, drop.cum[i] - drop.cum[i - 1]) : 1;
+  const last = drop.px.length - 1;
+  const hx = i <= last ? drop.px[i - 1] + (drop.px[i] - drop.px[i - 1]) * f : drop.px[last];
+  const hy = i <= last ? drop.py[i - 1] + (drop.py[i] - drop.py[i - 1]) * f : drop.py[last];
+  const line = (w, col) => {
+    c.beginPath(); let [sx, sy] = toScreen(drop.px[0], drop.py[0]); c.moveTo(sx, sy);
+    for (let k = 1; k < i && k <= last; k++) { [sx, sy] = toScreen(drop.px[k], drop.py[k]); c.lineTo(sx, sy); }
+    [sx, sy] = toScreen(hx, hy); c.lineTo(sx, sy);
+    c.lineWidth = w; c.strokeStyle = col; c.lineJoin = c.lineCap = "round"; c.stroke();
+  };
+  line(5, "rgba(140,200,255,.14)"); line(1.8, "#dcecfb");
+  const [sx0, sy0] = toScreen(drop.px[0], drop.py[0]);
+  c.fillStyle = "#fff"; c.beginPath(); c.arc(sx0, sy0, 3.5, 0, 7); c.fill();
+  const [hx2, hy2] = toScreen(hx, hy);
+  c.fillStyle = "rgba(160,205,255,.25)"; c.beginPath(); c.arc(hx2, hy2, 6, 0, 7); c.fill();
+  c.fillStyle = "#eef6ff"; c.beginPath(); c.arc(hx2, hy2, 3, 0, 7); c.fill();
+  $("dkm").textContent = fmt(dist) + " km";
+  $("dto").textContent = u < 1 ? "downstream so far" : `downstream to ${drop.end || "the coast"}`;
+}
+function setMode(m) {
+  mode = m;
+  document.body.classList.toggle("drop", m === "drop");
+  document.querySelectorAll("#modes button").forEach((b) => b.classList.toggle("on", b.dataset.m === m));
+  $("sub").textContent = m === "drop" ? "Click the map to follow the water to the sea." : "Click a river to see its basin.";
+  if (m === "drop") { select(-1); loadDrop().catch(() => {}); $("hit").style.cursor = "crosshair"; }
+  else { drop = null; $("dcard").classList.remove("open"); $("hit").style.cursor = "grab"; }
+  if (history.replaceState) history.replaceState(null, "", m === "drop" ? "#drop" : location.pathname);
+}
+document.querySelectorAll("#modes button").forEach((b) => (b.onclick = () => setMode(b.dataset.m)));
+$("placeSel").innerHTML = `<option value="">Choose a place</option>` + PLACES.map(([n], i) => `<option value="${i}">${n}</option>`).join("");
+$("placeSel").onchange = () => { if ($("placeSel").value === "") return; const [, lon, lat] = PLACES[+$("placeSel").value]; const [x, y] = laea(lon, lat); letFall(x, y); };
+$("dclose").onclick = () => { drop = null; $("dcard").classList.remove("open"); $("placeSel").value = ""; };
+$("close").onclick = () => select(-1);
+$("zIn").onclick = () => zoomAt(V.W / 2, V.H / 2, 1.6);
+$("zOut").onclick = () => zoomAt(V.W / 2, V.H / 2, 1 / 1.6);
+$("zAll").onclick = () => { select(-1); home(true); };
+
+(() => {
+  const hit = $("hit"), pts = new Map(); let moved = 0, pinch = null;
+  hit.addEventListener("pointerdown", (e) => { hit.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); moved = 0; anim = null;
+    if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); } hit.classList.add("drag"); });
+  hit.addEventListener("pointermove", (e) => {
+    if (!pts.has(e.pointerId)) {
+      if (e.pointerType === "mouse" && R && mode === "explore") {
+        const s = pick(e.clientX, e.clientY);
+        if (s !== hov) { hov = s; dirty = true; }
+        const tip = $("tip"), m = s >= 0 && S[s];
+        if (m) { tip.textContent = m.name || "Unnamed river"; tip.style.display = "block"; tip.style.left = e.clientX + 14 + "px"; tip.style.top = e.clientY - 30 + "px"; }
+        else tip.style.display = "none";
+        hit.style.cursor = s >= 0 ? "pointer" : "grab";
+      }
+      return;
+    }
+    const p = pts.get(e.pointerId), dx = e.clientX - p[0], dy = e.clientY - p[1];
+    pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 2 && pinch) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); zoomAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, d / pinch); pinch = d; }
+    else if (pts.size === 1) { V.cx -= dx / V.k; V.cy += dy / V.k; dirty = true; }
+    moved += Math.abs(dx) + Math.abs(dy);
+  });
+  const up = (e) => {
+    if (pts.has(e.pointerId) && moved < 6 && pts.size === 1 && R) {
+      if (mode === "drop") { const [x, y] = toKm(e.clientX, e.clientY); letFall(x, y); }
+      else { const s = pick(e.clientX, e.clientY); select(s === sel ? -1 : s); }
+    }
+    pts.delete(e.pointerId); if (pts.size < 2) pinch = null; if (!pts.size) hit.classList.remove("drag");
+  };
+  hit.addEventListener("pointerup", up); hit.addEventListener("pointercancel", up);
+  hit.addEventListener("pointerleave", () => { $("tip").style.display = "none"; if (hov >= 0) { hov = -1; dirty = true; } });
+  hit.addEventListener("wheel", (e) => { e.preventDefault(); anim = null; zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
+  addEventListener("keydown", (e) => { if (e.key === "Escape") { select(-1); drop = null; $("dcard").classList.remove("open"); } });
+})();
+
+/* ---------------- legend: line width and brightness from the same formulas as the shaders ---------------- */
+let lastK = 0;
+function flowKey() {
+  const c = $("flowKey"), d = Math.min(devicePixelRatio || 1, 2), w = c.clientWidth || 276, h = 66;
+  c.width = w * d; c.height = h * d;
+  const x = c.getContext("2d"); x.setTransform(d, 0, 0, d, 0, 0); x.clearRect(0, 0, w, h);
+  const flows = [10, 100, 1000, 10000, 40000], step = w / flows.length;
+  x.font = "12px 'Source Sans 3', sans-serif"; x.textAlign = "center"; x.fillStyle = "#c7d0da";
+  flows.forEach((q, i) => {
+    const F = Math.min(1, Math.max(0, Math.log10(q + 1) / 4.3)), f = Math.pow(F, 1.4);
+    const hw = (0.35 + 2.9 * Math.pow(F, 1.6)) * 1.0, b = 0.07 + 0.55 * f;
+    const col = `rgb(${[0.5, 0.74, 1].map((v) => Math.round(255 * Math.min(1, v * b * 1.5 * 0.95))).join(",")})`;   // water * brightness at the middle of the moving light * pass alpha
+    const cx = step * i + step / 2;
+    x.strokeStyle = col; x.lineWidth = Math.max(1, hw * 2); x.lineCap = "round";
+    x.beginPath(); x.moveTo(cx - step * 0.35, 22); x.lineTo(cx + step * 0.35, 22); x.stroke();
+    x.fillStyle = "#c7d0da"; x.fillText(fmt(q), cx, 52);
+  });
+}
+
+/* ---------------- frame loop ---------------- */
+function frame(now) {
+  if (anim) anim(now);
+  document.body.classList.toggle("cardopen", $("card").classList.contains("open") || $("dcard").classList.contains("open"));
+  if (R) {
+    if (dirty) { drawLand(); dirty = false; if (V.k !== lastK) { lastK = V.k; GIS.scale($("scale"), 1 / V.k); } }
+    drawLabels();
+    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+    gl.uniform3f(U.uView, V.cx, V.cy, V.k * V.dpr); gl.uniform2f(U.uRes, glc.width, glc.height);
+    const spacingPx = 110 * V.dpr;
+    gl.uniform1f(U.uSpacing, spacingPx / (V.k * V.dpr));
+    gl.uniform1f(U.uTime, reduce ? 0 : now / 1000 * 0.26);
+    gl.uniform1f(U.uSel, sel); gl.uniform1f(U.uHov, hov);
+    // a wide soft glow, then the river itself
+    gl.uniform1f(U.uWidth, 3.2 * V.dpr); gl.uniform1f(U.uAlpha, 0.045); gl.drawElements(gl.TRIANGLES, R.count, gl.UNSIGNED_INT, 0);
+    gl.uniform1f(U.uWidth, 1.0 * V.dpr); gl.uniform1f(U.uAlpha, drop && mode === "drop" ? 0.45 : 0.95); gl.drawElements(gl.TRIANGLES, R.count, gl.UNSIGNED_INT, 0);
+    drawDrop(now);
+  }
+  requestAnimationFrame(frame);
+}
+addEventListener("resize", () => { resize(); dirty = true; });
+$("sub").textContent = "Click a river to see its basin.";
+flowKey();
+load().then(() => {
+  GIS.state($("loading"), null); if (location.hash === "#drop") setMode("drop"); requestAnimationFrame(frame);
+  // fetch the Trace flow data in the background once the map is showing
+  const later = window.requestIdleCallback || ((f) => setTimeout(f, 800));
+  later(() => loadDrop().catch(() => {}));
+}).catch((e) => GIS.state($("loading"), e.message, true));
+})();
+</script>
+</body>
+</html>

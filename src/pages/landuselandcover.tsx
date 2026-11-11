@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import SiteNav, { SiteFooter } from "./SiteChrome";
+import "./page.css";
+import { Figure, Stats, ProjectContact } from "./parts";
 
 // Bulawayo map imagery — swap these files in /src/assets/ to update the maps site-wide
 import lulc1987 from "../assets/LULC_1987.webp";
@@ -48,22 +50,22 @@ const BULAWAYO_AREA_TABLE = [
   { cls: "Water",          y1: 210.439,   y2: 227.082,   y3: 241.357,   y4: 189.108 },
   { cls: "Woodland",       y1: 20068.249, y2: 13958.398, y3: 13734.917, y4: 12484.930 },
   { cls: "Grassland",      y1: 12638.904, y2: 19996.680, y3: 16623.833, y4: 14632.967 },
-  { cls: "Bare-land",      y1: 110.867,   y2: 279.963,   y3: 216.988,   y4: 300.347 },
-  { cls: "Built-up",       y1: 7850.456,  y2: 8249.450,  y3: 8277.169,  y4: 8535.046 },
-  { cls: "Dense Vegetation", y1: 6020.591, y2: 4537.787, y3: 4719.211, y4: 4984.152 },
+  { cls: "Bare land",      y1: 110.867,   y2: 279.963,   y3: 216.988,   y4: 300.347 },
+  { cls: "Built up",       y1: 7850.456,  y2: 8249.450,  y3: 8277.169,  y4: 8535.046 },
+  { cls: "Dense vegetation", y1: 6020.591, y2: 4537.787, y3: 4719.211, y4: 4984.152 },
   { cls: "Cultivation",    y1: 6031.894,  y2: 7586.040,  y3: 11021.915, y4: 13708.850, highlight: true },
 ];
 
 // Table 4.1.2 — Summary of transitions to cultivation, 1987–2025
 const TRANSITION_TABLE = [
-  { conv: "Stable cultivation",            area: "7 120.00",   pct: "52.31%" },
-  { conv: "Grassland → Cultivation",       area: "4 150.00",   pct: "30.49%" },
-  { conv: "Woodland → Cultivation",        area: "1 500.00",   pct: "11.02%" },
-  { conv: "Dense Vegetation → Cultivation", area: "420.00",    pct: "3.09%" },
-  { conv: "Bare-land → Cultivation",       area: "250.00",     pct: "1.84%" },
-  { conv: "Built-up → Cultivation",        area: "155.00",     pct: "1.14%" },
-  { conv: "Water → Cultivation",           area: "16.646",     pct: "0.12%" },
-  { conv: "TOTAL (2025 Area)",             area: "13 611.646", pct: "100.00%", total: true },
+  { conv: "Stayed cultivated",            area: "7 120.00",   pct: "52.31%" },
+  { conv: "Grassland to cultivation",       area: "4 150.00",   pct: "30.49%" },
+  { conv: "Woodland to cultivation",        area: "1 500.00",   pct: "11.02%" },
+  { conv: "Dense vegetation to cultivation", area: "420.00",    pct: "3.09%" },
+  { conv: "Bare land to cultivation",       area: "250.00",     pct: "1.84%" },
+  { conv: "Built up to cultivation",        area: "155.00",     pct: "1.14%" },
+  { conv: "Water to cultivation",           area: "16.646",     pct: "0.12%" },
+  { conv: "Total (2025 area)",             area: "13 611.646", pct: "100.00%", total: true },
 ];
 
 // Table 4.1.3 — Accuracy assessment
@@ -74,10 +76,10 @@ const ACCURACY_TABLE = [
 
 // Headline stats for the callout strip
 const BULAWAYO_STATS = [
-  { value: "11%", label: "Cultivation share of land cover, 1987" },
-  { value: "25%", label: "Cultivation share of land cover, 2025" },
-  { value: "+13.3%", label: "Net increase in cultivated area, 1987–2025" },
-  { value: "38 yrs", label: "Study period spanned by the classification" },
+  { value: "11%", label: "Share of the city under cultivation in 1987" },
+  { value: "25%", label: "Share under cultivation in 2025" },
+  { value: "+13.3%", label: "Net rise in cultivated area since 1987" },
+  { value: "38 years", label: "Of satellite record in the study" },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -91,16 +93,16 @@ const MUTARE_AREA_TABLE = [
   { cls: "Water",               y1: 32.622,    y2: 52.570,    y3: 197.625,   y4: 109.518 },
   { cls: "Grassland",           y1: 4031.146,  y2: 1236.786,  y3: 870.494,   y4: 3801.166 },
   { cls: "Cultivation",         y1: 12812.111, y2: 16093.327, y3: 16156.732, y4: 11724.342 },
-  { cls: "Riparian Vegetation", y1: 1230.597,  y2: 1153.029,  y3: 1235.379,  y4: 1441.649 },
+  { cls: "Riparian vegetation", y1: 1230.597,  y2: 1153.029,  y3: 1235.379,  y4: 1441.649 },
   { cls: "Woodland",            y1: 22190.572, y2: 21785.728, y3: 21177.292, y4: 19919.497 },
-  { cls: "Mine Dump / Bareland", y1: 111.995,  y2: 87.603,    y3: 772.000,   y4: 3413.571, highlight: true },
+  { cls: "Mine dumps and bare ground", y1: 111.995,  y2: 87.603,    y3: 772.000,   y4: 3413.571, highlight: true },
 ];
 
 const MUTARE_STATS = [
-  { value: "30×", label: "Growth in mine dump / bareland area, 1995–2025" },
-  { value: "8.4%", label: "Ward area under mine dump / bareland by 2025" },
-  { value: "-2,271 ha", label: "Woodland lost since 1995" },
-  { value: "-27%", label: "Cultivation decline since its 2015 peak" },
+  { value: "30×", label: "Growth in mine dumps and bare ground since 1995" },
+  { value: "8.4%", label: "Of the ward under mine dumps and bare ground in 2025" },
+  { value: "2,271 ha", label: "Of woodland lost since 1995" },
+  { value: "27%", label: "Drop in cultivation since its 2015 peak" },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -113,9 +115,9 @@ const PAGE_PATH = "/projects/land-use-land-cover";
 const AUTHOR_NAME = "Kudzanai Chakavarika";
 
 const SEO = {
-  title: "Land Use & Land Cover Change in Zimbabwe — Bulawayo & Chiyadzwa Diamond Mine, Mutare | Kudzanai Chakavarika",
+  title: "Land Use and Land Cover Change in Bulawayo and Mutare | Kudzanai Chakavarika",
   description:
-    "Satellite-based land use and land cover change analysis across Zimbabwe: 38 years of urban cultivation expansion in Bulawayo (1987–2025), and 30 years of diamond mining expansion at Chiyadzwa, Mutare Ward 30 (1995–2025). Plus a 1990-2025 suburb-level comparison of Cowdray Park, Mahatshula and Richmond in Bulawayo. By GIS & remote sensing analyst Kudzanai Chakavarika.",
+    "Land use and land cover change from satellite imagery: 38 years of urban farming in Bulawayo, 30 years of diamond mining at Chiyadzwa in Mutare and three Bulawayo suburbs from 1990 to 2025. By GIS and remote sensing analyst Kudzanai Chakavarika.",
   keywords:
     "land use land cover change Zimbabwe, LULC Bulawayo, Chiyadzwa diamond mine, Marange diamond fields, Mutare Ward 30 land cover, remote sensing Zimbabwe, Landsat classification Zimbabwe, urban agriculture Bulawayo, mine dump mapping, SEPAL Google Earth Engine, Cowdray Park, Mahatshula, Richmond, Bulawayo suburbs land cover, Kudzanai Chakavarika",
   canonical: `${SITE_URL}${PAGE_PATH}`,
@@ -123,13 +125,7 @@ const SEO = {
 };
 
 export default function LandUseLandCover() {
-  const [navScrolled, setNavScrolled] = useState(false);
 
-  useEffect(() => {
-    const fn = () => setNavScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", fn, { passive: true });
-    return () => window.removeEventListener("scroll", fn);
-  }, []);
 
   /* ── SEO: head tags ──
      Sets <title>, meta description/keywords/author, canonical link,
@@ -245,401 +241,244 @@ export default function LandUseLandCover() {
 
   return (
     <>
-      <style>{CSS}</style>
+      <SiteNav />
 
-      <header className={`pnav${navScrolled ? " pnav--scrolled" : ""}`}>
-        <a href="/" className="pnav__mark">KC<span>/</span>SPATIAL</a>
-        <Link to="/projects" className="pnav__back">← All Projects</Link>
-      </header>
-
-      {/* ── TITLE ── */}
       <section className="ptitle">
-        <span className="p-ref">Project · Land Use & Land Cover</span>
-        <h1>Land Use &amp; Land Cover Change</h1>
+        <h1>Land use and land cover change</h1>
         <p className="ptitle__subtitle">
-          A running set of LULC case studies across Zimbabwe - tracking how cultivation,
-          mining and settlement reshape the landscape over decades of satellite record.
+          Three case studies from Zimbabwe. Decades of satellite imagery show how farming and mining and
+          housing have reshaped the land.
         </p>
       </section>
 
-      {/* ── CASE NAV ── */}
-      <nav className="case-nav">
-        <a href="#case-bulawayo">Case I · Bulawayo Urban Cultivation</a>
-        <a href="#case-mutare">Case II · Chiyadzwa Diamond Mine, Mutare Ward 30</a>
-        <a href="#case-suburbs">Case III &middot; Bulawayo Suburbs, 1990&ndash;2025</a>
+      <nav className="case-nav" aria-label="Case studies">
+        <b>On this page</b>
+        <a href="#case-bulawayo">Urban farming in Bulawayo</a>
+        <a href="#case-mutare">Chiyadzwa diamond fields</a>
+        <a href="#case-suburbs">Three Bulawayo suburbs</a>
       </nav>
 
-      {/* ═══════════════════════════ CASE I — BULAWAYO ═══════════════════════════ */}
-
+      {/* Case I: Bulawayo */}
       <section className="case-divider" id="case-bulawayo">
-        <span className="p-ref">Case Study I</span>
-        <h2>Bulawayo — Urban Cultivation Expansion</h2>
+        <h2>Urban farming in Bulawayo</h2>
         <p>
-          A 38-year classification of Bulawayo's land cover, 1987 to 2025, tracking the
-          expansion of unregulated urban cultivation into grassland, woodland and
-          ecologically sensitive zones.
+          Bulawayo's land cover mapped four times between 1987 and 2025. Unregulated farming spread into
+          grassland and woodland and sensitive wetlands.
         </p>
       </section>
 
-      {/* ── STAT STRIP ── */}
-      <section className="stat-strip">
-        {BULAWAYO_STATS.map((s) => (
-          <div key={s.label} className="stat-strip__item">
-            <span className="stat-strip__value">{s.value}</span>
-            <span className="stat-strip__label">{s.label}</span>
-          </div>
-        ))}
-      </section>
+      <Stats items={BULAWAYO_STATS} />
 
-      {/* ── OVERVIEW ── */}
-      <section className="psection psection--paper">
-        <p className="section-tag">§ Overview</p>
-        <div className="proj-body">
-          <div className="proj-grid">
-            <div>
-              <h2 className="proj-h2">Study Area</h2>
-              <p className="proj-p">
-                Bulawayo lies in south-western Zimbabwe and covers approximately 546 km² of
-                semi-arid terrain, spanning high, medium and low-density suburbs, industrial
-                zones and open green corridors along streams and wetlands. As of the 2022
-                census the city holds close to 666,000 residents and rising food prices and
-                informal livelihoods have driven a steady expansion of unregulated farming
-                into these open spaces.
-              </p>
-            </div>
-            <div>
-              <h2 className="proj-h2">Method</h2>
-              <p className="proj-p">
-                Land cover was classified for four epochs - 1987, 2000, 2013 and 2025 — using
-                Landsat 5 (1987, 2000) and Landsat 8 (2013, 2025) Level-2 Collection 2 imagery,
-                processed in Google Earth Engine and the SEPAL platform. Dry-season scenes
-                with under 10% cloud cover were mosaicked to minimise vegetation greening
-                noise, then supervised-classified into seven land cover classes: water,
-                woodland, grassland, bare-land, built-up, dense vegetation and cultivation.
-              </p>
-            </div>
+      <section className="psection">
+        <div className="proj-grid">
+          <div>
+            <h3 className="proj-h2">Study area</h3>
+            <p className="proj-p">
+              Bulawayo lies in the southwest of Zimbabwe and covers about 546 km² of semi arid land. It
+              takes in high, medium and low density suburbs, industrial areas and open green strips along
+              streams and wetlands. The 2022 census counted close to 666,000 residents. Rising food prices
+              and informal work have pushed more and more farming into those open spaces.
+            </p>
           </div>
-        </div>
-      </section>
-
-      {/* ── MAP 1: 1987 STANDALONE ── */}
-      <section className="psection psection--paper">
-        <p className="section-tag">§ Fig 4.1 - Baseline Classification</p>
-        <div className="proj-body">
-          <div className="map-solo">
-            <MapFrame
-              year="1987"
-              src={BULAWAYO_MAPS["1987"]}
-              alt="Land use land cover map of Bulawayo, 1987"
-              solo
-            />
-            <p className="map-caption">
-              <strong>Fig 4.1</strong> - Land use / land cover map for 1987, Bulawayo. This
-              baseline predates the urban agriculture policy shifts of 2000 and captures the
-              city's land cover prior to major cultivation expansion.
+          <div>
+            <h3 className="proj-h2">Method</h3>
+            <p className="proj-p">
+              I classified land cover for 1987, 2000, 2013 and 2025 using Landsat 5 for the first two years
+              and Landsat 8 for the last two (Level 2, Collection 2). Processing ran in Google Earth Engine
+              and SEPAL. I used dry season scenes with less than 10% cloud so that seasonal greening would
+              not blur the classes. Each mosaic was sorted into seven classes: water, woodland, grassland,
+              bare land, built up, dense vegetation and cultivation.
             </p>
           </div>
         </div>
       </section>
 
-      {/* ── MAP 2-4: 2000 / 2013 / 2025 TRIPTYCH ── */}
-      <section className="psection psection--paper">
-        <p className="section-tag">§ Fig 4.2 — Post-Policy Change Series</p>
-        <div className="proj-body">
-          <div className="map-triptych">
+      <section className="psection">
+        <h3 className="sec-h">The 1987 baseline</h3>
+        <div className="fig-solo">
+          <Figure src={BULAWAYO_MAPS["1987"]} alt="Land use land cover map of Bulawayo, 1987" name="Figure 1.">
+            Land cover in Bulawayo in 1987. This is before the urban agriculture policy changes of 2000
+            and before farming started to spread.
+          </Figure>
+        </div>
+      </section>
+
+      <section className="psection">
+        <h3 className="sec-h">2000, 2013 and 2025</h3>
+        <div className="fig-three">
           {(["2000", "2013", "2025"] as const).map((yr) => (
-              <MapFrame
-                key={yr}
-                year={yr}
-                src={BULAWAYO_MAPS[yr]}
-                alt={`Land use land cover map of Bulawayo, ${yr}`}
-                solo={false}
-              />
-            ))}
-          </div>
-          <p className="map-caption">
-            <strong>Fig 4.2</strong> - Land use / land cover change maps for Bulawayo, 2000 to
-            2025. Cultivation grew from 13.8% of total land cover in 2000 to 20.1% in 2013
-            reaching 25% by 2025 - a 6-point jump in the 2000–2013 window alone.
-          </p>
+            <Figure key={yr} src={BULAWAYO_MAPS[yr]} alt={`Land use land cover map of Bulawayo, ${yr}`} name={yr} />
+          ))}
         </div>
-      </section>
-
-      {/* ── TABLE 4.1.0 ── */}
-      <section className="psection psection--paper">
-        <p className="section-tag">§ Table 4.1.0 — Land Cover Area by Class</p>
-        <div className="proj-body">
-          <LulcTable
-            columns={["1987 (ha)", "2000 (ha)", "2013 (ha)", "2025 (ha)"]}
-            rows={BULAWAYO_AREA_TABLE}
-          />
-          <p className="tbl-note">
-            Source: Dissertation Table 4.1.0. Cultivation (highlighted) rose from 6,031.9 ha in
-            1987 to 13,708.9 ha in 2025 - more than double - while woodland fell from 20,068.2
-            ha to 12,484.9 ha over the same period.
-          </p>
-        </div>
-      </section>
-
-      {/* ── TABLE 4.1.2 ── */}
-      <section className="psection psection--paper">
-        <p className="section-tag">§ Table 4.1.2 — Transitions to Cultivation (1987–2025)</p>
-        <div className="proj-body">
-          <div className="tbl-wrap">
-            <table className="dtable">
-              <thead>
-                <tr>
-                  <th>Class Conversion</th>
-                  <th>Area (ha)</th>
-                  <th>% of 2025 Cultivation</th>
-                </tr>
-              </thead>
-              <tbody>
-                {TRANSITION_TABLE.map((r) => (
-                  <tr key={r.conv} className={r.total ? "dtable__row--total" : ""}>
-                    <td className="dtable__label">{r.conv}</td>
-                    <td>{r.area}</td>
-                    <td>{r.pct}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="tbl-note">
-            Source: Dissertation Table 4.1.2. Grassland-to-cultivation conversion accounts for
-            the largest share of new farmland (30.49%) after stable cultivation itself; 52% of
-            land under cultivation in 1987 remained cultivated in 2025.
-          </p>
-        </div>
-      </section>
-
-      {/* ── TABLE 4.1.3 — ACCURACY ── */}
-      <section className="psection psection--paper">
-        <p className="section-tag">§ Table 4.1.3 - Accuracy Assessment</p>
-        <div className="proj-body">
-          <div className="tbl-wrap tbl-wrap--narrow">
-            <table className="dtable">
-              <thead>
-                <tr>
-                  <th>Assessed Metric</th>
-                  <th>2013 Classification</th>
-                  <th>2025 Classification</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ACCURACY_TABLE.map((r) => (
-                  <tr key={r.metric}>
-                    <td className="dtable__label">{r.metric}</td>
-                    <td>{r.y2013}</td>
-                    <td>{r.y2025}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="tbl-note">
-            Source: Dissertation Table 4.1.3. Both epochs exceed the 85% overall accuracy
-            threshold generally accepted for land cover classification, with 2025 achieving a
-            Kappa coefficient of 0.86.
-          </p>
-        </div>
-      </section>
-
-      {/* ═══════════════════════ CASE II — CHIYADZWA / MUTARE WARD 30 ═══════════════════════ */}
-
-      <section className="case-divider" id="case-mutare">
-        <span className="p-ref">Case Study II</span>
-        <h2>Chiyadzwa Diamond Mine - Mutare Ward 30</h2>
-        <p>
-          A 30-year classification of Ward 30, Mutare - home to the Chiyadzwa (Marange)
-          diamond fields - tracking the conversion of woodland, grassland and cultivated
-          land into mine dumps and bare ground as alluvial and formal diamond extraction
-          expanded across the ward.
+        <p className="map-caption">
+          <b>Figure 2.</b> Land cover in Bulawayo from 2000 to 2025. Cultivation grew from 13.8% of the
+          city in 2000 to 20.1% in 2013 and 25% by 2025. The biggest jump came between 2000 and 2013.
         </p>
       </section>
 
-      {/* ── STAT STRIP ── */}
-      <section className="stat-strip">
-        {MUTARE_STATS.map((s) => (
-          <div key={s.label} className="stat-strip__item">
-            <span className="stat-strip__value">{s.value}</span>
-            <span className="stat-strip__label">{s.label}</span>
-          </div>
-        ))}
+      <section className="psection">
+        <h3 className="sec-h">Area of each class</h3>
+        <LulcTable columns={["1987 (ha)", "2000 (ha)", "2013 (ha)", "2025 (ha)"]} rows={BULAWAYO_AREA_TABLE} />
+        <p className="tbl-note">
+          Cultivation (shaded) more than doubled from 6,031.9 ha in 1987 to 13,708.9 ha in 2025. Over the
+          same years woodland fell from 20,068.2 ha to 12,484.9 ha.
+        </p>
       </section>
 
-      {/* ── OVERVIEW ── */}
-      <section className="psection psection--paper">
-        <p className="section-tag">§ Overview</p>
-        <div className="proj-body">
-          <div className="proj-grid">
-            <div>
-              <h2 className="proj-h2">Study Area</h2>
-              <p className="proj-p">
-                Ward 30 sits within Mutare District, Manicaland Province and covers the
-                Chiyadzwa (Marange) diamond fields - one of Zimbabwe's largest alluvial
-                diamond deposits, worked informally in the mid-2000s before formal,
-                large-scale mining took hold. The ward is otherwise dominated by
-                communal woodland, grassland and cultivated land, with riparian
-                vegetation lining its drainage lines.
-              </p>
-            </div>
-            <div>
-              <h2 className="proj-h2">Method</h2>
-              <p className="proj-p">
-                Land cover was classified for four epochs - 1995, 2005, 2015 and 2025 - into
-                six classes: water, grassland, cultivation, riparian vegetation, woodland
-                and mine dump / bareland. The 1995 epoch serves as the pre-mining baseline,
-                against which the 2005 (early informal digging), 2015 (peak formal
-                operations) and 2025 (current) epochs are compared.
-              </p>
-            </div>
-          </div>
+      <section className="psection">
+        <h3 className="sec-h">Where the new farmland came from</h3>
+        <div className="tbl-wrap">
+          <table className="dtable">
+            <thead>
+              <tr>
+                <th>Change from 1987 to 2025</th>
+                <th>Area (ha)</th>
+                <th>Share of 2025 farmland</th>
+              </tr>
+            </thead>
+            <tbody>
+              {TRANSITION_TABLE.map((r) => (
+                <tr key={r.conv} className={r.total ? "dtable__row--total" : ""}>
+                  <td className="dtable__label">{r.conv}</td>
+                  <td className="dtable__num">{r.area}</td>
+                  <td>{r.pct}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+        <p className="tbl-note">
+          About half of the land farmed in 2025 was already farmed in 1987. Most of the rest was grassland,
+          which accounts for 30.5% of today's farmland.
+        </p>
       </section>
 
-      {/* ── MAP 1: 1995 STANDALONE ── */}
-      <section className="psection psection--paper">
-        <p className="section-tag">§ Fig 5.1 — Baseline Classification</p>
-        <div className="proj-body">
-          <div className="map-solo">
-            <MapFrame
-              year="1995"
-              src={MUTARE_MAPS["1995"]}
-              alt="Land use land cover map of Mutare Ward 30, 1995"
-              solo
-            />
-            <p className="map-caption">
-              <strong>Fig 5.1</strong> - Land use / land cover map for 1995, Mutare Ward 30.
-              This baseline predates informal diamond digging in Chiyadzwa and captures the
-              ward's land cover as almost entirely woodland and cultivation.
+      <section className="psection">
+        <h3 className="sec-h">Accuracy</h3>
+        <div className="tbl-wrap tbl-wrap--narrow">
+          <table className="dtable">
+            <thead>
+              <tr>
+                <th>Measure</th>
+                <th>2013</th>
+                <th>2025</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ACCURACY_TABLE.map((r) => (
+                <tr key={r.metric}>
+                  <td className="dtable__label">{r.metric}</td>
+                  <td>{r.y2013}</td>
+                  <td>{r.y2025}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="tbl-note">
+          Both years pass the 85% overall accuracy usually expected for land cover maps. The 2025 map has
+          a Kappa of 0.86.
+        </p>
+      </section>
+
+      {/* Case II: Chiyadzwa, Mutare Ward 30 */}
+      <section className="case-divider" id="case-mutare">
+        <h2>Chiyadzwa diamond fields in Mutare</h2>
+        <p>
+          Ward 30 in Mutare holds the Chiyadzwa (Marange) diamond fields. Mapped four times over 30 years
+          it shows woodland and farmland giving way to mine dumps and bare ground.
+        </p>
+      </section>
+
+      <Stats items={MUTARE_STATS} />
+
+      <section className="psection">
+        <div className="proj-grid">
+          <div>
+            <h3 className="proj-h2">Study area</h3>
+            <p className="proj-p">
+              Ward 30 is in Mutare District, Manicaland. Its diamond fields are among the largest alluvial
+              deposits in Zimbabwe. They were dug informally in the mid 2000s before large formal mines took
+              over. Outside the fields the ward is mostly communal woodland, grassland and farmland, with
+              riparian vegetation along its streams.
+            </p>
+          </div>
+          <div>
+            <h3 className="proj-h2">Method</h3>
+            <p className="proj-p">
+              I classified land cover for 1995, 2005, 2015 and 2025 into six classes: water, grassland,
+              cultivation, riparian vegetation, woodland and mine dumps with bare ground. 1995 is the
+              baseline before mining. 2005 shows the early informal digging, 2015 the height of formal
+              mining and 2025 the situation today.
             </p>
           </div>
         </div>
       </section>
 
-      {/* ── MAP 2-4: 2005 / 2015 / 2025 TRIPTYCH ── */}
-      <section className="psection psection--paper">
-        <p className="section-tag">§ Fig 5.2 — Mining Expansion Series</p>
-        <div className="proj-body">
-          <div className="map-triptych">
+      <section className="psection">
+        <h3 className="sec-h">The 1995 baseline</h3>
+        <div className="fig-solo">
+          <Figure src={MUTARE_MAPS["1995"]} alt="Land use land cover map of Mutare Ward 30, 1995" name="Figure 3.">
+            Land cover in Ward 30 in 1995, before informal diamond digging began. The ward is almost all
+            woodland and farmland.
+          </Figure>
+        </div>
+      </section>
+
+      <section className="psection">
+        <h3 className="sec-h">2005, 2015 and 2025</h3>
+        <div className="fig-three">
           {(["2005", "2015", "2025"] as const).map((yr) => (
-              <MapFrame
-                key={yr}
-                year={yr}
-                src={MUTARE_MAPS[yr]}
-                alt={`Land use land cover map of Mutare Ward 30, ${yr}`}
-                solo={false}
-              />
-            ))}
+            <Figure key={yr} src={MUTARE_MAPS[yr]} alt={`Land use land cover map of Mutare Ward 30, ${yr}`} name={yr} />
+          ))}
+        </div>
+        <p className="map-caption">
+          <b>Figure 4.</b> Land cover in Ward 30 from 2005 to 2025. Mine dumps and bare ground barely show
+          in 2005. They grew almost ninefold by 2015 as formal mining scaled up, then more than fourfold
+          again by 2025.
+        </p>
+      </section>
+
+      <section className="psection">
+        <h3 className="sec-h">Area of each class</h3>
+        <LulcTable columns={["1995 (ha)", "2005 (ha)", "2015 (ha)", "2025 (ha)"]} rows={MUTARE_AREA_TABLE} />
+        <p className="tbl-note">
+          Mine dumps and bare ground (shaded) grew about thirtyfold from 112.0 ha in 1995 to 3,413.6 ha in
+          2025. Woodland fell from 22,190.6 ha to 19,919.5 ha. Cultivation rose until 2015 and then
+          shrank, most likely because mining and resettlement took over farmland.
+        </p>
+      </section>
+
+      <section className="psection">
+        <h3 className="sec-h">What the numbers show</h3>
+        <div className="proj-grid">
+          <div>
+            <h3 className="proj-h2">Mine dumps spread fast</h3>
+            <p className="proj-p">
+              Mine dumps and bare ground covered only 0.28% of the ward in 1995 and 0.22% in 2005. Then they
+              took off, reaching 1.9% by 2015 and 8.4% by 2025 as formal mining spread across Chiyadzwa.
+              Most of that growth happened in the last ten years.
+            </p>
           </div>
-          <p className="map-caption">
-            <strong>Fig 5.2</strong> - Land use / land cover change maps for Mutare Ward 30,
-            2005 to 2025. Mine dump / bareland cover was negligible through 2005, then grew
-            nearly 9-fold between 2005 and 2015 as formal extraction scaled up, and more than
-            4-fold again between 2015 and 2025.
-          </p>
-        </div>
-      </section>
-
-      {/* ── AREA TABLE ── */}
-      <section className="psection psection--paper">
-        <p className="section-tag">§ Table 5.1 - Land Cover Area by Class</p>
-        <div className="proj-body">
-          <LulcTable
-            columns={["1995 (ha)", "2005 (ha)", "2015 (ha)", "2025 (ha)"]}
-            rows={MUTARE_AREA_TABLE}
-          />
-          <p className="tbl-note">
-            Mine dump / bareland (highlighted) grew from 111.995 ha in 1995 to 3,413.571 ha in
-            2025 - roughly a 30-fold increase - while woodland fell from 22,190.6 ha to
-            19,919.5 ha. Cultivation rose steadily through 2015 before contracting by 2025,
-            likely reflecting land taken up by mining and associated resettlement.
-          </p>
-        </div>
-      </section>
-
-      {/* ── READING THE TREND ── */}
-      <section className="psection psection--paper">
-        <p className="section-tag">§ Reading the Trend</p>
-        <div className="proj-body">
-          <div className="proj-grid">
-            <div>
-              <h2 className="proj-h2">Mine Dump Expansion</h2>
-              <p className="proj-p">
-                Mine dump / bareland cover was marginal through 2005 (0.28% → 0.22% of the
-                ward), then accelerated sharply - reaching 1.9% by 2015 and 8.4% by 2025 as
-                formal diamond mining operations scaled up across Chiyadzwa. The bulk of this
-                growth occurred in the most recent decade.
-              </p>
-            </div>
-            <div>
-              <h2 className="proj-h2">Cultivation Reversal</h2>
-              <p className="proj-p">
-                Cultivation expanded from 31.7% of the ward in 1995 to a peak of exactly 40.0%
-                in 2015, then dropped to 29.0% by 2025 - a loss of roughly 4,432 ha from its
-                peak, consistent with farmland being displaced by mine dumps, tailings and
-                associated infrastructure.
-              </p>
-            </div>
+          <div>
+            <h3 className="proj-h2">Farming went up, then down</h3>
+            <p className="proj-p">
+              Cultivation grew from 31.7% of the ward in 1995 to a peak of 40.0% in 2015. By 2025 it had
+              dropped to 29.0%, a loss of about 4,432 ha. That fits with farmland being taken over by mine
+              dumps, tailings and mine infrastructure.
+            </p>
           </div>
         </div>
       </section>
 
       <SuburbCase />
 
-      <footer className="pfooter">
-        <span>© 2026 Kudzanai Chakavarika</span>
-        <a href="/">spatialforce.co.zw</a>
-      </footer>
+      <ProjectContact>
+        If you need the full classification data or a similar study for your area, send me an email.
+      </ProjectContact>
+
+      <SiteFooter />
     </>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   MapFrame — shared map display block for both case studies.
-   Renders the real image with a "View full map" link when a src
-   is supplied, otherwise falls back to a placeholder panel.
-═══════════════════════════════════════════════════════════════ */
-type MapFrameProps = {
-  year: string;
-  src?: string;
-  alt: string;
-  solo?: boolean;
-};
-
-function MapFrame({ year, src, alt, solo = false }: MapFrameProps) {
-  return (
-    <div className={`map-card${solo ? " map-card--solo" : ""}`}>
-      <div className="map-card__head">
-        <span className="map-card__year">{year}</span>
-      </div>
-
-      <div className="map-frame">
-        {src ? (
-          <img src={src} alt={alt} className="map-img" />
-        ) : (
-          <div className="map-ph">
-            <span className="map-ph__note">Map coming soon</span>
-          </div>
-        )}
-      </div>
-
-      <div className="map-card__foot">
-        {src ? (
-          <a
-            className="map-view"
-            href={src}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View full map ↗
-          </a>
-        ) : (
-          <span className="map-view map-view--disabled">Awaiting upload</span>
-        )}
-      </div>
-    </div>
   );
 }
 
@@ -666,7 +505,7 @@ function LulcTable({ columns, rows }: LulcTableProps) {
       <table className="dtable">
         <thead>
           <tr>
-            <th>LULC Class</th>
+            <th>Class</th>
             {columns.map((c) => (
               <th key={c}>{c}</th>
             ))}
@@ -676,10 +515,10 @@ function LulcTable({ columns, rows }: LulcTableProps) {
           {rows.map((r) => (
             <tr key={r.cls} className={r.highlight ? "dtable__row--hl" : ""}>
               <td className="dtable__label">{r.cls}</td>
-              <td>{r.y1.toLocaleString(undefined, { minimumFractionDigits: 3 })}</td>
-              <td>{r.y2.toLocaleString(undefined, { minimumFractionDigits: 3 })}</td>
-              <td>{r.y3.toLocaleString(undefined, { minimumFractionDigits: 3 })}</td>
-              <td>{r.y4.toLocaleString(undefined, { minimumFractionDigits: 3 })}</td>
+              <td className="dtable__num">{r.y1.toLocaleString(undefined, { minimumFractionDigits: 3 })}</td>
+              <td className="dtable__num">{r.y2.toLocaleString(undefined, { minimumFractionDigits: 3 })}</td>
+              <td className="dtable__num">{r.y3.toLocaleString(undefined, { minimumFractionDigits: 3 })}</td>
+              <td className="dtable__num">{r.y4.toLocaleString(undefined, { minimumFractionDigits: 3 })}</td>
             </tr>
           ))}
         </tbody>
@@ -691,216 +530,6 @@ function LulcTable({ columns, rows }: LulcTableProps) {
 /* ═══════════════════════════════════════════════════════════════
    CSS
 ═══════════════════════════════════════════════════════════════ */
-const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-
-:root {
-  --paper:  #EFEAE0;
-  --paper2: #E4DECE;
-  --ink:    #201D18;
-  --night:  #191B15;
-  --rust:   #B1502A;
-  --rust-d: #8C3E20;
-  --brass:  #C89B4A;
-  --cream:  #F7F3E9;
-  --line:   rgba(32,29,24,0.13);
-  --linew:  rgba(247,243,233,0.13);
-  --fd: 'Big Shoulders Display', sans-serif;
-  --fb: 'IBM Plex Sans', sans-serif;
-  --fm: 'IBM Plex Mono', monospace;
-}
-
-html, body, #root { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; text-align: initial !important; background: var(--night); }
-body { font-family: var(--fb); color: var(--ink); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-
-.section-tag { font-family: var(--fm); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; color: var(--rust); padding: 1.8rem 4vw 1.1rem; text-transform: uppercase; }
-.p-ref { font-family: var(--fm); font-size: 0.74rem; color: var(--brass); letter-spacing: 0.06em; }
-
-/* ── NAV ── */
-.pnav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1.4rem 4vw; background: linear-gradient(rgba(25,27,21,0.9), transparent); transition: background 0.3s, padding 0.3s; }
-.pnav--scrolled { background: rgba(25,27,21,0.97); padding: 1rem 4vw; border-bottom: 1px solid var(--linew); }
-.pnav__mark { font-family: var(--fm); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.04em; color: var(--cream); text-decoration: none; }
-.pnav__mark span { color: var(--rust); }
-.pnav__back { font-family: var(--fm); font-size: 0.74rem; color: rgba(247,243,233,0.6); text-decoration: none; transition: color 0.2s; }
-.pnav__back:hover { color: var(--brass); }
-
-/* ── TITLE ── */
-.ptitle { background: var(--night); padding: 6.4rem 4vw 2rem; }
-.ptitle h1 {
-  font-family: var(--fd); font-weight: 800; text-transform: uppercase;
-  font-size: clamp(1.8rem, 3.6vw, 2.7rem); line-height: 1.06; letter-spacing: -0.01em;
-  color: var(--cream); margin: 0.5rem 0 0.9rem; max-width: 26ch;
-}
-.ptitle__subtitle { font-size: 0.98rem; font-weight: 300; color: rgba(247,243,233,0.62); max-width: 62ch; line-height: 1.6; }
-
-/* ── CASE NAV ── */
-.case-nav {
-  background: var(--night); display: flex; flex-wrap: wrap; gap: 0.7rem;
-  padding: 0 4vw 2rem; border-bottom: 1px solid var(--linew);
-}
-.case-nav a {
-  font-family: var(--fm); font-size: 0.72rem; letter-spacing: 0.02em; text-decoration: none;
-  color: var(--cream); background: rgba(247,243,233,0.06); border: 1px solid var(--linew);
-  padding: 0.55rem 1rem; border-radius: 999px; transition: background 0.2s, border-color 0.2s, color 0.2s;
-}
-.case-nav a:hover { background: rgba(177,80,42,0.18); border-color: var(--rust); color: var(--cream); }
-
-/* ── CASE DIVIDER ── */
-.case-divider {
-  background: var(--night); padding: 3.4rem 4vw 2.2rem; border-top: 3px solid var(--rust);
-}
-.case-divider h2 {
-  font-family: var(--fd); font-weight: 800; text-transform: uppercase;
-  font-size: clamp(1.5rem, 3vw, 2.15rem); line-height: 1.08; color: var(--cream);
-  margin: 0.5rem 0 0.8rem; max-width: 30ch;
-}
-.case-divider p { font-size: 0.92rem; font-weight: 300; line-height: 1.65; color: rgba(247,243,233,0.6); max-width: 66ch; }
-
-/* ── STAT STRIP ── */
-.stat-strip {
-  background: var(--night); display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 1px; background-color: var(--linew); border-bottom: 1px solid var(--linew);
-}
-.stat-strip__item { background: var(--night); padding: 1.6rem 1.4rem; display: flex; flex-direction: column; gap: 0.35rem; }
-.stat-strip__value { font-family: var(--fd); font-weight: 800; font-size: clamp(1.4rem, 2.4vw, 2.1rem); color: var(--rust); line-height: 1; }
-.stat-strip__label { font-family: var(--fm); font-size: 0.66rem; color: rgba(247,243,233,0.55); letter-spacing: 0.02em; line-height: 1.4; }
-
-/* ── SECTIONS ── */
-.psection { background: var(--night); padding-bottom: 0.5rem; }
-.psection--paper { background: var(--paper); }
-.psection--paper .section-tag { color: var(--rust); }
-.proj-body { padding: 0 4vw 3rem; }
-
-.proj-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.4rem; }
-.proj-h2 { font-family: var(--fd); font-weight: 700; text-transform: uppercase; font-size: 1.15rem; color: var(--ink); margin-bottom: 0.7rem; letter-spacing: 0.01em; }
-.proj-p { font-size: 0.9rem; line-height: 1.75; color: #4A463C; max-width: 56ch; }
-
-/* ── MAP CARDS — year sits in its own header strip, the map fills a
-   fixed-height contain-fit window in the middle, and "View full map"
-   sits in its own footer strip. Nothing is ever overlaid on top of
-   the map image itself, so labels never collide with map content. ── */
-.map-solo { display: flex; flex-direction: column; gap: 1rem; }
-.map-card {
-  display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 3px;
-  overflow: hidden; background: var(--cream); box-shadow: 0 8px 20px rgba(32,29,24,0.08);
-}
-.map-card--solo { max-width: 640px; }
-.map-card__head {
-  display: flex; align-items: center; padding: 0.6rem 0.9rem; background: var(--night);
-}
-.map-card__year {
-  font-family: var(--fd); font-weight: 800; font-size: 1rem; letter-spacing: 0.03em;
-  color: var(--cream); text-transform: uppercase;
-}
-.map-frame {
-  position: relative; background: var(--cream); overflow: hidden;
-  display: flex; align-items: center; justify-content: center; height: 400px;
-}
-/* Solo maps (e.g. the single baseline year) hug the image's own aspect
-   ratio instead of being forced into a fixed box — this is what stops
-   empty side gaps from appearing when the map is wider than it is tall. */
-.map-card--solo .map-frame {
-  height: auto; display: block;
-}
-.map-card--solo .map-img {
-  width: 100%; height: auto; max-height: none;
-}
-.map-triptych { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-bottom: 1rem; align-items: start; }
-.map-img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
-.map-card__foot {
-  display: flex; align-items: center; justify-content: flex-end; padding: 0.6rem 0.9rem;
-  background: var(--paper2); border-top: 1px solid var(--line);
-}
-.map-view {
-  font-family: var(--fm); font-size: 0.62rem; letter-spacing: 0.03em; background: var(--rust);
-  color: var(--cream); text-decoration: none; padding: 0.4rem 0.75rem; border-radius: 2px;
-  text-transform: uppercase; transition: background 0.2s;
-}
-.map-view:hover { background: var(--rust-d); }
-.map-view--disabled { background: transparent; color: rgba(140,62,32,0.5); border: 1px dashed rgba(177,80,42,0.4); }
-.map-caption { font-size: 0.84rem; line-height: 1.65; color: #4A463C; max-width: 72ch; }
-.map-caption strong { color: var(--rust-d); font-family: var(--fm); font-weight: 600; }
-
-/* ── MAP PLACEHOLDER (used until real imagery is supplied) ── */
-.map-ph {
-  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
-  background:
-    repeating-linear-gradient(45deg, rgba(177,80,42,0.06) 0, rgba(177,80,42,0.06) 2px, transparent 2px, transparent 14px),
-    var(--cream);
-  border: 1px dashed rgba(177,80,42,0.35);
-}
-.map-ph__note { font-family: var(--fm); font-size: 0.68rem; color: rgba(140,62,32,0.6); text-transform: uppercase; letter-spacing: 0.05em; }
-
-/* ── TABLES ── */
-.tbl-wrap { overflow-x: auto; margin-bottom: 1rem; border: 1px solid var(--line); border-radius: 3px; background: var(--cream); }
-.tbl-wrap--narrow { max-width: 640px; }
-.dtable { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 480px; }
-.dtable thead th {
-  font-family: var(--fm); font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.05em;
-  text-align: left; color: var(--cream); background: var(--night); padding: 0.75rem 1rem;
-}
-.dtable thead th:first-child { border-top-left-radius: 2px; }
-.dtable tbody td { padding: 0.65rem 1rem; border-top: 1px solid var(--line); color: #3A3630; }
-.dtable__label { font-weight: 500; color: var(--ink); }
-.dtable__row--hl { background: rgba(177,80,42,0.08); }
-.dtable__row--hl .dtable__label { color: var(--rust-d); font-weight: 600; }
-.dtable__row--total td { border-top: 2px solid var(--rust); font-weight: 600; color: var(--ink); }
-.tbl-note { font-size: 0.78rem; line-height: 1.6; color: #6b665a; max-width: 72ch; }
-
-.pfooter { background: var(--night); padding: 1.4rem 4vw; display: flex; align-items: center; justify-content: space-between; font-family: var(--fm); font-size: 0.66rem; color: rgba(247,243,233,0.4); }
-.pfooter a { color: rgba(247,243,233,0.4); text-decoration: none; }
-
-/* -- CASE III: suburb layouts (three-maps-in-one) -- */
-.map-card--wide { max-width: 980px; }
-.map-card--wide .map-frame { padding: 1.6rem 1.8rem; }
-.map-card--wide .map-img { width: 100%; height: auto; max-height: 560px; object-fit: contain; }
-.map-card--wide .map-card__head { justify-content: space-between; gap: 1rem; }
-.map-card__epochs { font-family: var(--fm); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--brass); text-transform: uppercase; }
-.sub-read { margin: 1.1rem 0 1.4rem; }
-.dtable__num { white-space: nowrap; }
-.dtable__pct { color: #6b665a; font-size: 0.76rem; margin-left: 0.35rem; }
-.dtable__row--hl .dtable__pct { color: var(--rust-d); }
-.cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.2rem; margin-bottom: 1rem; }
-.cmp__col { background: var(--cream); border: 1px solid var(--line); border-radius: 3px; padding: 1rem 1.1rem 1.1rem; }
-.cmp__col--all { border-color: var(--rust); }
-.cmp__name { font-family: var(--fd); font-weight: 800; font-size: 1rem; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ink); margin-bottom: 0.4rem; }
-.cmp__row { display: grid; grid-template-columns: 2.4rem 1fr 3.3rem; align-items: center; gap: 0.6rem; margin-top: 0.6rem; font-family: var(--fm); font-size: 0.7rem; color: #3A3630; }
-.cmp__track { height: 10px; background: rgba(32,29,24,0.08); border-radius: 2px; overflow: hidden; }
-.cmp__bar { height: 100%; background: var(--rust); }
-.cmp__val { text-align: right; font-weight: 600; color: var(--rust-d); }
-@media (max-width: 640px) {
-  .map-card--wide .map-frame { overflow-x: auto; }
-  .map-card--wide .map-img { width: auto; min-width: 600px; max-width: none; max-height: none; }
-  .map-card--wide .map-frame { padding: 0.8rem; }
-}
-
-/* ══════════════════ TABLET ≤ 1024px ══════════════════ */
-@media (max-width: 1024px) {
-  .proj-grid { grid-template-columns: 1fr; gap: 1.6rem; }
-  .stat-strip { grid-template-columns: repeat(2, 1fr); }
-  .map-frame { height: 320px; }
-}
-
-/* ══════════════════ MOBILE ≤ 640px ══════════════════ */
-@media (max-width: 640px) {
-  .pnav { padding: 1rem 6vw; }
-  .ptitle { padding: 5.6rem 6vw 1.6rem; }
-  .ptitle h1 { font-size: clamp(1.5rem, 6.5vw, 2rem); max-width: none; }
-  .case-nav { padding: 0 6vw 1.6rem; }
-  .case-divider { padding: 2.4rem 6vw 1.8rem; }
-  .section-tag { padding: 1.4rem 6vw 1rem; }
-  .proj-body { padding: 0 6vw 2rem; }
-  .stat-strip { grid-template-columns: repeat(2, 1fr); }
-  .stat-strip__item { padding: 1.2rem 1rem; }
-  .map-triptych { grid-template-columns: 1fr; }
-  .map-frame { height: 280px; }
-  .map-card--solo { max-width: none; }
-  .pfooter { flex-direction: column; gap: 0.5rem; text-align: center; }
-}
-`;
 
 /* ═══════════════════════════════════════════════════════════════
    CASE III — BULAWAYO SUBURBS: COWDRAY PARK / MAHATSHULA / RICHMOND
@@ -926,10 +555,10 @@ type Suburb = {
 const SUBURB_EPOCHS = ["1990", "2008", "2025"];
 
 const SUBURB_STATS = [
-  { value: "4.5x", label: "Growth in built-up area across the three suburbs, 1990-2025" },
-  { value: "52%", label: "Share of the three suburbs built-up by 2025 (11.7% in 1990)" },
-  { value: "16x", label: "Built-up growth in Mahatshula, the fastest of the three" },
-  { value: "-793 ha", label: "Grassland lost across the three suburbs since 1990" },
+  { value: "4.5×", label: "Growth in built up area across the three suburbs since 1990" },
+  { value: "52%", label: "Of the three suburbs built up by 2025, up from 11.7% in 1990" },
+  { value: "16×", label: "Growth in built up area in Mahatshula, the fastest of the three" },
+  { value: "793 ha", label: "Of grassland lost across the three suburbs since 1990" },
 ];
 
 const SUBURBS: Suburb[] = [
@@ -941,14 +570,14 @@ const SUBURBS: Suburb[] = [
     fig: "Fig 6.1",
     tbl: "Table 6.1",
     caption:
-      "Land use / land cover maps for Cowdray Park in 1990, 2008 and 2025, shown side by side in a single layout.",
+      "Land cover in Cowdray Park in 1990, 2008 and 2025.",
     reading:
-      "Cowdray Park is the largest of the three (about 1,593 ha) and shows the heaviest absolute conversion. Built-up land grew almost four-fold, from 226.5 ha (14.2%) to 890.5 ha (55.9%), and overtook grassland as the dominant class between 1990 and 2008. Growth was fastest in the first 18 years, at roughly 26.7 ha a year, and eased to about 10.8 ha a year after 2008 as undeveloped land ran down. Grassland fell by 468.9 ha and woodland by 195.1 ha - each roughly halving.",
-    note: "Mapped area is constant at 1,593.36 ha across all three epochs. Built-up (highlighted) is the only class that grew.",
+      "Cowdray Park is the largest of the three at about 1,593 ha and has seen the most land converted. Built up land grew almost fourfold from 226.5 ha (14.2%) to 890.5 ha (55.9%). It overtook grassland as the main class between 1990 and 2008. Building was fastest in those first 18 years at about 26.7 ha a year. After 2008 it slowed to about 10.8 ha a year as open land ran out. Grassland fell by 468.9 ha and woodland by 195.1 ha, so both roughly halved.",
+    note: "The mapped area is 1,593.36 ha in all three years. Built up land (shaded) is the only class that grew.",
     rows: [
       { cls: "Woodland", ha: [388.22, 240.63, 193.16], pct: [24.36, 15.1, 12.12] },
       { cls: "Grassland", ha: [978.65, 646.45, 509.74], pct: [61.42, 40.57, 31.99] },
-      { cls: "Built-up", ha: [226.49, 706.28, 890.46], pct: [14.21, 44.33, 55.89], highlight: true },
+      { cls: "Built up", ha: [226.49, 706.28, 890.46], pct: [14.21, 44.33, 55.89], highlight: true },
     ],
   },
   {
@@ -959,14 +588,14 @@ const SUBURBS: Suburb[] = [
     fig: "Fig 6.2",
     tbl: "Table 6.2",
     caption:
-      "Land use / land cover maps for Mahatshula in 1990, 2008 and 2025, shown side by side in a single layout.",
+      "Land cover in Mahatshula in 1990, 2008 and 2025.",
     reading:
-      "Mahatshula started from an almost undeveloped baseline (3.0% built-up in 1990) and shows the sharpest relative change of the three: built-up land grew about 16-fold to 320.5 ha (47.7%) by 2025. Unlike Cowdray Park the pace picked up rather than eased - roughly 7.3 ha a year to 2008, then 10.0 ha a year after. Grassland collapsed from 400.7 ha to 131.1 ha (-67%). Woodland rose to 323.4 ha in 2008 before falling back to 220.1 ha, so the post-2008 build-up came out of tree cover as well as open grassland.",
-    note: "Mapped area is 671.2 / 671.5 / 671.7 ha across the three epochs. Built-up (highlighted) rose from 19.9 ha to 320.5 ha.",
+      "Mahatshula was almost empty in 1990, with only 3.0% built up. It has changed the most of the three. Built up land grew about sixteenfold to 320.5 ha (47.7%) by 2025. Unlike Cowdray Park the pace picked up over time, from about 7.3 ha a year before 2008 to 10.0 ha a year after. Grassland shrank from 400.7 ha to 131.1 ha, a loss of 67%. Woodland grew to 323.4 ha in 2008 and then fell back to 220.1 ha. So the building after 2008 took trees as well as open grassland.",
+    note: "The mapped area is 671.2 ha, 671.5 ha and 671.7 ha in the three years. Built up land (shaded) rose from 19.9 ha to 320.5 ha.",
     rows: [
       { cls: "Woodland", ha: [250.55, 323.35, 220.11], pct: [37.33, 48.15, 32.77] },
       { cls: "Grassland", ha: [400.69, 197.66, 131.07], pct: [59.7, 29.44, 19.51] },
-      { cls: "Built-up", ha: [19.91, 150.48, 320.54], pct: [2.97, 22.41, 47.72], highlight: true },
+      { cls: "Built up", ha: [19.91, 150.48, 320.54], pct: [2.97, 22.41, 47.72], highlight: true },
     ],
   },
   {
@@ -977,14 +606,14 @@ const SUBURBS: Suburb[] = [
     fig: "Fig 6.3",
     tbl: "Table 6.3",
     caption:
-      "Land use / land cover maps for Richmond in 1990, 2008 and 2025, shown side by side in a single layout.",
+      "Land cover in Richmond in 1990, 2008 and 2025.",
     reading:
-      "Richmond is the smallest suburb (about 282 ha). Built-up land more than doubled, from 50.9 ha (18.1%) to 115.1 ha (41.0%), at a steady 1.6 ha a year to 2008 and 2.1 ha a year after. It is the only suburb where grassland recovered slightly after 2008 (68.2 ha to 76.5 ha), so the post-2008 growth came mainly at the expense of woodland, which dropped from 133.8 ha to 88.8 ha.",
-    note: "Mapped area is 282.19 ha in 1990 and 2008 but 280.35 ha in 2025, so 2025 shares are of a slightly smaller footprint. Built-up is highlighted.",
+      "Richmond is the smallest suburb at about 282 ha. Built up land more than doubled from 50.9 ha (18.1%) to 115.1 ha (41.0%). It grew at a steady 1.6 ha a year to 2008 and 2.1 ha a year after. Richmond is the only suburb where grassland came back a little after 2008, from 68.2 ha to 76.5 ha. The newer building mostly replaced woodland, which dropped from 133.8 ha to 88.8 ha.",
+    note: "The mapped area is 282.19 ha in 1990 and 2008 but 280.35 ha in 2025, so the 2025 shares are of a slightly smaller area. Built up land is shaded.",
     rows: [
       { cls: "Woodland", ha: [100.0, 133.79, 88.83], pct: [35.44, 47.41, 31.68] },
       { cls: "Grassland", ha: [131.26, 68.15, 76.47], pct: [46.52, 24.15, 27.28] },
-      { cls: "Built-up", ha: [50.93, 80.25, 115.05], pct: [18.05, 28.44, 41.04], highlight: true },
+      { cls: "Built up", ha: [50.93, 80.25, 115.05], pct: [18.05, 28.44, 41.04], highlight: true },
     ],
   },
 ];
@@ -994,47 +623,17 @@ const fmtHa = (n: number) =>
 
 const fmtDelta = (n: number) => (n > 0 ? "+" : "") + fmtHa(n);
 
-/* One image that already holds all three epoch maps - rendered wide, no per-year header. */
-function TripleMapFrame({ name, src, alt }: { name: string; src?: string; alt: string }) {
-  return (
-    <div className="map-card map-card--solo map-card--wide">
-      <div className="map-card__head">
-        <span className="map-card__year">{name}</span>
-        <span className="map-card__epochs">{SUBURB_EPOCHS.join(" \u00B7 ")}</span>
-      </div>
-      <div className="map-frame">
-        {src ? (
-          <img src={src} alt={alt} className="map-img" />
-        ) : (
-          <div className="map-ph">
-            <span className="map-ph__note">Map coming soon</span>
-          </div>
-        )}
-      </div>
-      <div className="map-card__foot">
-        {src ? (
-          <a className="map-view" href={src} target="_blank" rel="noopener noreferrer">
-            View full map &#8599;
-          </a>
-        ) : (
-          <span className="map-view map-view--disabled">Awaiting upload</span>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function SuburbTable({ rows }: { rows: SuburbRow[] }) {
   return (
     <div className="tbl-wrap">
       <table className="dtable">
         <thead>
           <tr>
-            <th>LULC Class</th>
+            <th>Class</th>
             {SUBURB_EPOCHS.map((y) => (
-              <th key={y}>{y} (ha, %)</th>
+              <th key={y}>{y} (ha)</th>
             ))}
-            <th>Net change 1990-2025 (ha)</th>
+            <th>Change since 1990 (ha)</th>
           </tr>
         </thead>
         <tbody>
@@ -1067,7 +666,7 @@ function SuburbCase() {
       shares: [0, 1, 2].map((i) => (built(s, i) / total(s, i)) * 100),
     })),
     {
-      name: "All three combined",
+      name: "All three together",
       all: true,
       shares: [0, 1, 2].map(
         (i) =>
@@ -1081,97 +680,72 @@ function SuburbCase() {
   return (
     <>
       <section className="case-divider" id="case-suburbs">
-        <span className="p-ref">Case Study III</span>
-        <h2>Bulawayo Suburbs - Cowdray Park, Mahatshula &amp; Richmond</h2>
+        <h2>Three Bulawayo suburbs</h2>
         <p>
-          A suburb-scale look at three Bulawayo neighbourhoods across 1990, 2008 and 2025 -
-          showing how built-up land has taken over grassland and woodland, and how differently
-          that conversion has played out from one suburb to the next.
+          Cowdray Park and Mahatshula and Richmond in 1990 and 2008 and 2025. Houses replaced grassland and
+          woodland in each suburb in a different way.
         </p>
       </section>
 
-      <section className="stat-strip">
-        {SUBURB_STATS.map((s) => (
-          <div key={s.label} className="stat-strip__item">
-            <span className="stat-strip__value">{s.value}</span>
-            <span className="stat-strip__label">{s.label}</span>
-          </div>
-        ))}
-      </section>
+      <Stats items={SUBURB_STATS} />
 
-      <section className="psection psection--paper">
-        <p className="section-tag">&sect; Overview</p>
-        <div className="proj-body">
-          <div className="proj-grid">
-            <div>
-              <h2 className="proj-h2">Study Area</h2>
-              <p className="proj-p">
-                Three Bulawayo suburbs - Cowdray Park (about 1,593 ha), Mahatshula (about 672
-                ha) and Richmond (about 282 ha) - covering roughly 2,545 ha between them.
-                Mapping at suburb scale shows how the citywide trend in Case I plays out on the
-                ground, and how quickly open land is being converted in each place.
-              </p>
-            </div>
-            <div>
-              <h2 className="proj-h2">Method</h2>
-              <p className="proj-p">
-                Each suburb was classified for three epochs - 1990, 2008 and 2025 - into three
-                classes: woodland, grassland and built-up. Areas are reported in hectares from
-                pixel counts, alongside each class&apos;s share of the suburb&apos;s mapped area.
-                Unlike Case I there is no separate cultivation class, and each suburb&apos;s three
-                epochs are presented as a single side-by-side map layout.
-              </p>
-            </div>
+      <section className="psection">
+        <div className="proj-grid">
+          <div>
+            <h3 className="proj-h2">Study area</h3>
+            <p className="proj-p">
+              Cowdray Park (about 1,593 ha), Mahatshula (about 672 ha) and Richmond (about 282 ha) cover
+              roughly 2,545 ha together. Mapping at this scale shows how the citywide trend in the first case
+              study looks on the ground and how quickly open land is being built on in each place.
+            </p>
+          </div>
+          <div>
+            <h3 className="proj-h2">Method</h3>
+            <p className="proj-p">
+              Each suburb was classified for 1990, 2008 and 2025 into three classes: woodland, grassland and
+              built up. Areas are in hectares from pixel counts, next to each class's share of the suburb.
+              There is no separate cultivation class here. Each suburb's three years are shown together in
+              one map layout.
+            </p>
           </div>
         </div>
       </section>
 
-      {SUBURBS.map((s) => (
-        <section key={s.id} className="psection psection--paper" id={`suburb-${s.id}`}>
-          <p className="section-tag">
-            &sect; {s.fig} &mdash; {s.name}, 1990 &middot; 2008 &middot; 2025
-          </p>
-          <div className="proj-body">
-            <TripleMapFrame name={s.name} src={s.src} alt={s.alt} />
-            <p className="map-caption" style={{ marginTop: "1rem" }}>
-              <strong>{s.fig}</strong> - {s.caption}
-            </p>
-            <p className="map-caption sub-read">{s.reading}</p>
-            <p className="section-tag" style={{ padding: "0.4rem 0 0.9rem" }}>
-              &sect; {s.tbl} &mdash; {s.name} Land Cover Area by Class
-            </p>
-            <SuburbTable rows={s.rows} />
-            <p className="tbl-note">{s.note}</p>
-          </div>
+      {SUBURBS.map((s, n) => (
+        <section key={s.id} className="psection" id={`suburb-${s.id}`}>
+          <h3 className="sec-h">{s.name}</h3>
+          {s.src && (
+            <Figure src={s.src} alt={s.alt} name={`Figure ${5 + n}.`}>{s.caption}</Figure>
+          )}
+          <p className="proj-p" style={{ marginTop: 18 }}>{s.reading}</p>
+          <SuburbTable rows={s.rows} />
+          <p className="tbl-note">{s.note}</p>
         </section>
       ))}
 
-      <section className="psection psection--paper">
-        <p className="section-tag">&sect; Table 6.4 &mdash; Built-up Share of Each Suburb</p>
-        <div className="proj-body">
-          <div className="cmp">
-            {compare.map((c) => (
-              <div key={c.name} className={`cmp__col${c.all ? " cmp__col--all" : ""}`}>
-                <h3 className="cmp__name">{c.name}</h3>
-                {c.shares.map((v, i) => (
-                  <div key={SUBURB_EPOCHS[i]} className="cmp__row">
-                    <span>{SUBURB_EPOCHS[i]}</span>
-                    <div className="cmp__track">
-                      <div className="cmp__bar" style={{ width: `${v}%` }} />
-                    </div>
-                    <span className="cmp__val">{v.toFixed(1)}%</span>
+      <section className="psection">
+        <h3 className="sec-h">Share of each suburb that is built up</h3>
+        <div className="cmp">
+          {compare.map((c) => (
+            <div key={c.name} className={`cmp__col${c.all ? " cmp__col--all" : ""}`}>
+              <h4 className="cmp__name">{c.name}</h4>
+              {c.shares.map((v, i) => (
+                <div key={SUBURB_EPOCHS[i]} className="cmp__row">
+                  <span>{SUBURB_EPOCHS[i]}</span>
+                  <div className="cmp__track">
+                    <div className="cmp__bar" style={{ width: `${v}%` }} />
                   </div>
-                ))}
-              </div>
-            ))}
-          </div>
-          <p className="tbl-note">
-            Built-up land as a share of each suburb&apos;s mapped area. Mahatshula started lowest
-            (3.0%) and caught up fastest, reaching 47.7% by 2025, while Cowdray Park remains the
-            most built-up at 55.9%. Figures are net change between epochs, so they show how much
-            land ended up built-up, not which class each new built-up pixel came from.
-          </p>
+                  <span className="cmp__val">{v.toFixed(1)}%</span>
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
+        <p className="tbl-note">
+          Mahatshula started lowest at 3.0% and caught up fastest, reaching 47.7% by 2025. Cowdray Park is
+          still the most built up at 55.9%. These are net figures, so they show how much land ended up built
+          up but not what each new built up pixel used to be.
+        </p>
       </section>
     </>
   );

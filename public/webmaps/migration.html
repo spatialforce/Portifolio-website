@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en" class="gis">
+<head>
+<meta charset="utf-8">
+<title>Migration Atlas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  #stage { background:#07101f; }
+  #view { position:absolute; inset:0; transform-origin:50% 72%; transition:transform 1.2s ease; }
+  #view.tilt { transform:perspective(1100px) rotateX(40deg) scale(1.32);
+    -webkit-mask-image:linear-gradient(to bottom, transparent 0%, #000 22%); mask-image:linear-gradient(to bottom, transparent 0%, #000 22%); }
+  @media (prefers-reduced-motion: reduce) { #view { transition:none; } }
+  #view canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+  #hit { position:absolute; inset:0; touch-action:none; cursor:grab; }
+  #hit.drag { cursor:grabbing; }
+  #month { left:56px; top:12px; }
+  #track { position:relative; flex:1; height:34px; touch-action:none; cursor:pointer; }
+  #rail { position:absolute; left:0; right:0; top:2px; height:14px; border:1px solid var(--gis-line); background:var(--gis-bg2); }
+  #rail i { position:absolute; top:0; bottom:0; width:1px; background:var(--gis-line); }
+  #knob { position:absolute; top:0; width:8px; height:18px; margin-left:-4px; background:var(--gis-on); }
+  #months { position:absolute; left:0; right:0; bottom:0; height:14px; font-size:var(--gis-t-meta); color:var(--gis-fg2); }
+  #months span { position:absolute; transform:translateX(-50%); }
+  #photo { display:block; width:100%; height:130px; object-fit:cover; margin-top:10px; border:1px solid var(--gis-line); background:var(--gis-bg2); }
+  #journey { margin:8px 0 0; }
+  #credit { margin:4px 0 0; font-size:var(--gis-t-meta); color:var(--gis-fg2); }
+  #credit a { color:inherit; }
+  #status:empty { display:none; }
+  #lgPts { display:flex; gap:8px; align-items:flex-start; }
+  #lgPts .pt { flex:none; width:9px; height:9px; margin:3px 2px 0; border-radius:50%; box-shadow:0 0 0 3px #0e1828; }
+  #about p { margin:8px 0 0; }
+  #about { display:none; }
+  #about.open { display:block; }
+  #tip { white-space:normal; }
+  #tip b { font-weight:600; }
+  #fatal { position:absolute; inset:0; display:none; align-items:center; justify-content:center; text-align:center; padding:30px; color:#dbe6fb; z-index:9; }
+  @media (max-width:760px){ #photo, #credit { display:none; } #months span.odd { display:none; } }
+</style>
+</head>
+<body>
+<main class="gis-map" id="stage">
+  <div id="view"><canvas id="gl"></canvas><canvas id="coast"></canvas></div>
+  <div id="hit"></div>
+  <div class="gis-chip" id="month"></div>
+  <div class="gis-tools"><div class="gis-grp">
+      <button class="gis-btn" id="zIn" type="button" title="Zoom in" aria-label="Zoom in"><i class="bi bi-plus-lg"></i></button>
+      <button class="gis-btn" id="zOut" type="button" title="Zoom out" aria-label="Zoom out"><i class="bi bi-dash-lg"></i></button>
+      <button class="gis-btn" id="zReset" type="button" title="Whole world" aria-label="Whole world"><i class="bi bi-fullscreen"></i></button></div>
+    <div class="gis-grp">
+      <button class="gis-btn on" id="tFollow" type="button" title="Follow the migration" aria-label="Follow the migration"><i class="bi bi-crosshair"></i></button>
+      <button class="gis-btn on" id="tTilt" type="button" title="Tilted 3D view" aria-label="Tilted 3D view"><i class="bi bi-badge-3d"></i></button></div></div>
+  <div class="gis-timebar" id="time">
+    <button class="gis-btn gis-btn--icon" id="play2" type="button" aria-label="Pause"><i class="bi bi-pause-fill" id="playIco"></i></button>
+    <div id="track"><div id="rail"></div><div id="knob"></div><div id="months"></div></div>
+  </div>
+  <div class="gis-attr">Data from GBIF and Natural Earth. Photos from Wikimedia Commons. Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar-reverse"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the atlas</div>
+  <div id="fatal"></div>
+</main>
+<aside class="gis-panel" id="side">
+  <header class="gis-panel__hd"><h1>Migration atlas</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset-reverse"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><label class="gis-label" for="sp">Species</label><select class="gis-select" id="sp"></select>
+      <img id="photo" alt=""><p id="journey"></p><p id="credit"></p></section>
+    <section class="gis-sec">
+      <div class="gis-field"><label class="gis-label" for="mo">Month</label><div class="gis-row"><select class="gis-select gis-grow" id="mo"></select><button class="gis-btn" id="play" type="button">Pause</button></div></div>
+      <div class="gis-field"><label class="gis-label" for="speed">Speed</label><select class="gis-select" id="speed"><option value="5">Slow</option><option value="3" selected>Normal</option><option value="1.5">Fast</option></select></div>
+      <div class="gis-field"><label class="gis-label" for="style">Style</label><select class="gis-select" id="style"><option value="3" selected>Particles</option><option value="0">Dots</option><option value="1">Squares</option><option value="2">Smooth</option></select></div></section>
+    <section class="gis-sec"><h2 class="gis-h">Legend</h2>
+      <div id="lgPts" class="gis-small"><span class="pt" id="lgDot"></span>More points means more common.</div>
+      <div id="lgRamp"><div class="gis-small" id="lgTitle" style="margin-bottom:4px">How common</div><div class="gis-ramp" id="lgBar"></div><div class="gis-ramp-lbl"><span id="lgLo">Rare</span><span id="lgHi">Common</span></div></div>
+      <ul class="gis-legend" style="margin-top:6px"><li><i class="gis-sw" style="background:#1e2939;border-color:#8893a3"></i>Too few records</li></ul>
+      <div class="gis-small gis-muted" id="status" style="margin-top:8px"></div></section>
+    <section class="gis-sec"><button class="gis-btn gis-btn--wide" id="aboutBtn" type="button" aria-expanded="false"><i class="bi bi-info-circle"></i>About this map</button>
+      <div id="about" class="gis-small">
+      <p>Colour shows the share of all records in each place that belong to this species. Empty areas are unknown.</p>
+      <p>Records from <a href="https://www.gbif.org" target="_blank" rel="noopener">GBIF</a> for <span id="yrs"></span> in 150 km cells.</p>
+      </div></section>
+  </div>
+</aside>
+<div class="gis-tip" id="tip"></div>
+
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const BASE = "migration/";
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTH_FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const GROUP = { Aves:"bird", Insecta:"insect", Cetacea:"whale and dolphin" };
+const DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- Equal Earth projection ---------------- */
+const A1 = 1.340264, A2 = -0.081106, A3 = 0.000893, A4 = 0.003796, MM = Math.sqrt(3) / 2;
+const XMAX = 2 * Math.sqrt(3) * Math.PI / (3 * A1);
+const YMAX = (() => { const t = Math.PI / 3, t2 = t * t, t6 = t2 * t2 * t2; return t * (A1 + A2 * t2 + t6 * (A3 + A4 * t2)); })();
+function project(lon, lat) {
+  const l = lon * Math.PI / 180, p = lat * Math.PI / 180;
+  const t = Math.asin(MM * Math.sin(p)), t2 = t * t, t6 = t2 * t2 * t2;
+  return [2 * Math.sqrt(3) * l * Math.cos(t) / (3 * (A1 + 3 * A2 * t2 + t6 * (7 * A3 + 9 * A4 * t2))),
+          t * (A1 + A2 * t2 + t6 * (A3 + A4 * t2))];
+}
+function invert(x, y) {
+  if (Math.abs(y) > YMAX) return null;
+  let t = y;
+  for (let i = 0; i < 8; i++) {
+    const t2 = t * t, t6 = t2 * t2 * t2;
+    t -= (t * (A1 + A2 * t2 + t6 * (A3 + A4 * t2)) - y) / (A1 + 3 * A2 * t2 + t6 * (7 * A3 + 9 * A4 * t2));
+  }
+  const t2 = t * t, t6 = t2 * t2 * t2, d = A1 + 3 * A2 * t2 + t6 * (7 * A3 + 9 * A4 * t2);
+  const l = 3 * x * d / (2 * Math.sqrt(3) * Math.cos(t));
+  if (Math.abs(l) > Math.PI) return null;
+  return [l * 180 / Math.PI, Math.asin(Math.max(-1, Math.min(1, Math.sin(t) / MM))) * 180 / Math.PI];
+}
+
+/* ---------------- colours ---------------- */
+// ColorBrewer YlOrBr (sequential), dark to light
+const RAMP = [[0, [153,52,4]], [.4, [236,112,20]], [.75, [254,196,79]], [1, [255,247,188]]];
+const rampCss = RAMP.map(([p, c]) => `rgb(${c.join(",")}) ${p * 100}%`).join(",");
+
+/* ---------------- WebGL ---------------- */
+const glc = $("gl");
+const gl = glc.getContext("webgl", { antialias: false, premultipliedAlpha: false, alpha: false });
+if (!gl) { const f = $("fatal"); f.style.display = "flex"; f.textContent = "This browser could not start WebGL. Open the map in Chrome or Edge."; return; }
+const glsl = (c) => `vec3(${c.map((v) => (v / 255).toFixed(4)).join(",")})`;
+const FS = `
+precision highp float;
+uniform vec2 uC; uniform float uK; uniform float uH;
+uniform sampler2D uA; uniform sampler2D uB; uniform sampler2D uLand;
+uniform float uM0; uniform float uM1; uniform float uMix; uniform float uFade; uniform float uMode; uniform float uDot; uniform vec3 uTint; uniform float uSea;
+const float A1 = ${A1}, A2 = ${A2}, A3 = ${A3}, A4 = ${A4}, MM = 0.8660254;
+vec3 ramp(float a){
+  ${RAMP.slice(1).map(([p, c], i) => `if (a <= ${p.toFixed(3)}) return mix(${glsl(RAMP[i][1])}, ${glsl(c)}, (a - ${RAMP[i][0].toFixed(3)}) / ${(p - RAMP[i][0]).toFixed(3)});`).join("\n  ")}
+  return ${glsl(RAMP[RAMP.length - 1][1])};
+}
+// projected point to equirectangular texture coordinates; z = 0 outside the world
+vec3 toUv(vec2 p){
+  float th = p.y;
+  for (int i = 0; i < 6; i++){
+    float t2 = th * th, t6 = t2 * t2 * t2;
+    th -= (th * (A1 + A2 * t2 + t6 * (A3 + A4 * t2)) - p.y) / (A1 + 3.0 * A2 * t2 + t6 * (7.0 * A3 + 9.0 * A4 * t2));
+  }
+  float t2 = th * th, t6 = t2 * t2 * t2;
+  float lam = 3.0 * p.x * (A1 + 3.0 * A2 * t2 + t6 * (7.0 * A3 + 9.0 * A4 * t2)) / (2.0 * 1.7320508 * cos(th));
+  float ok = (abs(p.y) <= ${YMAX.toFixed(5)} && abs(lam) <= 3.14159265) ? 1.0 : 0.0;
+  float phi = asin(clamp(sin(th) / MM, -1.0, 1.0));
+  return vec3(lam / 6.2831853 + 0.5, 0.5 - phi / 3.14159265, ok);
+}
+vec2 slot(float m, vec2 uv, float inset){
+  uv = clamp(uv, vec2(inset / 256.0, inset / 128.0), vec2(1.0 - inset / 256.0, 1.0 - inset / 128.0));
+  return vec2((mod(m, 4.0) + uv.x) / 4.0, (floor(m / 4.0) + uv.y) / 4.0);
+}
+vec2 flat2(sampler2D t, vec2 uv){
+  return mix(texture2D(t, slot(uM0, uv, 0.5)).rg, texture2D(t, slot(uM1, uv, 0.5)).rg, uMix);
+}
+vec4 cubic(float v){
+  vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v, s = n * n * n;
+  float x = s.x, y = s.y - 4.0 * s.x, z = s.z - 4.0 * s.y + 6.0 * s.x;
+  return vec4(x, y, z, 6.0 - x - y - z) / 6.0;
+}
+vec2 bicubic(sampler2D t, vec2 uv){
+  vec2 size = vec2(1024.0, 512.0), c = uv * size - 0.5, f = fract(c);
+  c -= f;
+  vec4 xc = cubic(f.x), yc = cubic(f.y);
+  vec4 s = vec4(xc.xz + xc.yw, yc.xz + yc.yw);
+  vec4 o = (c.xxyy + vec2(-0.5, 1.5).xyxy + vec4(xc.yw, yc.yw) / s) / size.xxyy;
+  vec2 a = texture2D(t, o.xz).rg, b = texture2D(t, o.yz).rg, cc = texture2D(t, o.xw).rg, d = texture2D(t, o.yw).rg;
+  float sx = s.x / (s.x + s.y), sy = s.z / (s.z + s.w);
+  return mix(mix(d, cc, sx), mix(b, a, sx), sy);
+}
+vec2 smooth2(sampler2D t, vec2 uv){
+  return mix(bicubic(t, slot(uM0, uv, 2.0)), bicubic(t, slot(uM1, uv, 2.0)), uMix);
+}
+vec2 value(vec2 uv){
+  vec2 a, b;
+  if (uMode > 1.5) { a = smooth2(uA, uv); b = smooth2(uB, uv); }
+  else { a = flat2(uA, uv); b = flat2(uB, uv); }
+  return mix(b, a, uFade);
+}
+void main(){
+  vec2 s = vec2(gl_FragCoord.x, uH - gl_FragCoord.y);
+  vec2 p = vec2(s.x - uC.x, uC.y - s.y) / uK;
+  vec3 here = toUv(p);
+  if (here.z < 0.5) { gl_FragColor = vec4(0.027, 0.063, 0.122, 1.0); return; }
+  float land = texture2D(uLand, here.xy).r;
+  vec3 ocean = vec3(0.055, 0.094, 0.157);
+  vec3 col;
+  if (uMode < 0.5) {
+    // dots on a regular grid: the dot area follows how common the species is
+    vec2 cell = (floor(p / uDot) + 0.5) * uDot;
+    vec3 cu = toUv(cell);
+    vec2 v = cu.z > 0.5 ? value(cu.xy) : vec2(0.0);
+    vec2 vh = value(here.xy);
+    col = mix(ocean, mix(vec3(0.118, 0.161, 0.224), vec3(0.17, 0.22, 0.3), smoothstep(0.3, 0.7, vh.g)), land);
+    float r = 0.5 * uDot * sqrt(clamp((v.r - 0.06) / 0.94, 0.0, 1.0)) * 1.05;
+    float a = 1.0 - smoothstep(r - 0.8 / uK, r + 0.8 / uK, length(p - cell));
+    col = mix(col, ramp(v.r), a * step(0.06, v.r));
+  } else if (uMode < 1.5) {
+    // squares: each data cell in one of five clear steps
+    vec2 g = (floor(here.xy * vec2(256.0, 128.0)) + 0.5) / vec2(256.0, 128.0);
+    vec2 v = value(g);
+    col = mix(ocean, mix(vec3(0.118, 0.161, 0.224), vec3(0.17, 0.22, 0.3), smoothstep(0.3, 0.7, v.g)), land);
+    float step5 = ceil(v.r * 5.0) / 5.0;
+    if (v.r > 0.06) col = ramp(step5);
+  } else if (uMode < 2.5) {
+    vec2 v = value(here.xy);
+    col = mix(ocean, mix(vec3(0.118, 0.161, 0.224), vec3(0.17, 0.22, 0.3), smoothstep(0.3, 0.7, v.g)), land);
+    col = mix(col, ramp(v.r), smoothstep(0.06, 0.2, v.r));
+  } else {
+    // particles: the map with only a light wash of the species colour where it lives
+    vec2 v = value(here.xy);
+    col = mix(ocean, mix(vec3(0.118, 0.161, 0.224), vec3(0.17, 0.22, 0.3), smoothstep(0.3, 0.7, v.g)), land);
+    col = mix(col, uTint, smoothstep(0.06, 0.7, v.r) * 0.2 * (1.0 - uSea * land));
+  }
+  gl_FragColor = vec4(col, 1.0);
+}`;
+function shader(type, src) {
+  const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+const prog = gl.createProgram();
+gl.attachShader(prog, shader(gl.VERTEX_SHADER, "attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }"));
+gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog); gl.useProgram(prog);
+gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+const aP = gl.getAttribLocation(prog, "p");
+gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 2, gl.FLOAT, false, 0, 0);
+const U = {};
+["uC","uK","uH","uA","uB","uLand","uM0","uM1","uMix","uFade","uMode","uDot","uTint","uSea"].forEach((n) => (U[n] = gl.getUniformLocation(prog, n)));
+gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+function texture(src) {
+  const t = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, src);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  return t;
+}
+
+/* ---------------- particles ---------------- */
+// one soft colour per species
+const COLOR = {
+  "barn-swallow": [138, 196, 255], "whimbrel": [240, 200, 150], "white-stork": [236, 238, 232], "amur-falcon": [255, 160, 128],
+  "woodland-kingfisher": [120, 214, 214], "european-bee-eater": [170, 222, 130], "bar-tailed-godwit": [232, 178, 120],
+  "ruby-throated-hummingbird": [246, 146, 178], "swainsons-hawk": [214, 186, 146], "monarch": [255, 170, 84],
+  "painted-lady": [244, 168, 196], "humpback-whale": [150, 186, 255],
+};
+const colorOf = (sp) => (COLOR[sp.slug] || [240, 200, 150]).map((v) => v / 255);
+const quadBuf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+function program(vs, fs) {
+  const pr = gl.createProgram();
+  gl.attachShader(pr, shader(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, shader(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+  return pr;
+}
+const ptsProg = program(`
+attribute vec3 aP;            // lon, lat in degrees, visibility 0..1
+uniform vec2 uC; uniform float uK; uniform vec2 uRes; uniform float uSize;
+varying float vVis;
+const float A1 = ${A1}, A2 = ${A2}, A3 = ${A3}, A4 = ${A4}, MM = 0.8660254;
+void main(){
+  float l = radians(aP.x), t = asin(MM * sin(radians(aP.y))), t2 = t * t, t6 = t2 * t2 * t2;
+  vec2 p = vec2(2.0 * 1.7320508 * l * cos(t) / (3.0 * (A1 + 3.0 * A2 * t2 + t6 * (7.0 * A3 + 9.0 * A4 * t2))),
+                t * (A1 + A2 * t2 + t6 * (A3 + A4 * t2)));
+  vec2 s = vec2(uC.x + p.x * uK, uC.y - p.y * uK);
+  gl_Position = vec4(s.x / uRes.x * 2.0 - 1.0, 1.0 - s.y / uRes.y * 2.0, 0.0, 1.0);
+  gl_PointSize = uSize;
+  vVis = aP.z;
+}`, `
+precision mediump float;
+uniform vec3 uColor; uniform float uAlpha;
+varying float vVis;
+void main(){
+  float d = length(gl_PointCoord - 0.5);
+  float a = smoothstep(0.5, 0.1, d) * uAlpha * vVis;   // soft round point
+  gl_FragColor = vec4(uColor * a, a);                  // premultiplied
+}`);
+const quadVS = "attribute vec2 p; varying vec2 vUv; void main(){ vUv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }";
+const fadeProg = program(quadVS, "precision mediump float; uniform float uKeep; void main(){ gl_FragColor = vec4(0.0, 0.0, 0.0, uKeep); }");
+const copyProg = program(quadVS, "precision mediump float; uniform sampler2D uT; varying vec2 vUv; void main(){ gl_FragColor = texture2D(uT, vUv); }");
+const PU = {
+  aP: gl.getAttribLocation(ptsProg, "aP"), uC: gl.getUniformLocation(ptsProg, "uC"), uK: gl.getUniformLocation(ptsProg, "uK"),
+  uRes: gl.getUniformLocation(ptsProg, "uRes"), uSize: gl.getUniformLocation(ptsProg, "uSize"),
+  uColor: gl.getUniformLocation(ptsProg, "uColor"), uAlpha: gl.getUniformLocation(ptsProg, "uAlpha"),
+  fadeP: gl.getAttribLocation(fadeProg, "p"), uKeep: gl.getUniformLocation(fadeProg, "uKeep"),
+  copyP: gl.getAttribLocation(copyProg, "p"), uT: gl.getUniformLocation(copyProg, "uT"),
+};
+const ptsBuf = gl.createBuffer();
+const trail = { tex: null, fb: null, w: 0, h: 0, clear: true };
+function makeTrail(w, h) {
+  if (trail.tex) { gl.deleteTexture(trail.tex); gl.deleteFramebuffer(trail.fb); }
+  trail.tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, trail.tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+  trail.fb = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, trail.fb);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, trail.tex, 0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  trail.w = w; trail.h = h; trail.clear = true;
+}
+function quad(attr) {
+  gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+  gl.enableVertexAttribArray(attr); gl.vertexAttribPointer(attr, 2, gl.FLOAT, false, 0, 0);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+/* The model. Every point keeps the same place within its flyway's population all year:
+   it sits at a fixed share of the way down the population by latitude, and a fixed share
+   across by longitude. As the population moves, the point moves with it, so the north
+   edge of the range in June becomes the north edge in December. Flyways are kept apart
+   so a point never jumps between continents. */
+const FLYWAYS = [[-170, -25], [-25, 65], [65, 180]];
+// whales are grouped by ocean basin, so a point never swaps between the Pacific and the Atlantic
+const BASINS = [[-180, -82], [-82, 20], [20, 120], [120, 180]];
+const marine = (sp) => sp.effort === "Cetacea";
+function rand(seed) { let x = seed >>> 0; return () => { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; return (x >>> 0) / 4294967296; }; }
+function buildParticles(sp, d) {
+  const W = 256, H = 128, N = innerWidth <= 760 ? 3500 : 8000, g = G(), px = d.px;
+  const cosl = new Float32Array(H);
+  for (let r = 0; r < H; r++) cosl[r] = Math.cos((90 - (r + 0.5) * 180 / H) * Math.PI / 180);
+  const wt = (m, r, c) => {
+    const o = ((Math.floor(m / 4) * 128 + r) * 1024 + (m % 4) * 256 + c) * 4, q = px[o] / 255;
+    if (q <= 0.06) return 0;
+    if (sea && isLand(-180 + (c + 0.5) * 360 / W, 90 - (r + 0.5) * 180 / H)) return 0;   // whales live at sea
+    return Math.pow(q, 1 / g) * cosl[r];
+  };
+  // mass of each flyway in each month
+  const sea = marine(sp);
+  const fl = (sea ? BASINS : FLYWAYS).map(([lo, hi]) => ({ c0: Math.max(0, Math.floor((lo + 180) / 360 * W)), c1: Math.min(W, Math.floor((hi + 180) / 360 * W)), mass: new Float64Array(12) }));
+  for (const f of fl) for (let m = 0; m < 12; m++) { let t = 0; for (let r = 0; r < H; r++) for (let c = f.c0; c < f.c1; c++) t += wt(m, r, c); f.mass[m] = t; }
+  // only the flyways this species really migrates along (from the atlas), so small resident
+  // populations elsewhere do not pull the eye away from the journey
+  const NAMES = ["Americas", "Africa and Eurasia", "Asia and Australasia"];
+  // only the Monarch is limited: its small Canary Islands and Australian populations do not migrate with the rest
+  const ONLY = { monarch: ["Americas"] }[sp.slug];
+  if (ONLY && !sea) fl.forEach((f, i) => { if (!ONLY.includes(NAMES[i])) f.mass.fill(0); });
+  const total = fl.reduce((a, f) => a + f.mass.reduce((x, y) => x + y, 0), 0) || 1;
+  const pos = new Float32Array(N * 12 * 2), vis = new Float32Array(N * 12);
+  const rnd = rand(12345 + sp.slug.length * 977);
+  let i0 = 0;
+  fl.forEach((f, fi) => {
+    const share = f.mass.reduce((x, y) => x + y, 0) / total;
+    const n = Math.round(N * share);
+    if (share < 0.03 || n <= 0) return;
+    const peak = Math.max(...f.mass) || 1;
+    const u = Array.from({ length: n }, () => [rnd(), rnd()]);
+    // a fixed soft offset for each point (about half a grid cell), so dense cells read as flocks, not squares
+    const jit = u.map(() => { const r = Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * 0.55, a = rnd() * 6.2832; return [r * Math.cos(a), r * Math.sin(a)]; });
+    for (let m = 0; m < 12; m++) {
+      // cumulative weight down the rows, and across each row
+      const rowCdf = new Float64Array(H + 1), colCdf = [];
+      // no single cell may attract more than the 90th percentile weight, so a few data poor cells
+      // with a high share cannot pile up into one dense block
+      const all = [];
+      for (let r = 0; r < H; r++) for (let c = f.c0; c < f.c1; c++) { const v = wt(m, r, c); if (v > 0) all.push(v); }
+      all.sort((a, b) => a - b);
+      const cap = all.length ? all[Math.floor(all.length * 0.9)] : Infinity;
+      for (let r = 0; r < H; r++) {
+        const cc = new Float64Array(f.c1 - f.c0 + 1);
+        for (let c = f.c0; c < f.c1; c++) cc[c - f.c0 + 1] = cc[c - f.c0] + Math.min(cap, wt(m, r, c));
+        colCdf.push(cc); rowCdf[r + 1] = rowCdf[r] + cc[cc.length - 1];
+      }
+      const has = rowCdf[H] > 0;
+      for (let k = 0; k < n; k++) {
+        const j = i0 + k, o = (j * 12 + m) * 2;
+        vis[j * 12 + m] = has ? Math.min(1, Math.pow(f.mass[m] / peak, 0.6)) : 0;
+        if (!has) { pos[o] = NaN; continue; }
+        const inv = (cdf, v) => {   // continuous inverse of a cumulative table
+          const target = v * cdf[cdf.length - 1];
+          let lo = 0, hi = cdf.length - 1;
+          while (hi - lo > 1) { const mid = (lo + hi) >> 1; cdf[mid] < target ? (lo = mid) : (hi = mid); }
+          const w = cdf[hi] - cdf[lo];
+          return lo + (w > 0 ? (target - cdf[lo]) / w : 0.5);
+        };
+        const rf = inv(rowCdf, u[k][0]), r = Math.min(H - 1, Math.floor(rf));
+        const cf = inv(colCdf[r], u[k][1]);
+        pos[o] = -180 + (f.c0 + cf) * 360 / W + jit[k][0];
+        pos[o + 1] = Math.max(-85, Math.min(85, 90 - rf * 180 / H + jit[k][1]));
+      }
+    }
+    // months with nobody in this flyway: hold the nearest position so the point fades in place
+    for (let k = 0; k < n; k++) {
+      const j = i0 + k;
+      for (let m = 0; m < 12; m++) {
+        const o = (j * 12 + m) * 2;
+        if (!Number.isNaN(pos[o])) continue;
+        for (let s = 1; s <= 6; s++) {
+          const a = (j * 12 + (m + s) % 12) * 2, b = (j * 12 + (m - s + 12) % 12) * 2;
+          if (!Number.isNaN(pos[a])) { pos[o] = pos[a]; pos[o + 1] = pos[a + 1]; break; }
+          if (!Number.isNaN(pos[b])) { pos[o] = pos[b]; pos[o + 1] = pos[b + 1]; break; }
+        }
+        if (Number.isNaN(pos[o])) { pos[o] = 0; pos[o + 1] = 0; }
+      }
+    }
+    i0 += n;
+  });
+  const phase = new Float32Array(i0);
+  for (let j = 0; j < i0; j++) phase[j] = rnd() * 6.2832;
+  // where the population is each month, for the camera: weighted centre and spread of the data itself
+  const keep = fl.map((f) => f.mass.some((v) => v > 0));
+  const centre = [];
+  for (let m = 0; m < 12; m++) {
+    let sx = 0, sy = 0, sw = 0;
+    const xy = [];
+    fl.forEach((f, fi) => {
+      if (!keep[fi]) return;
+      for (let r = 0; r < H; r += 1) for (let c = f.c0; c < f.c1; c++) {
+        const w = wt(m, r, c); if (!w) continue;
+        const q = project(-180 + (c + 0.5) * 360 / W, 90 - (r + 0.5) * 180 / H);
+        sx += q[0] * w; sy += q[1] * w; sw += w; xy.push(q[0], q[1], w);
+      }
+    });
+    if (!sw) { centre.push(null); continue; }
+    // the box holding the middle 90% of the population, in x and in y
+    const pc = (axis, q) => {
+      const idx = []; for (let k = 0; k < xy.length; k += 3) idx.push(k);
+      idx.sort((a, b) => xy[a + axis] - xy[b + axis]);
+      let acc = 0; for (const k of idx) { acc += xy[k + 2]; if (acc >= q * sw) return xy[k + axis]; }
+      return xy[idx[idx.length - 1] + axis];
+    };
+    const x0 = pc(0, 0.05), x1 = pc(0, 0.95), y0 = pc(1, 0.05), y1 = pc(1, 0.95);
+    centre.push([(x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) / 2 + 0.04, (y1 - y0) / 2 + 0.04]);
+  }
+  for (let m = 0; m < 12; m++) if (!centre[m]) centre[m] = centre.find(Boolean) || [0, 0, 1, 1];
+  return { n: i0, pos, vis, phase, centre, sea, out: new Float32Array(i0 * 3) };
+}
+function particlePositions(P, t, now) {
+  const f = t - 0.5, i = Math.floor(f), s = f - i, s2 = s * s, s3 = s2 * s;
+  const m0 = ((i - 1) % 12 + 12) % 12, m1 = (i % 12 + 12) % 12, m2 = (m1 + 1) % 12, m3 = (m1 + 2) % 12;
+  const e = s2 * (3 - 2 * s), wob = now * 0.0006;
+  for (let j = 0; j < P.n; j++) {
+    const b = j * 24, p = P.pos;
+    for (let a = 0; a < 2; a++) {   // Catmull-Rom between monthly positions gives curved, even flight
+      const p0 = p[b + m0 * 2 + a], p1 = p[b + m1 * 2 + a], p2 = p[b + m2 * 2 + a], p3 = p[b + m3 * 2 + a];
+      P.out[j * 3 + a] = 0.5 * (2 * p1 + (p2 - p0) * s + (2 * p0 - 5 * p1 + 4 * p2 - p3) * s2 + (3 * p1 - p0 - 3 * p2 + p3) * s3);
+    }
+    // a very small drift so a paused map still breathes
+    P.out[j * 3] += Math.sin(wob + P.phase[j]) * 0.18;
+    P.out[j * 3 + 1] += Math.cos(wob * 1.3 + P.phase[j]) * 0.12;
+    P.out[j * 3 + 2] = P.vis[j * 12 + m1] * (1 - e) + P.vis[j * 12 + m2] * e;
+    if (P.sea && isLand(P.out[j * 3], P.out[j * 3 + 1])) P.out[j * 3 + 2] = 0;   // never draw a whale on land
+  }
+  return P.out;
+}
+function drawParticles(now) {
+  const P = st.cur && st.cur.particles;
+  if (!P || !P.n) return;
+  const w = glc.width, h = glc.height;
+  if (trail.w !== w || trail.h !== h) makeTrail(w, h);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, trail.fb);
+  gl.viewport(0, 0, w, h);
+  gl.enable(gl.BLEND);
+  if (trail.clear) { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); trail.clear = false; }
+  // fade what is already there, which leaves a short soft trail behind each point
+  gl.useProgram(fadeProg); gl.blendFunc(gl.ZERO, gl.SRC_ALPHA);
+  gl.uniform1f(PU.uKeep, st.playing ? 0.86 : 0.7);
+  quad(PU.fadeP);
+  // the points
+  gl.useProgram(ptsProg); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  gl.bindBuffer(gl.ARRAY_BUFFER, ptsBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, particlePositions(P, st.t, now), gl.DYNAMIC_DRAW);
+  gl.enableVertexAttribArray(PU.aP); gl.vertexAttribPointer(PU.aP, 3, gl.FLOAT, false, 0, 0);
+  gl.uniform2f(PU.uC, st.cx * st.dpr, st.cy * st.dpr); gl.uniform1f(PU.uK, st.k * st.dpr);
+  gl.uniform2f(PU.uRes, w, h);
+  gl.uniform1f(PU.uSize, Math.min(6, 2.6 + (st.k / st.base - 1) * 0.6) * st.dpr);
+  gl.uniform3fv(PU.uColor, colorOf(st.sp)); gl.uniform1f(PU.uAlpha, 0.55 * st.fade);
+  gl.drawArrays(gl.POINTS, 0, P.n);
+  gl.disableVertexAttribArray(PU.aP);
+  // lay the trail layer over the map
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.useProgram(copyProg);
+  gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, trail.tex); gl.uniform1i(PU.uT, 3);
+  quad(PU.copyP);
+  gl.disable(gl.BLEND);
+  gl.useProgram(prog);
+}
+
+/* ---------------- state and view ---------------- */
+const st = { atlas: null, sp: null, cur: null, prev: null, fade: 1, fadeStart: 0, t: 0.5, playing: !reduceMotion, last: 0,
+  secPerMonth: 3, mode: 3, dpr: 1, k: 1, cx: 0, cy: 0, base: 1, dirty: true, follow: true, tilt: true, moved: false };
+const cache = new Map();
+const stage = $("stage"), coast = $("coast"), cctx = coast.getContext("2d");
+const area = () => { const r = stage.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; };
+function fit() {
+  const a = area(), small = a.w < 600;
+  st.base = Math.min((a.w - 24) / (2 * XMAX), (a.h - 90) / (2 * YMAX));
+  st.k = st.base;
+  st.cx = a.w / 2; st.cy = (a.h - 50) / 2 + 6;
+  if (small) {
+    // on a phone the world is tiny, so fill the height and centre on the species
+    st.k = Math.min(st.base * 2.2, (a.h - 80) / (2 * YMAX));
+    let x = 0, n = 0;
+    for (const t of (st.sp && st.sp.trails) || []) for (const p of t.points) if (p) { x += p[0]; n++; }
+    const [px] = project(n ? x / n : 20, 0), half = XMAX * st.k;
+    st.cx = Math.min(half, Math.max(a.w - half, a.w / 2 - px * st.k));
+  }
+  st.dirty = true;
+}
+function clampView() {
+  st.k = Math.max(st.base * 0.9, Math.min(st.base * 14, st.k));
+  const a = area(), mx = XMAX * st.k, my = YMAX * st.k;
+  st.cx = Math.min(a.w + mx - 80, Math.max(-mx + 80, st.cx));
+  st.cy = Math.min(a.h + my - 80, Math.max(-my + 80, st.cy));
+  st.dirty = true;
+}
+// the camera target: the population centre for the current moment, eased between months
+function followTarget() {
+  const P = st.cur && st.cur.particles;
+  if (!P) return null;
+  const f = st.t - 0.5, i = Math.floor(f), w = f - i, e = w * w * (3 - 2 * w);
+  const a = P.centre[((i % 12) + 12) % 12], b = P.centre[(((i + 1) % 12) + 12) % 12];
+  const L = (i2) => a[i2] + (b[i2] - a[i2]) * e;
+  const cx = L(0), cy = L(1), hw = L(2), hh = L(3);
+  const ar = area();
+  // frame the whole population: it fills most of the width and the lower part of the tilted view
+  const k = Math.max(st.base * 1.1, Math.min(st.base * 3.5, Math.min(ar.w * 0.42 / hw, ar.h * 0.32 / hh)));
+  return { k, cx: ar.w / 2 - cx * k, cy: ar.h * 0.6 + cy * k };
+}
+function easeCamera(dt) {
+  const T = followTarget();
+  if (!T) return;
+  const r = 1 - Math.exp(-dt * 1.2), rk = 1 - Math.exp(-dt * 0.8);
+  const k0 = st.k;
+  st.k += (T.k - st.k) * rk;
+  // keep the centre heading for its target while the zoom changes
+  st.cx += (T.cx * (st.k / T.k) + (1 - st.k / T.k) * area().w / 2 - st.cx) * r;
+  st.cy += (T.cy - st.cy) * r;
+  if (Math.abs(st.k - k0) > 1e-6 || r > 0) st.dirty = true;
+}
+function stopFollow() { st.follow = false; $("tFollow").classList.remove("on"); }
+function zoomAt(sx, sy, f) {
+  const px = (sx - st.cx) / st.k, py = (st.cy - sy) / st.k;
+  st.k *= f; clampView(); st.cx = sx - px * st.k; st.cy = sy + py * st.k; clampView();
+}
+function resize() {
+  st.dpr = Math.min(devicePixelRatio || 1, 2);
+  const a = area();
+  for (const c of [glc, coast]) { c.width = Math.round(a.w * st.dpr); c.height = Math.round(a.h * st.dpr); }
+  gl.viewport(0, 0, glc.width, glc.height);
+  fit();
+}
+
+/* ---------------- coastlines and borders ---------------- */
+const coastLines = [], borderLines = [], outline = [];
+function decode(lines, out) {
+  for (const r of lines) {
+    let lon = 0, lat = 0, prev = null, path = [];
+    for (let i = 0; i < r.length; i += 2) {
+      lon += r[i]; lat += r[i + 1];
+      const L = [lon / 100, lat / 100];
+      if (prev && (Math.abs(L[0] - prev[0]) > 180 || (Math.abs(L[0]) > 179.9 && Math.abs(prev[0]) > 179.9) || (L[1] < -89.5 && prev[1] < -89.5))) {
+        if (path.length > 1) out.push(path);
+        path = [];
+      }
+      path.push(project(L[0], L[1])); prev = L;
+    }
+    if (path.length > 1) out.push(path);
+  }
+}
+let landPx = null;
+const isLand = (lon, lat) => {
+  if (!landPx) return false;
+  const x = Math.min(2047, Math.max(0, Math.floor((lon + 180) / 360 * 2048))), y = Math.min(1023, Math.max(0, Math.floor((90 - lat) / 180 * 1024)));
+  return landPx[(y * 2048 + x) * 4] > 127;
+};
+function landMask(land) {
+  const c = document.createElement("canvas"); c.width = 2048; c.height = 1024;
+  const x = c.getContext("2d");
+  x.fillStyle = "#000"; x.fillRect(0, 0, 2048, 1024); x.fillStyle = "#fff"; x.beginPath();
+  for (const r of land) {
+    let lon = 0, lat = 0, prev = null, shift = 0, crosses = false;
+    const pts = [];
+    for (let i = 0; i < r.length; i += 2) {
+      lon += r[i]; lat += r[i + 1];
+      let L = lon / 100;
+      if (prev !== null && Math.abs(L + shift - prev) > 180) { shift += L + shift > prev ? -360 : 360; crosses = true; }
+      L += shift; prev = L; pts.push([L, lat / 100]);
+    }
+    for (const off of crosses ? [0, -360, 360] : [0]) {
+      pts.forEach(([L, la], i) => { const px = (L + off + 180) / 360 * 2048, py = (90 - la) / 180 * 1024; i ? x.lineTo(px, py) : x.moveTo(px, py); });
+      x.closePath();
+    }
+  }
+  x.fill("evenodd");
+  landPx = x.getImageData(0, 0, 2048, 1024).data;
+  return c;
+}
+function drawCoast() {
+  const c = cctx, d = st.dpr;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, coast.width, coast.height);
+  c.setTransform(st.k * d, 0, 0, -st.k * d, st.cx * d, st.cy * d);
+  const stroke = (lines, px, col, close) => {
+    c.beginPath();
+    for (const l of lines) { c.moveTo(l[0][0], l[0][1]); for (let i = 1; i < l.length; i++) c.lineTo(l[i][0], l[i][1]); if (close) c.closePath(); }
+    c.lineWidth = px / st.k; c.strokeStyle = col; c.stroke();
+  };
+  stroke(borderLines, 0.6, "rgba(230,238,252,0.18)");
+  stroke(coastLines, 0.8, "rgba(230,238,252,0.5)");
+  stroke([outline], 1, "rgba(230,238,252,0.25)", true);
+  st.dirty = false;
+}
+
+/* ---------------- species ---------------- */
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pct = (v) => { const p = v * 100; return (p >= 10 ? p.toFixed(0) : p >= 1 ? p.toFixed(1) : p.toFixed(2)) + "%"; };
+const G = () => (st.atlas && st.atlas.gamma) || 0.7;
+function loadImage(src) {
+  return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("Could not load " + src)); i.src = src; });
+}
+async function speciesData(sp) {
+  if (cache.has(sp.slug)) return cache.get(sp.slug);
+  const img = await loadImage(BASE + sp.slug + ".png");
+  const c = document.createElement("canvas"); c.width = img.width; c.height = img.height;
+  const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(img, 0, 0);
+  const d = { tex: texture(img), px: x.getImageData(0, 0, img.width, img.height).data };
+  d.particles = buildParticles(sp, d);
+  cache.set(sp.slug, d);
+  return d;
+}
+async function select(slug, instant) {
+  const sp = st.atlas.species.find((s) => s.slug === slug) || st.atlas.species[0];
+  if (st.sp && sp.slug === st.sp.slug) return;
+  $("status").textContent = "Loading " + sp.name.toLowerCase() + "...";
+  const data = await speciesData(sp);
+  st.prev = st.cur || data; st.cur = data; st.sp = sp;
+  st.fade = instant ? 1 : 0; st.fadeStart = performance.now();
+  $("sp").value = sp.slug;
+  $("photo").src = BASE + "photos/" + sp.slug + ".webp";
+  $("photo").alt = sp.name;
+  $("journey").textContent = sp.journey;
+  const cr = sp.credit;
+  $("credit").innerHTML = cr ? `Photo: <a href="${esc(cr.url)}" target="_blank" rel="noopener">${esc(cr.author)}, ${esc(cr.license)}</a>` : "";
+  trail.clear = true;
+  $("lgDot").style.background = `rgb(${colorOf(sp).map((v) => Math.round(v * 255)).join(",")})`;
+  $("lgTitle").textContent = `Share of ${GROUP[sp.effort]} records`;
+  $("lgLo").textContent = "Rare"; $("lgHi").textContent = pct(sp.vmax) + " or more";
+  $("status").innerHTML = `<b>${esc(sp.name)}</b> <i>(${esc(sp.sci)})</i><br>${sp.records.toLocaleString("en-US").replace(/,/g, " ")} records`;
+  if (innerWidth <= 760 && !st.follow) fit();
+  if (history.replaceState) history.replaceState(null, "", "#" + sp.slug);
+}
+
+/* ---------------- time ---------------- */
+function dateOf(t) {
+  let day = t / 12 * 365, m = 0;
+  while (m < 11 && day >= DAYS[m]) { day -= DAYS[m]; m++; }
+  return { m, d: Math.min(DAYS[m], Math.floor(day) + 1) };
+}
+function setPlaying(p) {
+  st.playing = p;
+  $("play").textContent = p ? "Pause" : "Play";
+  $("playIco").className = p ? "bi bi-pause-fill" : "bi bi-play-fill";
+  $("play2").setAttribute("aria-label", p ? "Pause" : "Play");
+}
+$("play").onclick = $("play2").onclick = () => setPlaying(!st.playing);
+$("mo").innerHTML = MONTH_FULL.map((m, i) => `<option value="${i}">${m}</option>`).join("");
+$("mo").onchange = () => { setPlaying(false); st.t = +$("mo").value + 0.5; };
+$("speed").onchange = () => (st.secPerMonth = +$("speed").value);
+function showLegend() {
+  $("lgPts").style.display = st.mode === 3 ? "flex" : "none";
+  $("lgRamp").style.display = st.mode === 3 ? "none" : "block";
+}
+$("style").onchange = () => { st.mode = +$("style").value; trail.clear = true; showLegend(); };
+showLegend();
+$("aboutBtn").onclick = () => $("about").classList.toggle("open");
+(() => {
+  let h = "", r = "";
+  for (let m = 0; m < 12; m++) {
+    h += `<span class="${m % 2 ? "odd" : ""}" style="left:${(m + 0.5) / 12 * 100}%">${MONTHS[m]}</span>`;
+    if (m) r += `<i style="left:${m / 12 * 100}%"></i>`;
+  }
+  $("months").innerHTML = h; $("rail").innerHTML = r;
+  const track = $("track");
+  let down = false;
+  const scrub = (e) => { const b = track.getBoundingClientRect(); st.t = Math.max(0, Math.min(11.999, (e.clientX - b.left) / b.width * 12)); };
+  track.addEventListener("pointerdown", (e) => { down = true; track.setPointerCapture(e.pointerId); setPlaying(false); scrub(e); });
+  track.addEventListener("pointermove", (e) => down && scrub(e));
+  track.addEventListener("pointerup", () => (down = false));
+  track.addEventListener("pointercancel", () => (down = false));
+})();
+
+/* ---------------- screen point on the tilted map to the flat map ----------------
+   #view uses perspective(D) rotateX(A) scale(C) about (ox, oy); this undoes it. */
+const TILT = { D: 1100, A: 40 * Math.PI / 180, C: 1.32, OY: 0.72 };
+function untilt(x, y) {
+  if (!st.tilt) return [x, y];
+  const a = area(), ox = a.w / 2, oy = a.h * TILT.OY, X = x - ox, Y = y - oy, { D, A, C } = TILT;
+  const u = Y * D / (D * Math.cos(A) + Y * Math.sin(A));
+  return [ox + X * (D - u * Math.sin(A)) / (D * C), oy + u / C];
+}
+
+/* ---------------- hover ---------------- */
+function showTip(cx, cy) {
+  const tip = $("tip"), a = area(), [sx, sy] = untilt(cx - a.x, cy - a.y);
+  const ll = st.sp && invert((sx - st.cx) / st.k, (st.cy - sy) / st.k);
+  if (!ll) { tip.style.display = "none"; return; }
+  const px = st.cur.px;
+  const gx = Math.min(255, Math.floor((ll[0] + 180) / 360 * 256)), gy = Math.min(127, Math.floor((90 - ll[1]) / 180 * 128));
+  const f = st.t - 0.5, m0 = ((Math.floor(f) % 12) + 12) % 12, m1 = (m0 + 1) % 12, mx = f - Math.floor(f);
+  const read = (m) => { const o = ((Math.floor(m / 4) * 128 + gy) * 1024 + (m % 4) * 256 + gx) * 4; return [px[o] / 255, px[o + 1] / 255]; };
+  const A = read(m0), B = read(m1), q = A[0] + (B[0] - A[0]) * mx, valid = A[1] + (B[1] - A[1]) * mx;
+  const { m } = dateOf(st.t);
+  let main;
+  if (valid < 0.5) main = "Too few records here";
+  else if (q < 0.06) main = "Not reported here";
+  else main = `<b>${pct(Math.pow(q, 1 / G()) * st.sp.vmax)}</b> of ${GROUP[st.sp.effort]} records are this species`;
+  tip.innerHTML = `${main}<br>${MONTH_FULL[m]} at ${Math.abs(ll[1]).toFixed(1)}° ${ll[1] >= 0 ? "N" : "S"} ${Math.abs(ll[0]).toFixed(1)}° ${ll[0] >= 0 ? "E" : "W"}`;
+  tip.style.display = "block";
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(innerWidth - w - 8, cx + 14) + "px";
+  tip.style.top = Math.max(8, Math.min(innerHeight - h - 8, cy - h - 10)) + "px";
+}
+
+/* ---------------- pan, zoom, pinch ---------------- */
+(() => {
+  const hit = $("hit"), pts = new Map();
+  let moved = 0, pinch = null;
+  const local = (e) => { const a = area(); return untilt(e.clientX - a.x, e.clientY - a.y); };
+  hit.addEventListener("pointerdown", (e) => {
+    hit.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); moved = 0;
+    if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); }
+    hit.classList.add("drag");
+  });
+  hit.addEventListener("pointermove", (e) => {
+    if (!pts.has(e.pointerId)) { if (e.pointerType === "mouse") showTip(e.clientX, e.clientY); return; }
+    const p = pts.get(e.pointerId), a0 = untilt(p[0], p[1]), a1 = untilt(e.clientX, e.clientY), dx = a1[0] - a0[0], dy = a1[1] - a0[1];
+    pts.set(e.pointerId, [e.clientX, e.clientY]);
+    stopFollow(); st.moved = true;
+    if (pts.size === 2 && pinch) {
+      const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), r = area();
+      const [mx, my] = untilt((a[0] + b[0]) / 2 - r.x, (a[1] + b[1]) / 2 - r.y);
+      zoomAt(mx, my, d / pinch); pinch = d;
+    } else if (pts.size === 1) { st.cx += dx; st.cy += dy; clampView(); }
+    moved += Math.abs(dx) + Math.abs(dy);
+    $("tip").style.display = "none";
+  });
+  const up = (e) => {
+    if (pts.has(e.pointerId) && moved < 6 && pts.size === 1) showTip(e.clientX, e.clientY);
+    pts.delete(e.pointerId); if (pts.size < 2) pinch = null;
+    if (!pts.size) hit.classList.remove("drag");
+  };
+  hit.addEventListener("pointerup", up); hit.addEventListener("pointercancel", up);
+  hit.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") $("tip").style.display = "none"; });
+  hit.addEventListener("wheel", (e) => { e.preventDefault(); stopFollow(); st.moved = true; const [x, y] = local(e); zoomAt(x, y, Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
+  hit.addEventListener("dblclick", (e) => { stopFollow(); st.moved = true; const [x, y] = local(e); zoomAt(x, y, 2); });
+  const mid = (f) => { const a = area(); stopFollow(); st.moved = true; zoomAt(a.w / 2, a.h * 0.6, f); };
+  $("zIn").onclick = () => mid(1.6); $("zOut").onclick = () => mid(1 / 1.6);
+  $("zReset").onclick = () => { stopFollow(); st.moved = true; fit(); };
+  $("tFollow").onclick = () => { st.follow = !st.follow; $("tFollow").classList.toggle("on", st.follow); };
+  $("tTilt").onclick = () => { st.tilt = !st.tilt; $("tTilt").classList.toggle("on", st.tilt); $("view").classList.toggle("tilt", st.tilt); };
+})();
+addEventListener("keydown", (e) => {
+  if (e.target.tagName === "SELECT") return;
+  if (e.key === " ") { e.preventDefault(); setPlaying(!st.playing); }
+  else if (e.key === "ArrowRight") { setPlaying(false); st.t = (Math.floor(st.t) + 1.5) % 12; }
+  else if (e.key === "ArrowLeft") { setPlaying(false); st.t = (Math.floor(st.t) + 11.5) % 12; }
+});
+
+/* ---------------- frame loop ---------------- */
+let landTex = null, lastM = -1;
+function frame(now) {
+  const dt = st.last ? Math.min(0.1, (now - st.last) / 1000) : 0; st.last = now;
+  if (st.playing) st.t = (st.t + dt / st.secPerMonth) % 12;
+  if (st.fade < 1) st.fade = Math.min(1, (now - st.fadeStart) / 500);
+  if (st.follow) easeCamera(dt);
+  const f = st.t - 0.5, m0 = ((Math.floor(f) % 12) + 12) % 12, mx = f - Math.floor(f);
+  gl.uniform2f(U.uC, st.cx * st.dpr, st.cy * st.dpr);
+  gl.uniform1f(U.uK, st.k * st.dpr); gl.uniform1f(U.uH, glc.height);
+  gl.uniform1f(U.uM0, m0); gl.uniform1f(U.uM1, (m0 + 1) % 12);
+  gl.uniform1f(U.uMix, mx * mx * (3 - 2 * mx)); gl.uniform1f(U.uFade, st.fade);
+  gl.uniform1f(U.uMode, st.mode);
+  // dot spacing: about 2 degrees, but never closer than 10 px on screen
+  gl.uniform1f(U.uDot, Math.max(2 * XMAX / 180, 10 / st.k));
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, st.cur.tex); gl.uniform1i(U.uA, 0);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, st.prev.tex); gl.uniform1i(U.uB, 1);
+  gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, landTex); gl.uniform1i(U.uLand, 2);
+  gl.uniform3fv(U.uTint, colorOf(st.sp)); gl.uniform1f(U.uSea, marine(st.sp) ? 1 : 0);
+  gl.viewport(0, 0, glc.width, glc.height);
+  quad(aP);
+  if (st.dirty) { if (st.moved) trail.clear = true; st.moved = false; drawCoast(); }
+  if (st.mode === 3) drawParticles(now);
+  $("knob").style.left = st.t / 12 * 100 + "%";
+  const { m } = dateOf(st.t);
+  if (m !== lastM) { lastM = m; $("month").textContent = MONTH_FULL[m]; if (document.activeElement !== $("mo")) $("mo").value = m; }
+  requestAnimationFrame(frame);
+}
+
+/* ---------------- start ---------------- */
+const json = (r) => {
+  if (!r.ok || !(r.headers.get("content-type") || "").includes("json")) throw new Error("The map data is missing. Run tools/migration/build.py to create it.");
+  return r.json();
+};
+(async () => {
+  try {
+    const [atlas, land, borders] = await Promise.all(["atlas.json", "land.json", "borders.json"].map((f) => fetch(BASE + f).then(json)));
+    st.atlas = atlas;
+    $("yrs").textContent = atlas.years;
+    $("lgBar").style.background = `linear-gradient(90deg,${rampCss})`;
+    $("sp").innerHTML = atlas.species.map((s) => `<option value="${s.slug}">${esc(s.name)}</option>`).join("");
+    $("sp").onchange = () => select($("sp").value);
+    decode(land, coastLines); decode(borders, borderLines);
+    for (let lat = -90; lat <= 90; lat++) outline.push(project(180, lat));
+    for (let lat = 90; lat >= -90; lat--) outline.push(project(-180, lat));
+    landTex = texture(landMask(land));
+    // deep links: #amur-falcon or #amur-falcon/jan
+    const [hs, hm] = decodeURIComponent(location.hash.slice(1)).split("/");
+    const mi = hm ? MONTHS.findIndex((x) => x.toLowerCase() === hm.slice(0, 3).toLowerCase()) : -1;
+    if (mi >= 0) { st.t = mi + 0.5; st.playing = false; }
+    setPlaying(st.playing);
+    resize();
+    $("view").classList.add("tilt");
+    await select(hs || "white-stork", true); // the White stork opens the map
+    const T0 = followTarget(); if (T0) { st.k = T0.k; st.cx = T0.cx; st.cy = T0.cy; st.dirty = true; }
+    requestAnimationFrame(frame);
+    $("loading").classList.add("gone");
+    for (const s of atlas.species) { try { await speciesData(s); } catch (e) { /* loads on demand instead */ } }
+  } catch (e) {
+    const f = $("fatal"); f.style.display = "flex"; f.textContent = e.message;
+  }
+})();
+addEventListener("resize", resize);
+})();
+</script>
+</body>
+</html>

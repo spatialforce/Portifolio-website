@@ -1,0 +1,1 @@
+{"year": 2025, "W": 1000, "H": 998, "dates": ["2025-01-15"], "scenes": [{"id": "LC08_L2SP_008056_20250115_02_T1", "date": "2025-01-15", "platform": "landsat-8", "pixels": 979519}], "stats": {"open": 7.7, "plants": 11.4, "openPct": 40, "plantsPct": 59, "footprint": 19.3}}

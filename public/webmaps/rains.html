@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" class="gis">
+<head>
+<meta charset="utf-8">
+<title>Rainfall onset in Southern Africa</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#fff; }
+  canvas#cv { position:absolute; inset:0; width:100%; height:100%; cursor:crosshair; }
+  #hist { display:block; width:288px; height:160px; }
+  #seasonRow { display:flex; justify-content:space-between; margin-bottom:4px; }
+</style>
+</head>
+<body>
+<main class="gis-map" id="map"><canvas id="cv"></canvas>
+  <div class="gis-card gis-card--tl" style="width:320px"><h2 class="gis-h">Start of the rains</h2><div class="gis-steps" id="key"></div></div>
+  <div class="gis-attr">Data from CHIRPS (UC Santa Barbara) and Natural Earth. Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar-reverse"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading 45 seasons of rainfall</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Rainfall onset in Southern Africa</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset-reverse"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><p class="gis-value" id="big">&nbsp;</p><p class="gis-p" id="what"></p></section>
+    <section class="gis-sec"><div id="seasonRow"><label class="gis-label" for="yr" style="margin:0">Season</label><b id="season"></b></div>
+      <input id="yr" class="gis-range" type="range" min="0" step="1"></section>
+    <section class="gis-sec"><h2 class="gis-h" id="histT">Every season here</h2><canvas id="hist" width="288" height="160"></canvas></section>
+    <section class="gis-sec gis-small gis-muted">Click the map to pick a place. The start is the first 25 mm in five days with no dry spell after.</section>
+  </div>
+</aside>
+<script>
+const MON = ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"];
+const LONG = ["September", "October", "November", "December", "January", "February"];
+// one colour per month, early to late: viridis (Matplotlib), six even samples
+const PAL = [[68, 1, 84], [65, 68, 135], [42, 120, 142], [34, 168, 132], [122, 209, 81], [253, 231, 37]];
+const NONE = [226, 222, 214];
+const CITIES = [["Harare", -17.83, 31.05], ["Bulawayo", -20.15, 28.58], ["Lusaka", -15.42, 28.28], ["Lilongwe", -13.96, 33.79],
+  ["Blantyre", -15.79, 35.01], ["Maputo", -25.92, 32.57], ["Beira", -19.83, 34.85], ["Nampula", -15.12, 39.27],
+  ["Johannesburg", -26.2, 28.05], ["Durban", -29.86, 31.0], ["Cape Town", -33.93, 18.5], ["Gaborone", -24.65, 25.91],
+  ["Windhoek", -22.56, 17.08], ["Luanda", -8.84, 13.29], ["Huambo", -12.78, 15.74], ["Maseru", -29.31, 27.48],
+  ["Mutare", -18.97, 32.67], ["Masvingo", -20.07, 30.83], ["Gweru", -19.45, 29.82], ["Kitwe", -12.8, 28.21],
+  ["Polokwane", -23.9, 29.45], ["Tete", -16.16, 33.59], ["Livingstone", -17.85, 25.86], ["Maun", -19.98, 23.42]];
+const cv = document.getElementById("cv"), cx = cv.getContext("2d"), hist = document.getElementById("hist"), hx = hist.getContext("2d");
+const yr = document.getElementById("yr");
+let M, grids = [], borders, W = 0, H = 0, dpr = 1, k = 1, ox = 0, oy = 0, si = 0, here = null, layer = null;
+
+// pentad 1..36 -> a date: six pentads a month from September, starting on days 1, 6, 11, 16, 21 and 26
+const month = (p) => Math.floor((p - 1) / 6);
+const day = (p) => 1 + ((p - 1) % 6) * 5;
+const dateOf = (p) => `${day(p)} ${LONG[month(p)]}`;
+function colour(p) {
+  if (p === 0) return NONE;
+  const x = (p - 1) / 6, i = Math.min(4, Math.floor(x)), f = Math.min(1, x - i);
+  return PAL[i].map((v, j) => Math.round(v + (PAL[i + 1][j] - v) * f));
+}
+const LUT = Array.from({ length: 256 }, (_, p) => p === 255 ? null : colour(Math.min(p, 36)));
+const label = (y) => `${y}/${String((y + 1) % 100).padStart(2, "0")}`;
+
+function paint() {
+  const g = grids[si], im = new ImageData(M.w, M.h), d = im.data;
+  for (let i = 0; i < g.length; i++) {
+    const c = LUT[g[i]]; if (!c) continue;
+    d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255;
+  }
+  layer = document.createElement("canvas"); layer.width = M.w; layer.height = M.h;
+  layer.getContext("2d").putImageData(im, 0, 0);
+}
+
+const px = (lon) => ox + (lon - M.box[0]) / (M.box[2] - M.box[0]) * M.w * k;
+const py = (lat) => oy + (M.box[3] - lat) / (M.box[3] - M.box[1]) * M.h * k;
+function fit() { k = Math.min(W / M.w, H / M.h) * 0.96; ox = (W - M.w * k) / 2; oy = (H - M.h * k) / 2; }
+
+function draw() {
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx.fillStyle = "#fff"; cx.fillRect(0, 0, W, H);
+  cx.imageSmoothingEnabled = true;
+  cx.drawImage(layer, ox, oy, M.w * k, M.h * k);
+  cx.save(); cx.beginPath(); cx.rect(ox, oy, M.w * k, M.h * k); cx.clip();
+  cx.beginPath();
+  for (const r of borders) { r.forEach(([x, y], i) => i ? cx.lineTo(px(x), py(y)) : cx.moveTo(px(x), py(y))); cx.closePath(); }
+  cx.lineWidth = 0.8; cx.strokeStyle = "rgba(17,17,17,.55)"; cx.stroke(); cx.restore();
+  if (here) {
+    const x = px(here.lon), y = py(here.lat);
+    cx.beginPath(); cx.arc(x, y, 6, 0, Math.PI * 2);
+    cx.lineWidth = 3; cx.strokeStyle = "#fff"; cx.stroke(); cx.lineWidth = 1.5; cx.strokeStyle = "#111"; cx.stroke();
+    cx.font = "600 13px 'Source Sans 3',sans-serif"; cx.textBaseline = "middle";
+    cx.lineWidth = 3; cx.strokeStyle = "#fff"; cx.strokeText(here.name, x + 10, y); cx.fillStyle = "#111"; cx.fillText(here.name, x + 10, y);
+  }
+}
+
+const cell = (lat, lon) => {
+  const c = Math.floor((lon - M.box[0]) / (M.box[2] - M.box[0]) * M.w), r = Math.floor((M.box[3] - lat) / (M.box[3] - M.box[1]) * M.h);
+  return c < 0 || r < 0 || c >= M.w || r >= M.h ? -1 : r * M.w + c;
+};
+
+function panel() {
+  document.getElementById("season").textContent = label(M.seasons[si].season);
+  if (!here) return;
+  const p = grids[si][here.i];
+  document.getElementById("big").textContent = p === 0 ? "Never" : dateOf(p);
+  document.getElementById("what").textContent = p === 0
+    ? `The rains never properly started at ${here.name} in ${label(M.seasons[si].season)}.`
+    : `The rains started at ${here.name} in ${label(M.seasons[si].season)}.`;
+  document.getElementById("histT").textContent = `${here.name} since 1981`;
+  chart();
+}
+
+// Every season at this place: one bar per season, as long as the wait from 1 September.
+function chart() {
+  const w = hist.width, h = hist.height, n = grids.length, top = 14, bot = h - 16, bw = w / n;
+  hx.clearRect(0, 0, w, h);
+  hx.font = "12px 'Source Sans 3',sans-serif"; hx.fillStyle = "#111"; hx.textBaseline = "middle";
+  const y = (p) => top + (p - 1) / 35 * (bot - top);
+  for (let m = 0; m < 6; m++) {
+    const yy = y(m * 6 + 1); hx.fillStyle = "#e6e6e6"; hx.fillRect(28, yy, w - 28, 1);
+    hx.fillStyle = "#555"; hx.fillText(MON[m], 0, yy);
+  }
+  const x0 = 28, cw = (w - x0) / n;
+  for (let s = 0; s < n; s++) {
+    const p = grids[s][here.i], x = x0 + s * cw;
+    if (p === 255) continue;
+    const c = p === 0 ? [150, 150, 150] : colour(p);
+    hx.fillStyle = `rgb(${c})`;
+    if (p === 0) hx.fillRect(x, bot - 3, Math.max(1, cw - 1), 3);
+    else hx.fillRect(x, top, Math.max(1, cw - 1), y(p) - top + 2);
+    if (s === si) { hx.strokeStyle = "#111"; hx.lineWidth = 1.5; hx.strokeRect(x - 1, top - 3, cw + 1, bot - top + 6); }
+  }
+  hx.fillStyle = "#555"; hx.textAlign = "left"; hx.fillText(String(M.seasons[0].season), x0, h - 5);
+  hx.textAlign = "right"; hx.fillText(String(M.seasons[n - 1].season), w, h - 5); hx.textAlign = "left";
+}
+
+function choose(lat, lon) {
+  const i = cell(lat, lon);
+  if (i < 0 || grids[0][i] === 255) return;
+  let name = `${Math.abs(lat).toFixed(1)}° S, ${lon.toFixed(1)}° E`, best = 0.35;
+  for (const [n, a, b] of CITIES) { const d = Math.hypot(a - lat, (b - lon) * 0.93); if (d < best) { best = d; name = n; } }
+  here = { lat, lon, i, name }; panel(); draw();
+}
+
+cv.addEventListener("click", (e) => {
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  choose(M.box[3] - (y - oy) / (M.h * k) * (M.box[3] - M.box[1]), M.box[0] + (x - ox) / (M.w * k) * (M.box[2] - M.box[0]));
+});
+yr.oninput = () => { si = +yr.value; paint(); panel(); draw(); };
+
+function resize() {
+  dpr = devicePixelRatio || 1;
+  const r = document.getElementById("map").getBoundingClientRect(); W = r.width; H = r.height;
+  cv.width = W * dpr; cv.height = H * dpr;
+  if (layer) { fit(); draw(); }
+}
+addEventListener("resize", resize);
+
+document.getElementById("key").innerHTML = MON.map((m, i) => `<span><i style="background:rgb(${PAL[i]})"></i>${m}</span>`).join("") +
+  `<span><i style="background:rgb(${NONE})"></i>Never</span>`;
+const loading = document.getElementById("loading");
+
+const img = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+Promise.all([fetch("rains/rains.json").then((r) => r.json()), fetch("rains/borders.json").then((r) => r.json())])
+  .then(async ([m, b]) => {
+    M = m; borders = b;
+    const c = document.createElement("canvas"); c.width = M.w; c.height = M.h;
+    const g = c.getContext("2d", { willReadFrequently: true });
+    const pics = await Promise.all(M.seasons.map((s) => img(`rains/${s.season}.png`)));
+    grids = pics.map((p) => { g.clearRect(0, 0, M.w, M.h); g.drawImage(p, 0, 0); const d = g.getImageData(0, 0, M.w, M.h).data, a = new Uint8Array(M.w * M.h); for (let i = 0; i < a.length; i++) a[i] = d[i * 4]; return a; });
+    yr.max = grids.length - 1; si = grids.length - 1; yr.value = si;
+    paint(); resize(); choose(-17.83, 31.05); GIS.state(loading, null);
+  })
+  .catch(() => GIS.state(loading, "The rainfall data could not be loaded. Run tools/rains/build.py.", true));
+</script>
+</body>
+</html>

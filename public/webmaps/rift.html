@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" class="gis gis-lay-float">
+<head>
+<meta charset="utf-8">
+<title>East African Rift</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#e9ecef; }
+  #stage canvas { display:block; width:100%; height:100%; outline:none; }
+  #tip b { font-weight:600; }
+  #labels { position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:2; }
+  #labels span { position:absolute; transform:translate(-50%,-50%); font-size:13px; font-weight:600; color:#174a7c;
+    text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 2px #fff; white-space:nowrap; }
+  #labels.off { display:none; }
+  .gis-legend li { cursor:pointer; user-select:none; }
+  .sw-arrow { width:18px; height:3px; background:#1b1f24; position:relative; border:0; }
+  .sw-arrow::after { content:""; position:absolute; right:-2px; top:-4px; border-left:7px solid #1b1f24; border-top:5.5px solid transparent; border-bottom:5.5px solid transparent; }
+  .sw-dash { height:3px; border:0; width:18px; background:repeating-linear-gradient(90deg,#7a1f12 0 5px,transparent 5px 8px); }
+  .sw-cone { width:0; height:0; border:0; border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:11px solid; margin:0 2px; }
+  #stats td:last-child { font-variant-numeric:tabular-nums; text-align:right; }
+  .gis-thumb #labels { display:none; }
+</style>
+<script type="importmap">{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+</head>
+<body>
+<main class="gis-map" id="stage">
+  <div id="labels"></div>
+  <div class="gis-tools gis-tools--bl"><div class="gis-grp">
+    <button class="gis-btn" id="zIn" type="button" title="Zoom in" aria-label="Zoom in"><i class="bi bi-plus-lg"></i></button>
+    <button class="gis-btn" id="zOut" type="button" title="Zoom out" aria-label="Zoom out"><i class="bi bi-dash-lg"></i></button>
+    <button class="gis-btn" id="zAll" type="button" title="Whole rift" aria-label="Whole rift"><i class="bi bi-fullscreen"></i></button>
+    <button class="gis-btn" id="tilt" type="button" title="Look straight down" aria-label="Look straight down"><i class="bi bi-badge-3d"></i></button></div></div>
+  <div class="gis-card gis-card--tl" style="width:230px"><h2 class="gis-h">Legend</h2>
+    <ul class="gis-legend" id="legend">
+      <li data-l="young"><i class="gis-sw sw-cone" style="border-bottom-color:#bd0026"></i>Volcano erupted since 1900</li>
+      <li data-l="old"><i class="gis-sw sw-cone" style="border-bottom-color:#fd8d3c"></i>Other Holocene volcano</li>
+      <li data-l="gps"><i class="gis-sw sw-arrow"></i>GPS motion</li>
+      <li data-l="plate"><i class="gis-sw sw-dash"></i>Plate boundary</li>
+      <li data-l="lakes"><i class="gis-sw" style="background:#6ea6d3"></i>Rift lake</li>
+    </ul></div>
+  <div class="gis-attr">Data from Terrain Tiles (SRTM and GMTED2010), Smithsonian Global Volcanism Program, Nevada Geodetic Laboratory, Natural Earth and Bird (2003). Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar-reverse"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the rift</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>East African Rift</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset-reverse"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><p class="gis-value" id="big">&nbsp;</p><p class="gis-p" id="what"></p></section>
+    <section class="gis-sec" style="padding:0"><table class="gis-table" id="stats"></table></section>
+    <section class="gis-sec"><div class="gis-label">Height exaggeration</div>
+      <div class="gis-seg gis-seg--full" id="ex"><button class="gis-btn" type="button" data-x="5">5 times</button><button class="gis-btn on" type="button" data-x="12">12 times</button><button class="gis-btn" type="button" data-x="25">25 times</button></div></section>
+    <section class="gis-sec gis-small">Arrows show GPS motion relative to the Nubian plate, drawn 25 km long for each mm a year. Stations on swelling volcanoes are left out. Click an arrow for its station.</section>
+  </div>
+</aside>
+<div class="gis-tip" id="tip"></div>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { Line2 } from "three/addons/lines/Line2.js";
+import { LineMaterial } from "three/addons/lines/LineMaterial.js";
+import { LineGeometry } from "three/addons/lines/LineGeometry.js";
+const $ = (id) => document.getElementById(id);
+const fmt = GIS.fmt, KM = 111.32, ARROW = 25; // km a degree; km of arrow for each mm a year
+const YOUNG = 0xbd0026, OLD = 0xfd8d3c, INK = 0x1b1f24, PLATE = 0x7a1f12;
+
+let D, Hgt, ex = 12, lon0, lat0, terrainMesh, picked = null;
+const layers = { young: [], old: [], gps: [], plate: [], lakes: [] };
+const stage = $("stage"), tip = $("tip");
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xe9ecef);
+const camera = new THREE.PerspectiveCamera(38, 1, 5, 40000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.maxPolarAngle = Math.PI * 0.46;
+controls.screenSpacePanning = false; controls.minDistance = 80; controls.maxDistance = 9000;
+
+// lon/lat to scene km: x east, z south (equirectangular)
+const X = (lon) => (lon - lon0) * KM, Zc = (lat) => -(lat - lat0) * KM;
+// terrain height in metres, bilinear on the grid of cell centres
+function heightAt(lon, lat) {
+  const [w0, , , n0] = D.extent, s = D.step;
+  const fx = Math.min(Math.max((lon - w0) / s - 0.5, 0), D.w - 1.001), fy = Math.min(Math.max((n0 - lat) / s - 0.5, 0), D.h - 1.001);
+  const i = Math.floor(fx), j = Math.floor(fy), a = fx - i, b = fy - j, k = j * D.w + i;
+  return (Hgt[k] * (1 - a) + Hgt[k + 1] * a) * (1 - b) + (Hgt[k + D.w] * (1 - a) + Hgt[k + D.w + 1] * a) * b;
+}
+const Y = (m) => Math.max(m, 0) * ex / 1000;
+
+const img = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("Could not load " + src + ". Run tools/rift/build.py.")); i.src = src; });
+
+function buildTerrain(hpic, gpic) {
+  const c = document.createElement("canvas"); c.width = D.w; c.height = D.h;
+  const g = c.getContext("2d", { willReadFrequently: true }); g.drawImage(hpic, 0, 0);
+  const px = g.getImageData(0, 0, D.w, D.h).data;
+  Hgt = new Float32Array(D.w * D.h);
+  for (let k = 0; k < Hgt.length; k++) Hgt[k] = px[k * 4] * 256 + px[k * 4 + 1] - 1000;
+  const [w0, s0, e0, n0] = D.extent, s = D.step;
+  const geo = new THREE.BufferGeometry(), n = D.w * D.h;
+  const pos = new Float32Array(n * 3), uv = new Float32Array(n * 2);
+  for (let j = 0; j < D.h; j++) for (let i = 0; i < D.w; i++) {
+    const k = j * D.w + i, lon = w0 + (i + 0.5) * s, lat = n0 - (j + 0.5) * s;
+    pos[k * 3] = X(lon); pos[k * 3 + 1] = Hgt[k]; pos[k * 3 + 2] = Zc(lat);
+    uv[k * 2] = (i + 0.5) / D.w; uv[k * 2 + 1] = 1 - (j + 0.5) / D.h;
+  }
+  const idx = new Uint32Array((D.w - 1) * (D.h - 1) * 6); let q = 0;
+  for (let j = 0; j < D.h - 1; j++) for (let i = 0; i < D.w - 1; i++) {
+    const a = j * D.w + i, b = a + 1, c2 = a + D.w, d = c2 + 1;
+    idx[q++] = a; idx[q++] = c2; idx[q++] = b; idx[q++] = b; idx[q++] = c2; idx[q++] = d;
+  }
+  geo.setAttribute("position", new THREE.BufferAttribute(pos, 3)); geo.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+  geo.setIndex(new THREE.BufferAttribute(idx, 1));
+  const tex = new THREE.Texture(gpic); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.needsUpdate = true;
+  terrainMesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex }));
+  terrainMesh.frustumCulled = false; scene.add(terrainMesh);
+  // a thin base so the block reads as a slice of the Earth
+  const span = [(e0 - w0) * KM, (n0 - s0) * KM];
+  const base = new THREE.Mesh(new THREE.BoxGeometry(span[0], 30, span[1]), new THREE.MeshBasicMaterial({ color: 0xc9cccf }));
+  base.position.set(X((w0 + e0) / 2), -15.2, Zc((s0 + n0) / 2)); scene.add(base);
+}
+
+// volcanoes: small cones sitting on the ground, true size of a symbol, not of the mountain
+const cone = new THREE.ConeGeometry(7, 16, 4); cone.translate(0, 8, 0);
+function buildVolcanoes() {
+  for (const [key, col, list] of [["young", YOUNG, D.volcanoes.filter((v) => v.last >= 1900)], ["old", OLD, D.volcanoes.filter((v) => !(v.last >= 1900))]]) {
+    const m = new THREE.InstancedMesh(cone, new THREE.MeshBasicMaterial({ color: col }), list.length);
+    m.userData = { list, kind: "volcano" }; scene.add(m); layers[key].push(m);
+  }
+  placeVolcanoes();
+}
+function placeVolcanoes() {
+  const o = new THREE.Object3D();
+  for (const m of [...layers.young, ...layers.old]) {
+    m.userData.list.forEach((v, i) => { o.position.set(X(v.lon), Y(heightAt(v.lon, v.lat)), Zc(v.lat)); o.updateMatrix(); m.setMatrixAt(i, o.matrix); });
+    m.instanceMatrix.needsUpdate = true; m.computeBoundingSphere();
+  }
+}
+
+// GPS arrows: flat shapes facing up, always drawn on top
+const arrowMat = new THREE.MeshBasicMaterial({ color: INK, depthTest: false, side: THREE.DoubleSide });
+const pickMat = new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: false, side: THREE.DoubleSide });
+const dotMat = new THREE.MeshBasicMaterial({ color: INK, depthTest: false });
+function arrowShape(len) {
+  const hw = 3.2, hl = Math.min(22, len * 0.45), hh = 9, sh = Math.max(len - hl, 0), s = new THREE.Shape();
+  s.moveTo(0, -hw); s.lineTo(sh, -hw); s.lineTo(sh, -hh); s.lineTo(len, 0); s.lineTo(sh, hh); s.lineTo(sh, hw); s.lineTo(0, hw); s.closePath();
+  return new THREE.ShapeGeometry(s);
+}
+function buildGps() {
+  const dot = new THREE.CircleGeometry(5, 20); dot.rotateX(-Math.PI / 2);
+  for (const st of D.gps.filter((s) => !s.volcanic)) {
+    const sp = Math.hypot(st.ve, st.vn), g = new THREE.Group();
+    const a = new THREE.Mesh(arrowShape(sp * ARROW), arrowMat);
+    a.rotation.x = -Math.PI / 2; a.rotation.z = Math.atan2(st.vn, st.ve); // shape +x east, +y north after rotation
+    const d = new THREE.Mesh(dot, dotMat);
+    a.renderOrder = d.renderOrder = 3;
+    g.add(a, d); g.userData = { st, kind: "gps", arrow: a };
+    scene.add(g); layers.gps.push(g);
+  }
+  placeGps();
+}
+function placeGps() { for (const g of layers.gps) { const s = g.userData.st; g.position.set(X(s.lon), Y(heightAt(s.lon, s.lat)) + 1.5, Zc(s.lat)); } }
+
+// plate boundary draped on the ground
+const plateMat = new LineMaterial({ color: PLATE, linewidth: 2.5, dashed: true, dashSize: 14, gapSize: 9, worldUnits: false });
+function buildPlates() { for (const line of D.boundary) { const l = new Line2(new LineGeometry(), plateMat); l.userData.line = line; scene.add(l); layers.plate.push(l); } placePlates(); }
+function placePlates() {
+  for (const l of layers.plate) {
+    const pts = [], L = l.userData.line;
+    for (let k = 0; k < L.length - 1; k++) {
+      const [a, b] = [L[k], L[k + 1]], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.04));
+      for (let t = 0; t < n; t++) { const lo = a[0] + (b[0] - a[0]) * t / n, la = a[1] + (b[1] - a[1]) * t / n; pts.push(X(lo), Y(heightAt(lo, la)) + 0.8, Zc(la)); }
+    }
+    const e = L[L.length - 1]; pts.push(X(e[0]), Y(heightAt(e[0], e[1])) + 0.8, Zc(e[1]));
+    l.geometry.dispose(); l.geometry = new LineGeometry(); l.geometry.setPositions(pts); l.computeLineDistances();
+  }
+}
+
+// lake names as text over the map
+const labelEls = [];
+function buildLakes() {
+  $("labels").innerHTML = D.lakes.map((l) => `<span>${l.name}</span>`).join("");
+  [...$("labels").children].forEach((el, i) => labelEls.push({ el, l: D.lakes[i] }));
+}
+const v3 = new THREE.Vector3();
+function drawLabels() {
+  const r = stage.getBoundingClientRect();
+  for (const { el, l } of labelEls) {
+    v3.set(X(l.lon), Y(heightAt(l.lon, l.lat)) + 1, Zc(l.lat)).project(camera);
+    const on = v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05;
+    el.style.display = on ? "" : "none";
+    if (on) el.style.transform = `translate(${((v3.x + 1) / 2 * r.width).toFixed(1)}px,${((1 - v3.y) / 2 * r.height).toFixed(1)}px) translate(-50%,-50%)`;
+  }
+}
+
+function setEx(x) {
+  ex = x; terrainMesh.scale.y = ex / 1000; placeVolcanoes(); placeGps(); placePlates();
+  document.querySelectorAll("#ex button").forEach((b) => b.classList.toggle("on", +b.dataset.x === x));
+}
+
+const DIRS = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"];
+const dirOf = (ve, vn) => DIRS[Math.round(((Math.atan2(ve, vn) * 180 / Math.PI + 360) % 360) / 45) % 8];
+function showStation(st) {
+  picked = st;
+  for (const g of layers.gps) g.userData.arrow.material = g.userData.st === st ? pickMat : arrowMat;
+  for (const g of layers.gps) g.children[1].material = g.userData.st === st ? pickMat : dotMat;
+  const sp = Math.hypot(st.ve, st.vn);
+  $("big").textContent = `${fmt(sp, 1)} mm a year`;
+  $("what").textContent = `GPS station ${st.id} moving ${dirOf(st.ve, st.vn)} relative to the Nubian plate.`;
+  $("stats").innerHTML = `<tr><td>East</td><td>${fmt(st.ve, 1)} mm</td></tr><tr><td>North</td><td>${fmt(st.vn, 1)} mm</td></tr>
+    <tr><td>Uncertainty</td><td>${fmt(Math.max(st.se, st.sn), 1)} mm</td></tr><tr><td>Years recorded</td><td>${fmt(st.yrs, 1)}</td></tr>`;
+}
+
+function home() {
+  if (document.documentElement.classList.contains("gis-thumb")) { // thumbnail: terrain fills the frame
+    controls.target.set(X(35.5), 0, Zc(0.5)); camera.position.set(X(36.5), 820, Zc(-4)); controls.update(); return;
+  }
+  controls.target.set(X(39), 0, Zc(-0.5));
+  camera.position.set(X(41), 2350, Zc(-21.5));
+  controls.update();
+}
+const dolly = (f) => { const v = camera.position.clone().sub(controls.target).multiplyScalar(f); camera.position.copy(controls.target).add(v); controls.update(); };
+$("zIn").onclick = () => dolly(1 / 1.4); $("zOut").onclick = () => dolly(1.4); $("zAll").onclick = home;
+$("tilt").onclick = () => { const d = camera.position.distanceTo(controls.target); camera.position.set(controls.target.x, controls.target.y + d, controls.target.z + 1); controls.update(); };
+document.querySelectorAll("#ex button").forEach((b) => (b.onclick = () => setEx(+b.dataset.x)));
+document.querySelectorAll("#legend li").forEach((li) => (li.onclick = () => {
+  const off = li.classList.toggle("off"), k = li.dataset.l;
+  if (k === "lakes") $("labels").classList.toggle("off", off); else layers[k].forEach((o) => (o.visible = !off));
+}));
+
+// hover and click
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+function hitTest(e) {
+  const r = renderer.domElement.getBoundingClientRect();
+  mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const gps = layers.gps.filter((g) => g.visible), vol = [...layers.young, ...layers.old].filter((m) => m.visible);
+  const hg = ray.intersectObjects(gps, true)[0];
+  if (hg) return { kind: "gps", st: hg.object.parent.userData.st };
+  const hv = ray.intersectObjects(vol, false)[0];
+  if (hv) return { kind: "volcano", v: hv.object.userData.list[hv.instanceId] };
+  return null;
+}
+const yearText = (y) => (y == null ? "No dated eruption" : `Last erupted ${y < 0 ? fmt(-y) + " BCE" : y}`);
+renderer.domElement.addEventListener("pointermove", (e) => {
+  if (e.buttons || e.pointerType === "touch") { tip.style.display = "none"; return; }
+  const h = hitTest(e);
+  renderer.domElement.style.cursor = h ? "pointer" : "";
+  if (!h) { tip.style.display = "none"; return; }
+  tip.innerHTML = h.kind === "gps"
+    ? `<b>${h.st.id}</b><br>${fmt(Math.hypot(h.st.ve, h.st.vn), 1)} mm a year ${dirOf(h.st.ve, h.st.vn)}`
+    : `<b>${h.v.name}</b><br>${h.v.elev != null ? fmt(h.v.elev) + " m" : ""}${h.v.elev != null ? "<br>" : ""}${yearText(h.v.last)}`;
+  tip.style.display = "block";
+  tip.style.left = Math.min(e.clientX + 16, innerWidth - 240) + "px"; tip.style.top = e.clientY + 14 + "px";
+});
+renderer.domElement.addEventListener("pointerleave", () => (tip.style.display = "none"));
+let down = null;
+renderer.domElement.addEventListener("pointerdown", (e) => (down = [e.clientX, e.clientY]));
+renderer.domElement.addEventListener("pointerup", (e) => {
+  if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 4) return;
+  const h = hitTest(e); if (h && h.kind === "gps") showStation(h.st);
+});
+
+function resize() {
+  const r = stage.getBoundingClientRect();
+  renderer.setSize(r.width, r.height, false); camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix();
+  plateMat.resolution.set(r.width, r.height);
+}
+addEventListener("resize", resize);
+function frame() { controls.update(); renderer.render(scene, camera); if (D) drawLabels(); requestAnimationFrame(frame); }
+
+resize(); requestAnimationFrame(frame);
+(async () => {
+  try {
+    const r = await fetch("rift/rift.json"); if (!r.ok) throw new Error("The rift data is missing. Run tools/rift/build.py.");
+    const meta = await r.json();
+    const [hpic, gpic] = await Promise.all([img("rift/height.png"), img("rift/ground.jpg")]);
+    D = meta; lon0 = (D.extent[0] + D.extent[2]) / 2; lat0 = (D.extent[1] + D.extent[3]) / 2;
+    buildTerrain(hpic, gpic); buildVolcanoes(); buildGps(); buildPlates(); buildLakes();
+    setEx(ex); home();
+    showStation(D.gps.find((s) => s.id === "DKUT") || D.gps[0]);
+    GIS.state($("loading"), null);
+  } catch (e) { GIS.state($("loading"), e.message, true); }
+})();
+</script>
+</body>
+</html>

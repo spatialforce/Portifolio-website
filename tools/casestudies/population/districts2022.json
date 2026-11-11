@@ -1,0 +1,639 @@
+[
+ {
+  "district": "Bulawayo",
+  "pop2022": 665940,
+  "adm2": "Bulawayo",
+  "pcode": "ZW1021",
+  "province": "Bulawayo"
+ },
+ {
+  "district": "Buhera",
+  "pop2022": 271920,
+  "adm2": "Buhera",
+  "pcode": "ZW1101",
+  "province": "Manicaland"
+ },
+ {
+  "district": "Chimanimani",
+  "pop2022": 153620,
+  "adm2": "Chimanimani",
+  "pcode": "ZW1102",
+  "province": "Manicaland"
+ },
+ {
+  "district": "Chipinge Rural",
+  "pop2022": 375259,
+  "adm2": "Chipinge",
+  "pcode": "ZW1103",
+  "province": "Manicaland"
+ },
+ {
+  "district": "Makoni",
+  "pop2022": 288444,
+  "adm2": "Makoni",
+  "pcode": "ZW1104",
+  "province": "Manicaland"
+ },
+ {
+  "district": "Mutare Rural",
+  "pop2022": 306760,
+  "adm2": "Mutare",
+  "pcode": "ZW1105",
+  "province": "Manicaland"
+ },
+ {
+  "district": "Mutasa",
+  "pop2022": 197810,
+  "adm2": "Mutasa",
+  "pcode": "ZW1106",
+  "province": "Manicaland"
+ },
+ {
+  "district": "Nyanga",
+  "pop2022": 146282,
+  "adm2": "Nyanga",
+  "pcode": "ZW1107",
+  "province": "Manicaland"
+ },
+ {
+  "district": "Mutare Urban",
+  "pop2022": 224802,
+  "adm2": "Mutare Urban",
+  "pcode": "ZW1121",
+  "province": "Manicaland"
+ },
+ {
+  "district": "Rusape",
+  "pop2022": 37906,
+  "adm2": "Rusape",
+  "pcode": "ZW1122",
+  "province": "Manicaland"
+ },
+ {
+  "district": "Chipinge Urban",
+  "pop2022": 34959,
+  "adm2": "Chipinge Urban",
+  "pcode": "ZW1123",
+  "province": "Manicaland"
+ },
+ {
+  "district": "Bindura Rural",
+  "pop2022": 169841,
+  "adm2": "Bindura",
+  "pcode": "ZW1201",
+  "province": "Mashonaland Central"
+ },
+ {
+  "district": "Muzarabani",
+  "pop2022": 134076,
+  "adm2": "Centenary/ Muzarabani",
+  "pcode": "ZW1202",
+  "province": "Mashonaland Central"
+ },
+ {
+  "district": "Guruve",
+  "pop2022": 153602,
+  "adm2": "Guruve",
+  "pcode": "ZW1203",
+  "province": "Mashonaland Central"
+ },
+ {
+  "district": "Mazowe",
+  "pop2022": 293362,
+  "adm2": "Mazowe",
+  "pcode": "ZW1204",
+  "province": "Mashonaland Central"
+ },
+ {
+  "district": "Mount Darwin",
+  "pop2022": 240727,
+  "adm2": "Mount Darwin",
+  "pcode": "ZW1205",
+  "province": "Mashonaland Central"
+ },
+ {
+  "district": "Rushinga",
+  "pop2022": 76880,
+  "adm2": "Rushinga",
+  "pcode": "ZW1206",
+  "province": "Mashonaland Central"
+ },
+ {
+  "district": "Shamva",
+  "pop2022": 165641,
+  "adm2": "Shamva",
+  "pcode": "ZW1207",
+  "province": "Mashonaland Central"
+ },
+ {
+  "district": "Mbire",
+  "pop2022": 83724,
+  "adm2": "Mbire",
+  "pcode": "ZW1208",
+  "province": "Mashonaland Central"
+ },
+ {
+  "district": "Bindura Urban",
+  "pop2022": 51393,
+  "adm2": "Bindura Urban",
+  "pcode": "ZW1221",
+  "province": "Mashonaland Central"
+ },
+ {
+  "district": "Mvurwi",
+  "pop2022": 15645,
+  "adm2": "Mvurwi",
+  "pcode": "ZW1209",
+  "province": "Mashonaland Central"
+ },
+ {
+  "district": "Chikomba",
+  "pop2022": 123937,
+  "adm2": "Chikomba",
+  "pcode": "ZW1301",
+  "province": "Mashonaland East"
+ },
+ {
+  "district": "Goromonzi",
+  "pop2022": 386199,
+  "adm2": "Goromonzi",
+  "pcode": "ZW1302",
+  "province": "Mashonaland East"
+ },
+ {
+  "district": "Hwedza",
+  "pop2022": 74869,
+  "adm2": "Hwedza",
+  "pcode": "ZW1303",
+  "province": "Mashonaland East"
+ },
+ {
+  "district": "Marondera Rural",
+  "pop2022": 136173,
+  "adm2": "Marondera",
+  "pcode": "ZW1304",
+  "province": "Mashonaland East"
+ },
+ {
+  "district": "Mudzi",
+  "pop2022": 158483,
+  "adm2": "Mudzi",
+  "pcode": "ZW1305",
+  "province": "Mashonaland East"
+ },
+ {
+  "district": "Murehwa",
+  "pop2022": 205442,
+  "adm2": "Murehwa",
+  "pcode": "ZW1306",
+  "province": "Mashonaland East"
+ },
+ {
+  "district": "Mutoko",
+  "pop2022": 161091,
+  "adm2": "Mutoko",
+  "pcode": "ZW1307",
+  "province": "Mashonaland East"
+ },
+ {
+  "district": "Seke",
+  "pop2022": 200476,
+  "adm2": "Seke",
+  "pcode": "ZW1308",
+  "province": "Mashonaland East"
+ },
+ {
+  "district": "Uzumba Maramba Pfungwe",
+  "pop2022": 124225,
+  "adm2": "Uzumba Maramba Pfungwe",
+  "pcode": "ZW1309",
+  "province": "Mashonaland East"
+ },
+ {
+  "district": "Marondera Urban",
+  "pop2022": 66203,
+  "adm2": "Marondera Urban",
+  "pcode": "ZW1321",
+  "province": "Mashonaland East"
+ },
+ {
+  "district": "Ruwa Local Board",
+  "pop2022": 94083,
+  "adm2": "Ruwa",
+  "pcode": "ZW1326",
+  "province": "Mashonaland East"
+ },
+ {
+  "district": "Chegutu Rural",
+  "pop2022": 178906,
+  "adm2": "Chegutu",
+  "pcode": "ZW1401",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Hurungwe",
+  "pop2022": 390907,
+  "adm2": "Hurungwe",
+  "pcode": "ZW1402",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Mhondoro-Ngezi",
+  "pop2022": 140991,
+  "adm2": "Mhondoro-Ngezi",
+  "pcode": "ZW1427",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Kariba Rural",
+  "pop2022": 45774,
+  "adm2": "Kariba",
+  "pcode": "ZW1404",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Makonde",
+  "pop2022": 209947,
+  "adm2": "Makonde",
+  "pcode": "ZW1405",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Zvimba",
+  "pop2022": 348000,
+  "adm2": "Zvimba",
+  "pcode": "ZW1406",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Sanyati",
+  "pop2022": 139233,
+  "adm2": "Sanyati",
+  "pcode": "ZW1428",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Chinhoyi Urban",
+  "pop2022": 103671,
+  "adm2": "Chinhoyi",
+  "pcode": "ZW1421",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Kadoma",
+  "pop2022": 117380,
+  "adm2": "Kadoma Urban",
+  "pcode": "ZW1403",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Chegutu Urban",
+  "pop2022": 66258,
+  "adm2": "Chegutu Urban",
+  "pcode": "ZW1423",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Kariba Urban",
+  "pop2022": 27909,
+  "adm2": "Kariba Urban",
+  "pcode": "ZW1424",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Norton",
+  "pop2022": 87038,
+  "adm2": "Norton",
+  "pcode": "ZW1425",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Karoi",
+  "pop2022": 37564,
+  "adm2": "Karoi",
+  "pcode": "ZW1426",
+  "province": "Mashonaland West"
+ },
+ {
+  "district": "Binga",
+  "pop2022": 159982,
+  "adm2": "Binga",
+  "pcode": "ZW1501",
+  "province": "Matabeleland North"
+ },
+ {
+  "district": "Bubi",
+  "pop2022": 74084,
+  "adm2": "Bubi",
+  "pcode": "ZW1502",
+  "province": "Matabeleland North"
+ },
+ {
+  "district": "Hwange Rural",
+  "pop2022": 69357,
+  "adm2": "Hwange",
+  "pcode": "ZW1503",
+  "province": "Matabeleland North"
+ },
+ {
+  "district": "Lupane",
+  "pop2022": 107245,
+  "adm2": "Lupane",
+  "pcode": "ZW1504",
+  "province": "Matabeleland North"
+ },
+ {
+  "district": "Nkayi",
+  "pop2022": 112471,
+  "adm2": "Nkayi",
+  "pcode": "ZW1505",
+  "province": "Matabeleland North"
+ },
+ {
+  "district": "Tsholotsho",
+  "pop2022": 115782,
+  "adm2": "Tsholotsho",
+  "pcode": "ZW1506",
+  "province": "Matabeleland North"
+ },
+ {
+  "district": "Umguza",
+  "pop2022": 113265,
+  "adm2": "Umguza",
+  "pcode": "ZW1507",
+  "province": "Matabeleland North"
+ },
+ {
+  "district": "Hwange Urban",
+  "pop2022": 40241,
+  "adm2": "Hwange Urban",
+  "pcode": "ZW1521",
+  "province": "Matabeleland North"
+ },
+ {
+  "district": "Victoria Falls",
+  "pop2022": 35199,
+  "adm2": "Victoria Falls",
+  "pcode": "ZW1522",
+  "province": "Matabeleland North"
+ },
+ {
+  "district": "Beitbridge Rural",
+  "pop2022": 94000,
+  "adm2": "Beitbridge",
+  "pcode": "ZW1601",
+  "province": "Matabeleland South"
+ },
+ {
+  "district": "Bulilima",
+  "pop2022": 85600,
+  "adm2": "Bulilima",
+  "pcode": "ZW1602",
+  "province": "Matabeleland South"
+ },
+ {
+  "district": "Mangwe",
+  "pop2022": 65562,
+  "adm2": "Mangwe",
+  "pcode": "ZW1603",
+  "province": "Matabeleland South"
+ },
+ {
+  "district": "Gwanda",
+  "pop2022": 124548,
+  "adm2": "Gwanda",
+  "pcode": "ZW1604",
+  "province": "Matabeleland South"
+ },
+ {
+  "district": "Insiza",
+  "pop2022": 122903,
+  "adm2": "Insiza",
+  "pcode": "ZW1605",
+  "province": "Matabeleland South"
+ },
+ {
+  "district": "Matobo",
+  "pop2022": 95696,
+  "adm2": "Matobo",
+  "pcode": "ZW1606",
+  "province": "Matabeleland South"
+ },
+ {
+  "district": "Umzingwane",
+  "pop2022": 71860,
+  "adm2": "Umzingwane",
+  "pcode": "ZW1607",
+  "province": "Matabeleland South"
+ },
+ {
+  "district": "Gwanda Urban",
+  "pop2022": 27143,
+  "adm2": "Gwanda Urban",
+  "pcode": "ZW1621",
+  "province": "Matabeleland South"
+ },
+ {
+  "district": "Beitbridge",
+  "pop2022": 58574,
+  "adm2": "Beitbridge Urban",
+  "pcode": "ZW1622",
+  "province": "Matabeleland South"
+ },
+ {
+  "district": "Plumtree",
+  "pop2022": 14459,
+  "adm2": "Plumtree",
+  "pcode": "ZW1623",
+  "province": "Matabeleland South"
+ },
+ {
+  "district": "Chirumhanzu",
+  "pop2022": 95272,
+  "adm2": "Chirumhanzu",
+  "pcode": "ZW1701",
+  "province": "Midlands"
+ },
+ {
+  "district": "Gokwe North",
+  "pop2022": 249723,
+  "adm2": "Gokwe North",
+  "pcode": "ZW1702",
+  "province": "Midlands"
+ },
+ {
+  "district": "Gokwe South",
+  "pop2022": 317553,
+  "adm2": "Gokwe South",
+  "pcode": "ZW1703",
+  "province": "Midlands"
+ },
+ {
+  "district": "Gweru Rural",
+  "pop2022": 121712,
+  "adm2": "Gweru",
+  "pcode": "ZW1704",
+  "province": "Midlands"
+ },
+ {
+  "district": "Kwekwe Rural",
+  "pop2022": 197063,
+  "adm2": "Kwekwe",
+  "pcode": "ZW1705",
+  "province": "Midlands"
+ },
+ {
+  "district": "Mberengwa",
+  "pop2022": 208458,
+  "adm2": "Mberengwa",
+  "pcode": "ZW1706",
+  "province": "Midlands"
+ },
+ {
+  "district": "Shurugwi Rural",
+  "pop2022": 98315,
+  "adm2": "Shurugwi",
+  "pcode": "ZW1707",
+  "province": "Midlands"
+ },
+ {
+  "district": "Zvishavane Rural",
+  "pop2022": 85035,
+  "adm2": "Zvishavane",
+  "pcode": "ZW1708",
+  "province": "Midlands"
+ },
+ {
+  "district": "Gweru Urban",
+  "pop2022": 161292,
+  "adm2": "Gweru Urban",
+  "pcode": "ZW1721",
+  "province": "Midlands"
+ },
+ {
+  "district": "Kwekwe Urban",
+  "pop2022": 119863,
+  "adm2": "Kwekwe Urban",
+  "pcode": "ZW1722",
+  "province": "Midlands"
+ },
+ {
+  "district": "Redcliff",
+  "pop2022": 41526,
+  "adm2": "Redcliff",
+  "pcode": "ZW1723",
+  "province": "Midlands"
+ },
+ {
+  "district": "Zvishavane Urban",
+  "pop2022": 59717,
+  "adm2": "Zvishavane Urban",
+  "pcode": "ZW1725",
+  "province": "Midlands"
+ },
+ {
+  "district": "Gokwe Centre",
+  "pop2022": 33075,
+  "adm2": "Gokwe South Urban",
+  "pcode": "ZW1729",
+  "province": "Midlands"
+ },
+ {
+  "district": "Shurugwi Urban",
+  "pop2022": 23304,
+  "adm2": "Shurugwi Town",
+  "pcode": "ZW1728",
+  "province": "Midlands"
+ },
+ {
+  "district": "Bikita",
+  "pop2022": 176835,
+  "adm2": "Bikita",
+  "pcode": "ZW1801",
+  "province": "Masvingo"
+ },
+ {
+  "district": "Chiredzi Rural",
+  "pop2022": 303503,
+  "adm2": "Chiredzi",
+  "pcode": "ZW1802",
+  "province": "Masvingo"
+ },
+ {
+  "district": "Chivi",
+  "pop2022": 172979,
+  "adm2": "Chivi",
+  "pcode": "ZW1803",
+  "province": "Masvingo"
+ },
+ {
+  "district": "Gutu",
+  "pop2022": 208160,
+  "adm2": "Gutu",
+  "pcode": "ZW1804",
+  "province": "Masvingo"
+ },
+ {
+  "district": "Masvingo Rural",
+  "pop2022": 238103,
+  "adm2": "Masvingo",
+  "pcode": "ZW1805",
+  "province": "Masvingo"
+ },
+ {
+  "district": "Mwenezi",
+  "pop2022": 209327,
+  "adm2": "Mwenezi",
+  "pcode": "ZW1806",
+  "province": "Masvingo"
+ },
+ {
+  "district": "Zaka",
+  "pop2022": 198889,
+  "adm2": "Zaka",
+  "pcode": "ZW1807",
+  "province": "Masvingo"
+ },
+ {
+  "district": "Masvingo Urban",
+  "pop2022": 90286,
+  "adm2": "Masvingo Urban",
+  "pcode": "ZW1821",
+  "province": "Masvingo"
+ },
+ {
+  "district": "Chiredzi Urban",
+  "pop2022": 40457,
+  "adm2": "Chiredzi Urban",
+  "pcode": "ZW1822",
+  "province": "Masvingo"
+ },
+ {
+  "district": "Harare Rural",
+  "pop2022": 357860,
+  "adm2": "Harare Rural",
+  "pcode": "ZW1924",
+  "province": "Harare"
+ },
+ {
+  "district": "Harare Urban",
+  "pop2022": 1491740,
+  "adm2": "Harare",
+  "pcode": "ZW1921",
+  "province": "Harare"
+ },
+ {
+  "district": "Chitungwiza",
+  "pop2022": 371244,
+  "adm2": "Chitungwiza",
+  "pcode": "ZW1922",
+  "province": "Harare"
+ },
+ {
+  "district": "Epworth",
+  "pop2022": 206365,
+  "adm2": "Epworth",
+  "pcode": "ZW1923",
+  "province": "Harare"
+ }
+]

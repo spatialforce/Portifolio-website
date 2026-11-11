@@ -1,0 +1,131 @@
+body{font-family:'Open Sans',Arial,sans-serif;color:#333;background:#fff;line-height:1.7;margin:0}
+.snav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 5%;background:#161a18;font-family:'Montserrat',Arial,sans-serif}
+.snav a{color:#fff;text-decoration:none}
+.snav__brand{font-weight:600;letter-spacing:1px;font-size:15px}
+.snav__links{display:flex;gap:28px}
+.snav__links a{font-size:13px;font-weight:500;letter-spacing:1.5px;padding:6px 0;border-bottom:2px solid transparent}
+.snav__links a:hover{border-bottom-color:#8ccf3f}
+
+.ptitle{max-width:1000px;margin:0 auto;padding:120px 24px 24px}
+.ptitle h1{font-family:'Montserrat',Arial,sans-serif;font-size:clamp(28px,4.5vw,42px);font-weight:600;line-height:1.2;margin:0 0 12px;color:#111}
+.ptitle__subtitle{font-size:18px;color:#555;margin:0;max-width:760px}
+
+.psection{max-width:1000px;margin:0 auto;padding:28px 24px}
+.sec-h{font-family:'Montserrat',Arial,sans-serif;font-size:24px;font-weight:600;margin:0 0 14px;color:#111}
+.sec-h--sub{font-size:18px;margin:28px 0 12px}
+.poverview,.proj-p{margin:0 0 12px;max-width:780px}
+.proj-h2{font-family:'Montserrat',Arial,sans-serif;font-size:18px;font-weight:600;margin:0 0 8px;color:#111}
+.proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+
+.case-nav{max-width:1000px;margin:0 auto;padding:6px 24px 0;display:flex;flex-wrap:wrap;gap:10px}
+.case-nav a{padding:8px 16px;border:1px solid #ccc;color:#222;text-decoration:none;font-size:14px;font-weight:500}
+.case-nav a:hover{background:#222;color:#fff;border-color:#222}
+.case-divider{max-width:1000px;margin:56px auto 8px;padding:36px 24px 0;border-top:1px solid #ddd}
+.case-divider h2{font-family:'Montserrat',Arial,sans-serif;font-size:30px;font-weight:600;margin:0 0 10px;color:#111}
+.case-divider p{margin:0;max-width:780px;color:#555}
+
+.stat-strip{max-width:1000px;margin:8px auto 0;padding:16px 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.stat-strip__item{background:#f3f4f1;padding:16px 18px}
+.stat-strip__value{display:block;font-family:'Montserrat',Arial,sans-serif;font-size:28px;font-weight:600;color:#111;line-height:1.2}
+.stat-strip__label{display:block;font-size:14px;color:#555;margin-top:4px;line-height:1.45}
+
+.map-card{border:1px solid #ddd;background:#fff}
+.map-card--solo{max-width:900px}
+.map-card__head{padding:10px 14px;border-bottom:1px solid #eee}
+.map-card__year{font-family:'Montserrat',Arial,sans-serif;font-weight:600}
+.map-card__epochs{display:none}
+.map-frame{background:#f4f4f4;display:flex;justify-content:center}
+.map-img{display:block;width:100%;height:auto;object-fit:contain}
+.map-card__foot{padding:8px 14px;border-top:1px solid #eee}
+.map-view{font-size:14px;color:#222}
+.map-view--disabled{color:#999}
+.map-ph{padding:60px 20px;color:#999;text-align:center}
+.map-triptych{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.map-pair{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.map-caption{font-size:14px;color:#555;margin:12px 0 0;max-width:820px}
+
+.tbl-wrap{overflow-x:auto;margin-bottom:8px}
+.tbl-wrap--narrow{max-width:640px}
+.dtable{width:100%;border-collapse:collapse;font-size:15px}
+.dtable th{text-align:left;font-weight:600;background:#f3f4f1;padding:10px 12px;border-bottom:2px solid #ccc;white-space:nowrap}
+.dtable td{padding:10px 12px;border-bottom:1px solid #e5e5e5;vertical-align:top}
+.dtable__label{font-weight:600}
+.dtable__row--hl td{background:#fbf6dd}
+.dtable__row--total td{font-weight:700;border-top:2px solid #333}
+.dtable__pct{display:block;font-size:12px;color:#777}
+.dtable__bar{min-width:140px}
+.bar{height:8px;background:#e8e8e8}
+.bar__fill{height:100%;background:#4c8a2b}
+.tbl-note{font-size:14px;color:#555;margin:10px 0 0;max-width:820px}
+
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:20px}
+.cmp__col{border:1px solid #ddd;padding:14px}
+.cmp__col--all{background:#f3f4f1}
+.cmp__name{font-family:'Montserrat',Arial,sans-serif;font-size:15px;font-weight:600;margin:0 0 10px}
+.cmp__row{display:grid;grid-template-columns:48px 1fr 48px;gap:8px;align-items:center;font-size:13px;margin-bottom:6px}
+.cmp__track{height:8px;background:#e8e8e8}
+.cmp__bar{height:100%;background:#4c8a2b}
+.cmp__bar--area{background:#999}
+.cmp__val{text-align:right}
+.cmp__n{font-size:13px;color:#666;margin:6px 0 0}
+
+.map-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:24px}
+button.map-card{font:inherit;text-align:left;padding:0;cursor:pointer;color:inherit}
+button.map-card img{display:block;width:100%;aspect-ratio:4/3;object-fit:contain;background:#f4f4f4}
+.map-card__info{display:block;padding:12px 14px}
+.map-card__label{display:block;font-family:'Montserrat',Arial,sans-serif;font-weight:600;font-size:17px}
+.map-card__province{display:block;color:#666;font-size:14px}
+.map-card__focus{display:block;font-size:14px;margin-top:4px}
+.map-card__tag,.map-card__coords,.plightbox__coords{display:none}
+
+.fsheet-list{display:flex;flex-direction:column;gap:48px}
+.fsheet{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start;padding-bottom:48px;border-bottom:1px solid #e5e5e5}
+.fsheet:last-child{border-bottom:0}
+.fsheet__frame{border:1px solid #ddd;background:#f4f4f4;padding:0;cursor:pointer}
+.fsheet__frame img{display:block;width:100%;height:auto}
+.fsheet__tag{display:none}
+.fsheet__info h3{font-family:'Montserrat',Arial,sans-serif;font-size:22px;font-weight:600;margin:0 0 4px}
+.fsheet__location{color:#666;margin:0 0 14px}
+.fsheet__stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 16px;padding:12px 0;border-top:1px solid #eee;border-bottom:1px solid #eee}
+.fsheet__stats dt{font-size:12px;color:#777}
+.fsheet__stats dd{margin:0;font-weight:600;font-size:14px;line-height:1.4}
+.fsheet__block{margin-bottom:12px}
+.fsheet__block-label{display:block;font-weight:600;color:#111;margin-bottom:2px}
+.fsheet__block p{margin:0}
+.psources{list-style:none;padding:0;margin:0}
+.psources li{margin-bottom:6px}
+.psources span{font-weight:600;margin-right:8px}
+
+.pcta{text-align:center;max-width:700px;margin-top:20px;border-top:1px solid #ddd;padding-top:40px}
+.pcta h2{font-family:'Montserrat',Arial,sans-serif;font-size:24px;margin:0 0 10px}
+.pcta p{color:#555}
+.pcta__actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+.btn-solid,.btn-line{padding:11px 26px;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;border:2px solid #222;font-family:'Montserrat',Arial,sans-serif}
+.btn-solid{background:#222;color:#fff}
+.btn-line{color:#222}
+.btn-solid:hover{background:#000}.btn-line:hover{background:#222;color:#fff}
+
+.plightbox{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.plightbox img{max-width:94vw;max-height:80vh;object-fit:contain}
+.plightbox__close{position:absolute;top:14px;right:22px;background:none;border:0;color:#fff;font-size:38px;cursor:pointer}
+.plightbox__caption,.plightbox>p{color:#fff;text-align:center;margin-top:12px}
+.plightbox__title{font-weight:600;margin:0}.plightbox__focus{margin:0;color:#ccc}
+
+.sfoot{background:#161a18;color:#ccc;text-align:center;padding:40px 24px;margin-top:60px}
+.sfoot p{margin:0 0 8px}.sfoot a{color:#fff}.sfoot small{color:#888}
+.soon{color:#555;font-size:17px}
+
+@media(max-width:800px){
+ .proj-grid,.fsheet{grid-template-columns:1fr}
+ .map-triptych,.map-pair{grid-template-columns:1fr}
+ .snav__links{gap:16px}.snav__brand{font-size:13px}
+}
+
+.plist{display:flex;flex-direction:column;gap:28px}
+.plist__row{display:grid;grid-template-columns:minmax(0,320px) 1fr;gap:28px;align-items:center;text-decoration:none;color:inherit;padding-bottom:28px;border-bottom:1px solid #e5e5e5}
+.plist__row:last-child{border-bottom:0}
+.plist__row img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:#f4f4f4}
+.plist__row h3{font-family:'Montserrat',Arial,sans-serif;font-size:22px;font-weight:600;margin:0 0 6px;color:#111}
+.plist__row p{margin:0;color:#555}
+.plist__row:hover h3{text-decoration:underline}
+@media(max-width:800px){.plist__row{grid-template-columns:1fr}}

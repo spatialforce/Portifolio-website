@@ -1,0 +1,48 @@
+{
+  "width": 1500,
+  "height": 1340,
+  "bounds": {
+    "w": -154.985,
+    "e": -154.795,
+    "s": 19.4,
+    "n": 19.56
+  },
+  "panels": [
+    {
+      "label": "Before",
+      "when": "Apr 2018",
+      "file": "0.jpg",
+      "lavaKm2": 0.0
+    },
+    {
+      "label": "May 2018",
+      "when": "",
+      "file": "1.jpg",
+      "lavaKm2": 14.1
+    },
+    {
+      "label": "June 2018",
+      "when": "",
+      "file": "2.jpg",
+      "lavaKm2": 26.3
+    },
+    {
+      "label": "July 2018",
+      "when": "",
+      "file": "3.jpg",
+      "lavaKm2": 31.5
+    },
+    {
+      "label": "August 2018",
+      "when": "",
+      "file": "4.jpg",
+      "lavaKm2": 34.7
+    },
+    {
+      "label": "After",
+      "when": "Jan 2019",
+      "file": "5.jpg",
+      "lavaKm2": 36.0
+    }
+  ]
+}

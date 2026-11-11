@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" class="gis">
+<head>
+<meta charset="utf-8">
+<title>Trade Corridors</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#0a0c0f; }
+  #map { position:absolute; inset:0; width:100%; height:100%; cursor:grab; touch-action:none; }
+  #map.drag { cursor:grabbing; }
+  .gis-scale { color:#eceff2; }
+  #info h2 { margin:0; font-size:var(--gis-t-title); font-weight:600; }
+  #info .route { margin:0 0 8px; color:var(--gis-fg2); }
+  #info .gis-dl { margin-bottom:8px; }
+</style>
+</head>
+<body>
+<main class="gis-map" id="stage"><canvas id="map"></canvas>
+  <div class="gis-card gis-card--bl"><h2 class="gis-h">Legend</h2><ul class="gis-legend" id="legend"></ul></div>
+  <div class="gis-tools gis-tools--right"><div class="gis-grp">
+    <button class="gis-btn" id="zIn" type="button" title="Zoom in" aria-label="Zoom in"><i class="bi bi-plus-lg"></i></button>
+    <button class="gis-btn" id="zOut" type="button" title="Zoom out" aria-label="Zoom out"><i class="bi bi-dash-lg"></i></button>
+    <button class="gis-btn" id="zAll" type="button" title="Full extent" aria-label="Full extent"><i class="bi bi-fullscreen"></i></button></div></div>
+  <div class="gis-scale" id="scale"></div>
+  <div class="gis-attr">Data from Natural Earth. Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar-reverse"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the corridors</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Trade corridors</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset-reverse"></i></button></header>
+  <div class="gis-panel__bd">
+    <ul class="gis-list" id="list"></ul>
+    <section class="gis-sec" id="info"></section>
+  </div>
+</aside>
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => Math.round(n).toLocaleString("en-US").replace(/,/g, " ");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const COL = { rail: "#f2a65a", road: "#9cc3d5" };
+const RGB = { rail: [242, 166, 90], road: [156, 195, 213] };
+
+const cv = $("map"), x = cv.getContext("2d");
+let D, W = 0, H = 0, dpr = 1;
+let view = { cx: 0, cy: 0, k: 1 };        // map centre in km and pixels per km
+let sel = null, hover = null, t0 = performance.now();
+
+function fit() {
+  const pad = 30, top = pad;
+  const w = W - pad * 2, h = H - top - pad;
+  const b = D.bounds;
+  view.k = Math.min(w / (b[2] - b[0]), h / (b[3] - b[1]));
+  view.cx = (b[0] + b[2]) / 2;
+  view.cy = (b[1] + b[3]) / 2;
+  view.ox = pad + w / 2; view.oy = top + h / 2;
+}
+const sx = (px) => view.ox + (px - view.cx) * view.k;
+const sy = (py) => view.oy - (py - view.cy) * view.k;
+
+function resize() {
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  const r = $("stage").getBoundingClientRect(); W = r.width; H = r.height;
+  cv.width = W * dpr; cv.height = H * dpr;
+}
+function path(pts) { x.beginPath(); pts.forEach((p, i) => (i ? x.lineTo(sx(p[0]), sy(p[1])) : x.moveTo(sx(p[0]), sy(p[1])))); }
+
+function draw(now) {
+  const t = (now - t0) / 1000;
+  x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  x.fillStyle = "#0a0c0f"; x.fillRect(0, 0, W, H);
+
+  // land and borders
+  x.fillStyle = "#15191e"; x.strokeStyle = "#2a3038"; x.lineWidth = 0.8;
+  for (const r of D.land) { path(r); x.closePath(); x.fill(); x.stroke(); }
+  x.fillStyle = "#0a0c0f"; for (const r of D.lakes) { path(r); x.closePath(); x.fill(); }
+
+  // the whole network, faint
+  x.lineWidth = 0.7; x.strokeStyle = "rgba(156,195,213,.13)"; for (const l of D.road) { path(l); x.stroke(); }
+  x.strokeStyle = "rgba(242,166,90,.18)"; for (const l of D.rail) { path(l); x.stroke(); }
+
+  // country names
+  x.font = "600 11px Source Sans 3, sans-serif"; x.textAlign = "center"; x.fillStyle = "rgba(236,232,225,.22)";
+  for (const [n, a, b] of D.labels) x.fillText(n.toUpperCase(), sx(a), sy(b));
+
+  // corridors
+  const focus = sel || hover;
+  for (const c of D.corridors) {
+    const on = !focus || c === focus, [r, g, b] = RGB[c.mode];
+    x.lineJoin = "round"; x.lineCap = "round";
+    path(c.line);
+    x.strokeStyle = `rgba(${r},${g},${b},${on ? 0.55 : 0.14})`; x.lineWidth = c === focus ? 3.2 : 2; x.stroke();
+
+    // goods moving inland from the port
+    const speed = reduce ? 60 : 160;   // km per second
+    const gap = 70, n = Math.floor(c.total / gap);
+    x.fillStyle = `rgba(${Math.min(255, r + 30)},${Math.min(255, g + 30)},${Math.min(255, b + 30)},${on ? 0.95 : 0.25})`;
+    const rad = c === focus ? 2.6 : 1.8;
+    for (let i = 0; i < n; i++) {
+      const d = (i * gap + t * speed) % c.total;
+      const p = at(c, d);
+      x.beginPath(); x.arc(sx(p[0]), sy(p[1]), rad, 0, 7); x.fill();
+    }
+  }
+
+  // ports and towns
+  x.textAlign = "left"; x.font = "12px Source Sans 3, sans-serif";
+  const near = focus ? new Set(focus.stops) : null;
+  for (const [n, a, b] of D.towns) {
+    const lit = near && near.has(n);
+    x.fillStyle = lit ? "#ece8e1" : "rgba(236,232,225,.35)";
+    x.fillRect(sx(a) - 1.5, sy(b) - 1.5, 3, 3);
+    if (lit || view.k > 0.45) { x.fillStyle = lit ? "#ece8e1" : "rgba(236,232,225,.4)"; x.fillText(n, sx(a) + 6, sy(b) + 4); }
+  }
+  x.font = "600 13px Source Sans 3, sans-serif";
+  for (const [n, a, b] of D.ports) {
+    const lit = !focus || focus.port === n;
+    x.fillStyle = lit ? "#fff" : "rgba(255,255,255,.4)";
+    x.fillRect(sx(a) - 3.5, sy(b) - 3.5, 7, 7);
+    x.fillText(n, sx(a) + 9, sy(b) + 4);
+  }
+  if (view.k !== lastK) { lastK = view.k; GIS.scale($("scale"), 1 / view.k); }
+  requestAnimationFrame(draw);
+}
+let lastK = 0;
+
+// position along a corridor, d km from the port
+function at(c, d) {
+  const L = c.cum; let lo = 0, hi = L.length - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (L[m] <= d) lo = m; else hi = m; }
+  const a = c.line[lo], b = c.line[hi], w = (d - L[lo]) / ((L[hi] - L[lo]) || 1);
+  return [a[0] + (b[0] - a[0]) * w, a[1] + (b[1] - a[1]) * w];
+}
+
+function info(c) {
+  if (!c) {
+    $("info").innerHTML = `<p>Eight corridors run inland from seven ports.</p><p class="gis-muted" style="margin-top:8px">Pick one to see its route.</p>`;
+    return;
+  }
+  $("info").innerHTML = `<h2>${c.name}</h2><div class="route">${c.port} to ${c.end}</div>
+    <dl class="gis-dl"><dt>Length</dt><dd>${fmt(c.km)} km by ${c.mode}</dd>
+    <dt>Countries</dt><dd>${c.countries.join("<br>").replace("Dem. Rep. Congo", "DR Congo")}</dd>
+    <dt>Borders</dt><dd>${c.borders.join("<br>")}</dd></dl><p>${c.text}</p>`;
+}
+function select(c) {
+  sel = sel === c ? null : c;
+  [...$("list").children].forEach((li, i) => li.classList.toggle("on", D.corridors[i] === sel));
+  info(sel);
+}
+
+// picking a corridor on the map
+function pick(mx, my) {
+  let best = null, bd = 10;
+  for (const c of D.corridors) for (let i = 1; i < c.line.length; i++) {
+    const ax = sx(c.line[i - 1][0]), ay = sy(c.line[i - 1][1]), bx = sx(c.line[i][0]), by = sy(c.line[i][1]);
+    const dx = bx - ax, dy = by - ay, l = dx * dx + dy * dy || 1;
+    const u = Math.max(0, Math.min(1, ((mx - ax) * dx + (my - ay) * dy) / l));
+    const d = Math.hypot(mx - ax - u * dx, my - ay - u * dy);
+    if (d < bd) { bd = d; best = c; }
+  }
+  return best;
+}
+
+// pan and zoom
+let drag = null, moved = false;
+cv.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy }; moved = false; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove", (e) => {
+  if (drag) {
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) { moved = true; cv.classList.add("drag"); }
+    view.cx = drag.cx - dx / view.k; view.cy = drag.cy + dy / view.k;
+  } else if (e.pointerType === "mouse") {
+    hover = pick(e.clientX, e.clientY); cv.style.cursor = hover ? "pointer" : "";
+  }
+});
+cv.addEventListener("pointerup", (e) => {
+  cv.classList.remove("drag");
+  if (!moved) { const c = pick(e.clientX, e.clientY); if (c || sel) select(c || sel); }
+  drag = null;
+});
+cv.addEventListener("pointerleave", () => { hover = null; });
+cv.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const f = Math.exp(-e.deltaY * 0.0015), mx = e.clientX, my = e.clientY;
+  const px = view.cx + (mx - view.ox) / view.k, py = view.cy - (my - view.oy) / view.k;
+  view.k = Math.max(0.15, Math.min(4, view.k * f));
+  view.cx = px - (mx - view.ox) / view.k; view.cy = py + (my - view.oy) / view.k;
+}, { passive: false });
+addEventListener("keydown", (e) => { if (e.key === "Escape" && sel) select(sel); });
+addEventListener("resize", () => { resize(); fit(); });
+function zoomBy(f) {
+  const k = Math.max(0.15, Math.min(4, view.k * f));
+  view.cx += (W / 2 - view.ox) / view.k - (W / 2 - view.ox) / k; view.cy -= (H / 2 - view.oy) / view.k - (H / 2 - view.oy) / k; view.k = k;
+}
+$("zIn").onclick = () => zoomBy(1.6); $("zOut").onclick = () => zoomBy(1 / 1.6); $("zAll").onclick = () => fit();
+
+fetch("corridors/corridors.json").then((r) => { if (!r.ok) throw new Error("The corridor data is missing. Run tools/corridors/build.py."); return r.json(); }).then((d) => {
+  D = d;
+  const all = D.corridors.flatMap((c) => c.line);
+  D.bounds = [Math.min(...all.map((p) => p[0])) - 60, Math.min(...all.map((p) => p[1])) - 60, Math.max(...all.map((p) => p[0])) + 60, Math.max(...all.map((p) => p[1])) + 60];
+  const stops = { "north-south": ["Johannesburg", "Beitbridge", "Harare", "Chirundu", "Lusaka", "Ndola", "Lubumbashi"],
+    beira: ["Mutare", "Harare"], maputo: ["Mbombela", "Johannesburg"], nacala: ["Nampula", "Cuamba", "Blantyre", "Lilongwe"],
+    tazara: ["Mbeya", "Tunduma", "Mpika", "Kapiri Mposhi"], lobito: ["Huambo", "Kuito", "Luena", "Luau", "Kolwezi"],
+    "trans-kalahari": ["Windhoek", "Gobabis", "Gaborone", "Pretoria"], "walvis-ndola": ["Grootfontein", "Rundu", "Katima Mulilo", "Livingstone", "Lusaka", "Ndola", "Lubumbashi"] };
+  for (const c of D.corridors) {
+    c.cum = [0]; for (let i = 1; i < c.line.length; i++) c.cum.push(c.cum[i - 1] + Math.hypot(c.line[i][0] - c.line[i - 1][0], c.line[i][1] - c.line[i - 1][1]));
+    c.total = c.cum[c.cum.length - 1]; c.stops = stops[c.slug] || [];
+  }
+  $("list").innerHTML = D.corridors.map((c) => `<li tabindex="0"><i class="gis-sw gis-sw--line" style="background:${COL[c.mode]}"></i>${c.name}<span class="gis-end">${fmt(c.km)} km</span></li>`).join("");
+  [...$("list").children].forEach((li, i) => { li.onclick = () => select(D.corridors[i]); li.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(D.corridors[i]); } }; li.onmouseenter = () => (hover = D.corridors[i]); li.onmouseleave = () => (hover = null); });
+  $("legend").innerHTML = Object.entries(COL).map(([m, c]) => `<li><i class="gis-sw gis-sw--line" style="background:${c}"></i>${m[0].toUpperCase() + m.slice(1)}</li>`).join("")
+    + `<li><i class="gis-sw" style="background:#0a0c0f;display:grid;place-items:center"><b style="width:7px;height:7px;background:#fff"></b></i>Port</li><li><i class="gis-sw" style="background:#0a0c0f;display:grid;place-items:center"><b style="width:3px;height:3px;background:#ece8e1"></b></i>Town</li>`;
+  info(null); resize(); fit();
+  GIS.state($("loading"), null);
+  requestAnimationFrame(draw);
+}).catch((e) => GIS.state($("loading"), e.message, true));
+})();
+</script>
+</body>
+</html>

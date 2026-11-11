@@ -1,0 +1,92 @@
+district,pcode,cells,slope,p
+Beitbridge,ZW1601,445,6.4,0.801
+Beitbridge Urban,ZW1622,4,7.4,0.711
+Bikita,ZW1801,181,-11.9,0.733
+Bindura,ZW1201,71,-1.7,0.965
+Bindura Urban,ZW1221,1,-18.1,0.543
+Binga,ZW1501,455,-5.9,0.87
+Bubi,ZW1502,204,5.8,0.847
+Buhera,ZW1101,185,3.6,0.894
+Bulawayo,ZW1021,19,2.5,0.917
+Bulilima,ZW1602,228,22.4,0.398
+Centenary/ Muzarabani,ZW1202,143,12.4,0.689
+Chegutu,ZW1401,180,-1.5,0.988
+Chegutu Urban,ZW1423,2,-4.2,0.894
+Chikomba,ZW1301,219,25.7,0.45
+Chimanimani,ZW1102,115,17.1,0.667
+Chinhoyi,ZW1421,4,-7.2,0.847
+Chipinge,ZW1103,176,-2.4,0.917
+Chipinge Urban,ZW1123,1,6.9,0.87
+Chiredzi,ZW1802,601,-6.0,0.756
+Chiredzi Urban,ZW1822,1,-9.5,0.604
+Chirumhanzu,ZW1701,159,15.6,0.689
+Chitungwiza,ZW1922,1,-2.0,0.87
+Chivi,ZW1803,118,-1.2,0.941
+Epworth,ZW1923,1,2.0,0.965
+Gokwe North,ZW1702,244,2.4,0.87
+Gokwe South,ZW1703,384,-1.1,0.87
+Gokwe South Urban,ZW1729,1,-1.5,0.965
+Goromonzi,ZW1302,90,9.0,0.711
+Guruve,ZW1203,101,10.9,0.667
+Gutu,ZW1804,239,6.4,0.801
+Gwanda,ZW1604,370,6.5,0.778
+Gwanda Urban,ZW1621,1,9.3,0.543
+Gweru,ZW1704,200,16.0,0.432
+Gweru Urban,ZW1721,5,17.4,0.543
+Harare,ZW1921,22,-0.7,0.988
+Harare Rural,ZW1924,6,2.8,0.941
+Hurungwe,ZW1402,667,1.0,0.988
+Hwange,ZW1503,913,-3.1,0.894
+Hwange Urban,ZW1521,12,-1.2,0.988
+Hwedza,ZW1303,87,22.4,0.604
+Insiza,ZW1605,283,19.4,0.543
+Kadoma Urban,ZW1403,9,3.6,0.917
+Kariba,ZW1404,279,-12.6,0.667
+Kariba Urban,ZW1424,1,-0.7,0.965
+Karoi,ZW1426,1,-17.0,0.45
+Kwekwe,ZW1705,296,14.8,0.646
+Kwekwe Urban,ZW1722,2,7.5,0.733
+Lupane,ZW1504,335,-11.7,0.667
+Makonde,ZW1405,284,-7.4,0.801
+Makoni,ZW1104,270,8.1,0.778
+Mangwe,ZW1603,197,23.1,0.366
+Marondera,ZW1304,112,16.8,0.45
+Marondera Urban,ZW1321,2,15.8,0.583
+Masvingo,ZW1805,237,-5.9,0.756
+Masvingo Urban,ZW1821,3,-3.4,0.894
+Matobo,ZW1606,257,9.1,0.711
+Mazowe,ZW1204,150,5.6,0.87
+Mberengwa,ZW1706,175,6.9,0.87
+Mbire,ZW1208,153,8.7,0.778
+Mhondoro-Ngezi,ZW1427,150,8.5,0.625
+Mount Darwin,ZW1205,155,0.4,0.965
+Mudzi,ZW1305,140,5.3,0.801
+Murehwa,ZW1306,118,2.7,0.917
+Mutare,ZW1105,189,3.5,0.894
+Mutare Urban,ZW1121,7,7.3,0.87
+Mutasa,ZW1106,85,2.3,0.917
+Mutoko,ZW1307,135,2.4,0.965
+Mvurwi,ZW1209,1,14.8,0.468
+Mwenezi,ZW1806,455,-0.2,0.988
+Nkayi,ZW1505,163,-2.8,0.894
+Norton,ZW1425,1,7.6,0.756
+Nyanga,ZW1107,194,-0.3,0.988
+Plumtree,ZW1623,5,34.2,0.398
+Redcliff,ZW1723,5,10.4,0.824
+Rusape,ZW1122,1,14.4,0.524
+Rushinga,ZW1206,76,9.4,0.733
+Ruwa,ZW1326,1,3.2,0.917
+Sanyati,ZW1428,164,-2.1,0.941
+Seke,ZW1308,94,11.8,0.711
+Shamva,ZW1207,92,-16.3,0.604
+Shurugwi,ZW1707,119,10.0,0.486
+Shurugwi Town,ZW1728,5,13.0,0.824
+Tsholotsho,ZW1506,265,13.6,0.604
+Umguza,ZW1507,208,11.0,0.689
+Umzingwane,ZW1607,93,11.3,0.646
+Uzumba Maramba Pfungwe,ZW1309,93,-11.1,0.711
+Victoria Falls,ZW1522,2,-5.3,0.847
+Zaka,ZW1807,108,-17.5,0.505
+Zvimba,ZW1406,203,-3.2,0.917
+Zvishavane,ZW1708,86,2.5,0.917
+Zvishavane Urban,ZW1725,3,9.2,0.801

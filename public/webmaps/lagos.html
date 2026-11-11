@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" class="gis gis-lay-left">
+<head>
+<meta charset="utf-8">
+<title>Lagos built from the sea</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#fff; display:grid; grid-template-columns:1fr 1fr; gap:3px; overflow:hidden; }
+  .pane { position:relative; background:#14426f; overflow:hidden; min-width:0; }
+  .pane canvas { position:absolute; inset:0; width:100%; height:100%; cursor:grab; touch-action:none; }
+  .pane canvas.drag { cursor:grabbing; }
+  .pane .gis-chip { left:12px; top:12px; font-size:16px; font-weight:600; }
+  .gis-scale { color:#fff; text-shadow:0 0 3px #000; }
+</style>
+</head>
+<body>
+<main class="gis-map" id="map">
+  <div class="pane" id="pb"><canvas></canvas><div class="gis-chip yr"></div>
+    <div class="gis-scale" id="scale"></div></div>
+  <div class="pane" id="pa"><canvas></canvas><div class="gis-chip yr"></div>
+    <div class="gis-tools gis-tools--br"><div class="gis-grp">
+      <button class="gis-btn" id="zIn" type="button" title="Zoom in" aria-label="Zoom in"><i class="bi bi-plus-lg"></i></button>
+      <button class="gis-btn" id="zOut" type="button" title="Zoom out" aria-label="Zoom out"><i class="bi bi-dash-lg"></i></button>
+      <button class="gis-btn" id="zAll" type="button" title="Whole coast" aria-label="Whole coast"><i class="bi bi-fullscreen"></i></button></div></div>
+    <div class="gis-attr">Images from Landsat and Sentinel-2. Map by Kudzanai Chakavarika</div></div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the images</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Lagos built from the sea</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec"><p class="gis-value" id="now"></p><p class="gis-p" id="nowt"></p></section>
+    <section class="gis-sec" style="padding:0"><table class="gis-table" id="years"></table></section>
+    <section class="gis-sec"><label class="gis-check"><input type="checkbox" id="line" checked>Outline the new land</label>
+      <p class="gis-p" style="margin-top:10px">Water is drawn in one blue for every year so the coast is easy to compare.</p></section>
+  </div>
+</aside>
+<script>
+const $ = (id) => document.getElementById(id);
+const panes = ["pb", "pa"].map((id) => {
+  const el = $(id), cv = el.querySelector("canvas");
+  return { el, cv, cx: cv.getContext("2d"), yr: el.querySelector(".yr"), pic: null };
+});
+let D = null, pics = {}, edges = [], land = null, year = 0, view = { s: 1, x: 0, y: 0 }, ghost = null, dpr = 1, W = 0, H = 0, kmPx = 0, anim = null;
+
+const img = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("Missing " + src + ". Run tools/lagos/build.py.")); i.src = src; });
+
+// Outline of the land that is new by frame k, from land.png (value = frame in which a cell first shows as land).
+function edge(k) {
+  if (edges[k]) return edges[k];
+  const w = D.w, h = D.h, out = new ImageData(w, h), o = out.data;
+  const inn = (x, y) => x >= 0 && y >= 0 && x < w && y < h && land[y * w + x] > 0 && land[y * w + x] <= k;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (!inn(x, y)) continue;
+    if (inn(x - 1, y) && inn(x + 1, y) && inn(x, y - 1) && inn(x, y + 1) && inn(x - 2, y) && inn(x + 2, y) && inn(x, y - 2) && inn(x, y + 2)) continue;
+    const p = (y * w + x) * 4; o[p] = 255; o[p + 1] = 221; o[p + 2] = 0; o[p + 3] = 255;
+  }
+  const c = document.createElement("canvas"); c.width = w; c.height = h; c.getContext("2d").putImageData(out, 0, 0);
+  return (edges[k] = c);
+}
+
+// Cover the frame. Opens on the west end where Eko Atlantic is.
+const minScale = () => Math.max(W / D.w, H / D.h);
+function fit() { view.s = minScale(); view.x = 0; view.y = H - D.h * view.s; }
+function clamp() {
+  const iw = D.w * view.s, ih = D.h * view.s;
+  view.x = Math.min(0, Math.max(W - iw, view.x)); view.y = Math.min(0, Math.max(H - ih, view.y));
+}
+function ring(cx, x, y) {
+  cx.beginPath(); cx.arc(x, y, 5, 0, Math.PI * 2);
+  cx.lineWidth = 3; cx.strokeStyle = "#000"; cx.stroke();
+  cx.lineWidth = 1.5; cx.strokeStyle = "#fff"; cx.stroke();
+}
+
+// The new land broken into small irregular fragments (nearest of a scatter of points), each cut from the latest image.
+function pieces(k) {
+  const w = D.w, h = D.h, G = 34, gw = Math.ceil(w / G), gh = Math.ceil(h / G), lab = new Int32Array(w * h), box = new Map();
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const sx = new Float32Array(gw * gh), sy = new Float32Array(gw * gh);
+  for (let j = 0; j < gh; j++) for (let i = 0; i < gw; i++) { sx[j * gw + i] = (i + rnd()) * G; sy[j * gw + i] = (j + rnd()) * G; }
+  const sea = document.createElement("canvas"); sea.width = w; sea.height = h;
+  const sg = sea.getContext("2d"); sg.drawImage(pics[D.frames[0].year], 0, 0);
+  const si = sg.getImageData(0, 0, w, h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const n = y * w + x;
+    if (!(land[n] > 0 && land[n] <= k)) { si.data[n * 4 + 3] = 0; continue; }
+    const ci = (x / G) | 0, cj = (y / G) | 0; let best = 1e9, id = 0;
+    for (let j = Math.max(0, cj - 1); j <= Math.min(gh - 1, cj + 1); j++) for (let i = Math.max(0, ci - 1); i <= Math.min(gw - 1, ci + 1); i++) {
+      const q = j * gw + i, d = (sx[q] - x) ** 2 + (sy[q] - y) ** 2;
+      if (d < best) { best = d; id = q + 1; }
+    }
+    lab[n] = id;
+    let b = box.get(id); if (!b) box.set(id, b = { id, x0: x, y0: y, x1: x, y1: y });
+    if (x < b.x0) b.x0 = x; if (x > b.x1) b.x1 = x; if (y > b.y1) b.y1 = y;
+  }
+  sg.putImageData(si, 0, 0);
+  const pic = pics[D.frames[k].year];
+  const parts = [...box.values()].map((b) => {
+    const bw = b.x1 - b.x0 + 1, bh = b.y1 - b.y0 + 1, c = document.createElement("canvas"); c.width = bw; c.height = bh;
+    const g = c.getContext("2d"); g.drawImage(pic, -b.x0, -b.y0);
+    const im = g.getImageData(0, 0, bw, bh), a = im.data;
+    for (let j = 0; j < bh; j++) for (let i = 0; i < bw; i++) if (lab[(b.y0 + j) * w + b.x0 + i] !== b.id) a[(j * bw + i) * 4 + 3] = 0;
+    g.putImageData(im, 0, 0);
+    return { x: b.x0, y: b.y0, w: bw, h: bh, neu: c, wait: 500 + 4200 * rnd(), dx: (rnd() - 0.5) * 150, dy: 60 + rnd() * 130, turn: (rnd() - 0.5) * 0.9 };
+  });
+  return { sea, parts };
+}
+// Opening move: the fragments drift in over the sea one after another and settle into the outline.
+const DRIFT = 3200;
+function float(cx) {
+  const t = performance.now() - anim.t0;
+  let live = false;
+  cx.drawImage(anim.sea, view.x, view.y, D.w * view.s, D.h * view.s);
+  anim.parts.forEach((q) => {
+    const u = Math.min(1, Math.max(0, (t - q.wait) / DRIFT));
+    if (u < 1) live = true;
+    if (u <= 0) return;
+    const r = (1 - u) ** 3, pw = q.w * view.s, ph = q.h * view.s;
+    cx.save(); cx.globalAlpha = Math.min(1, u * 5);
+    cx.shadowColor = `rgba(0,0,0,${0.5 * r})`; cx.shadowBlur = 14 * r * dpr; cx.shadowOffsetY = 10 * r * dpr;
+    cx.translate(view.x + q.x * view.s + pw / 2 + q.dx * r, view.y + q.y * view.s + ph / 2 + q.dy * r); cx.rotate(q.turn * r);
+    cx.drawImage(q.neu, -pw / 2, -ph / 2, pw, ph); cx.restore();
+  });
+  if (live) requestAnimationFrame(draw); else anim = null;
+}
+
+function draw() {
+  if (!D) return;
+  panes.forEach((p) => {
+    const cx = p.cx;
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = "high";
+    if (p.pic) cx.drawImage(p.pic, view.x, view.y, D.w * view.s, D.h * view.s);
+    if (anim && p === panes[1]) float(cx);
+    if ($("line").checked) cx.drawImage(edge(year), view.x, view.y, D.w * view.s, D.h * view.s);
+    if (ghost) ring(cx, ghost.x, ghost.y);
+  });
+  GIS.scale($("scale"), kmPx / view.s);
+}
+
+async function pick(k) {
+  year = k; anim = null;
+  const fr = D.frames[k];
+  panes[1].yr.textContent = fr.year;
+  $("now").textContent = `${GIS.fmt(fr.ha)} ha`;
+  $("nowt").textContent = `New land from ${D.frames[0].year} to ${fr.year}`;
+  document.querySelectorAll("#years tr").forEach((tr) => tr.classList.toggle("on", +tr.dataset.k === k));
+  if (!pics[fr.year]) pics[fr.year] = await img(`lagos/${fr.year}.jpg`);
+  if (year === k) { panes[1].pic = pics[fr.year]; draw(); }
+}
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  const r = panes[0].el.getBoundingClientRect(); W = r.width; H = r.height;
+  panes.forEach((p) => { p.cv.width = W * dpr; p.cv.height = H * dpr; });
+  if (D) { fit(); draw(); }
+}
+
+function zoomAt(x, y, k0) {
+  if (!D) return;
+  const min = minScale(), k = Math.min(Math.max(view.s * k0, min), min * 8) / view.s;
+  view.x = x - (x - view.x) * k; view.y = y - (y - view.y) * k; view.s *= k; clamp(); draw();
+}
+panes.forEach((p) => {
+  let last = null;
+  const pos = (e) => { const r = p.cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  p.cv.addEventListener("pointerdown", (e) => { p.cv.setPointerCapture(e.pointerId); last = pos(e); p.cv.classList.add("drag"); });
+  p.cv.addEventListener("pointermove", (e) => {
+    const [x, y] = pos(e);
+    if (last) { view.x += x - last[0]; view.y += y - last[1]; clamp(); last = [x, y]; }
+    ghost = { x, y }; draw();
+  });
+  const up = () => { last = null; p.cv.classList.remove("drag"); };
+  p.cv.addEventListener("pointerup", up); p.cv.addEventListener("pointercancel", up);
+  p.cv.addEventListener("pointerleave", () => { if (!last) { ghost = null; draw(); } });
+  p.cv.addEventListener("wheel", (e) => { e.preventDefault(); const [x, y] = pos(e); zoomAt(x, y, Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
+});
+
+addEventListener("resize", resize);
+$("zIn").onclick = () => zoomAt(W / 2, H / 2, 1.6);
+$("zOut").onclick = () => zoomAt(W / 2, H / 2, 1 / 1.6);
+$("zAll").onclick = () => { if (D) { fit(); draw(); } };
+$("line").onchange = draw;
+
+fetch("lagos/lagos.json").then((r) => { if (!r.ok) throw new Error("The data is missing. Run tools/lagos/build.py."); return r.json(); })
+  .then(async (d) => {
+    const [first, mask] = await Promise.all([img(`lagos/${d.frames[0].year}.jpg`), img("lagos/land.png")]);
+    const c = document.createElement("canvas"); c.width = d.w; c.height = d.h;
+    const g = c.getContext("2d", { willReadFrequently: true }); g.drawImage(mask, 0, 0);
+    const px = g.getImageData(0, 0, d.w, d.h).data;
+    land = new Uint8Array(d.w * d.h);
+    for (let i = 0; i < land.length; i++) land[i] = px[i * 4];
+    D = d; pics[d.frames[0].year] = first; panes[0].pic = first;
+    const [w0, s0, e0, n0] = d.box;
+    kmPx = (e0 - w0) * 111.32 * Math.cos((s0 + n0) / 2 * Math.PI / 180) / d.w;
+    panes[0].yr.textContent = d.frames[0].year;
+    $("years").innerHTML = d.frames.slice(1).map((fr, i) =>
+      `<tr data-k="${i + 1}" tabindex="0"><td>${fr.year}</td><td>${GIS.fmt(fr.ha)} ha</td></tr>`).join("");
+    document.querySelectorAll("#years tr").forEach((tr) => {
+      const go = () => pick(+tr.dataset.k);
+      tr.onclick = go; tr.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+    });
+    resize(); await pick(d.frames.length - 1);
+    GIS.state($("loading"), null);
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) { anim = pieces(year); anim.t0 = performance.now(); draw(); }
+  })
+  .catch((e) => GIS.state($("loading"), e.message, true));
+</script>
+</body>
+</html>

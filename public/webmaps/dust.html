@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" class="gis gis-lay-float">
+<head>
+<meta charset="utf-8">
+<title>Saharan Dust</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="gis.css">
+<script src="gis.js"></script>
+<style>
+  .gis-map { background:#d9e3ea; }
+  #cv { position:absolute; inset:0; width:100%; height:100%; cursor:crosshair; }
+  #rampt { position:relative; height:15px; }
+  #when { min-width:150px; white-space:nowrap; }
+  #chart { display:block; width:100%; height:120px; margin-top:10px; }
+  #chart text { font:12px 'Source Sans 3',sans-serif; fill:#1b1f24; }
+  #list tr { cursor:pointer; } #list td { text-align:left; }
+  .gis-card--tl { min-width:220px; } #rampt span { white-space:nowrap; }
+</style>
+</head>
+<body>
+<main class="gis-map" id="map"><canvas id="cv"></canvas>
+  <div class="gis-card gis-card--tl"><h2 class="gis-h">Dust optical depth</h2><div class="gis-ramp" id="ramp"></div><div class="gis-ramp-lbl" id="rampt"></div></div>
+  <div class="gis-timebar"><button class="gis-btn gis-btn--icon" id="play" type="button" aria-label="Pause"><i class="bi bi-pause-fill" id="ico"></i></button>
+    <span id="when"></span>
+    <input class="gis-range gis-grow" id="t" type="range" min="0" max="1" step="0.01" value="0" aria-label="Time"></div>
+  <div class="gis-attr">Data from NASA MERRA-2 (GMAO) and Natural Earth. Map by Kudzanai Chakavarika</div>
+  <button class="gis-btn gis-btn--icon gis-reopen" data-gis-toggle type="button" title="Show panel" aria-label="Show panel"><i class="bi bi-layout-sidebar-reverse"></i></button>
+  <div class="gis-state" id="loading"><span class="gis-spin"></span>Loading the dust</div>
+</main>
+<aside class="gis-panel">
+  <header class="gis-panel__hd"><h1>Saharan dust</h1>
+    <button class="gis-btn gis-btn--icon gis-btn--bare" data-gis-toggle type="button" title="Hide panel" aria-label="Hide panel"><i class="bi bi-layout-sidebar-inset-reverse"></i></button></header>
+  <div class="gis-panel__bd">
+    <section class="gis-sec" style="padding:0"><table class="gis-table" id="list"></table></section>
+    <section class="gis-sec"><p class="gis-value" id="big">&nbsp;</p><p class="gis-p" id="what"></p>
+      <svg id="chart" viewBox="0 0 280 120" preserveAspectRatio="none" aria-label="Dust at this place through the event"></svg></section>
+    <section class="gis-sec gis-small">Dust optical depth is how much the dust dims sunlight passing straight down through the air. At 1 the dust blocks about 63% of sunlight coming straight down. Streaks follow the direction the dust is carried and are sped up so you can see them move. Click anywhere on the map for its dust through the event.</section>
+  </div>
+</aside>
+<div class="gis-tip" id="tip"></div>
+<script>
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const EVENTS = {
+  jul2026: { name: "July 2026 Atlantic plume", place: ["San Juan", -66.1, 18.45] },
+  mar2026: { name: "March 2026 Spain to Britain", place: ["London", -0.13, 51.5] },
+  jun2020: { name: "June 2020 Atlantic plume", place: ["Barbados", -59.55, 13.15] },
+  mar2022: { name: "March 2022 Spain and France", place: ["Murcia", -1.13, 37.99] },
+  feb2021: { name: "February 2021 Alps", place: ["Bern", 7.45, 46.95] },
+};
+// ColorBrewer YlOrBr, by dust optical depth
+const STOPS = [[0.1, [255, 247, 188]], [0.3, [254, 227, 145]], [0.6, [254, 196, 79]], [1, [236, 112, 20]], [2, [204, 76, 2]], [4, [102, 37, 6]]];
+const MS_PER_FRAME = 260;
+const THUMB = document.documentElement.classList.contains("gis-thumb");
+const cv = document.getElementById("cv"), cx = cv.getContext("2d"), tip = document.getElementById("tip");
+const trail = document.createElement("canvas"), tx = trail.getContext("2d");
+const dimg = document.createElement("canvas"), dx = dimg.getContext("2d");
+let D, E, A, V, N = 0, t = 0, playing = !THUMB, last = 0, W = 0, H = 0, dpr = 1, k = 1, ox = 0, oy = 0, landPath = null;
+let place = null, series = [], parts = [];
+const LATC = Math.cos(25 * Math.PI / 180);
+
+const px = (lon) => ox + (lon - D.box[0]) * LATC * k;
+const py = (lat) => oy + (D.box[3] - lat) * k;
+const unx = (x) => (x - ox) / (LATC * k) + D.box[0];
+const uny = (y) => D.box[3] - (y - oy) / k;
+
+function color(a) {
+  if (a <= STOPS[0][0]) return STOPS[0][1];
+  for (let i = 1; i < STOPS.length; i++) if (a <= STOPS[i][0]) {
+    const [p, cp] = STOPS[i - 1], [q, cq] = STOPS[i], f = (a - p) / (q - p);
+    return cp.map((v, j) => Math.round(v + (cq[j] - v) * f));
+  }
+  return STOPS[STOPS.length - 1][1];
+}
+// byte -> optical depth (stored on a square root scale) and colour lookup
+const AOD = new Float32Array(256), LUT = new Uint8ClampedArray(256 * 4);
+function buildLut() {
+  for (let b = 0; b < 256; b++) {
+    const a = (b / 255) ** 2 * D.aodMax; AOD[b] = a;
+    const c = color(a), al = Math.max(0, Math.min(1, (a - 0.06) / 0.5));
+    LUT.set([c[0], c[1], c[2], Math.round(al * 235)], b * 4);
+  }
+}
+
+// pixel access into the frame atlases
+function aodAt(f, i, j) {
+  const c = f % E.cols, r = (f / E.cols) | 0;
+  return AOD[A[((r * D.h + j) * E.cols * D.w + c * D.w + i)]];
+}
+function aodLL(lon, lat, tt) {
+  const i = Math.round((lon - D.box[0]) / D.dx), j = Math.round((D.box[3] - lat) / D.dy);
+  if (i < 0 || j < 0 || i >= D.w || j >= D.h) return null;
+  const f0 = Math.floor(tt), f1 = Math.min(N - 1, f0 + 1), s = tt - f0;
+  return aodAt(f0, i, j) * (1 - s) + aodAt(f1, i, j) * s;
+}
+const HW = () => (D.w + 1) >> 1, HH = () => (D.h + 1) >> 1;
+function vel(lon, lat, f) {
+  const fi = (lon - D.box[0]) / D.dx / 2, fj = (D.box[3] - lat) / D.dy / 2;
+  const i = Math.round(fi), j = Math.round(fj), hw = HW(), hh = HH();
+  if (i < 0 || j < 0 || i >= hw || j >= hh) return null;
+  const c = f % E.cols, r = (f / E.cols) | 0, o = ((r * hh + j) * E.cols * hw + c * hw + i) * 4;
+  return [V[o] - 128, V[o + 1] - 128];
+}
+
+function frameTime(tt) {
+  const d = new Date(E.start + "T00:00:00Z");
+  d.setUTCMinutes(Math.floor(tt) * 180 + 30);
+  return d;
+}
+const fmtTime = (d) => `${String(d.getUTCHours()).padStart(2, "0")}:30 UTC on ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+
+function fit() {
+  // cover the map; on wide screens keep the box clear of the floating panel
+  const panel = !THUMB && W > 760 && !document.documentElement.classList.contains("gis-collapsed") ? 340 : 0;
+  const aw = W - panel, bw = (D.box[2] - D.box[0]) * LATC, bh = D.box[3] - D.box[1];
+  k = Math.max(W / bw, H / bh);
+  // centre the Atlantic and Sahara in the free part of the map
+  const cLon = THUMB ? -30 : -28, cLat = 24;
+  ox = aw / 2 - (cLon - D.box[0]) * LATC * k; oy = H / 2 - (D.box[3] - cLat) * k;
+  ox = Math.min(0, Math.max(W - bw * k, ox)); oy = Math.min(0, Math.max(H - bh * k, oy));
+  landPath = new Path2D();
+  for (const r of D.land) { r.forEach(([x, y], i) => i ? landPath.lineTo(px(x), py(y)) : landPath.moveTo(px(x), py(y))); landPath.closePath(); }
+  tx.clearRect(0, 0, trail.width, trail.height);
+}
+
+function paintDust() {
+  const img = dx.createImageData(D.w, D.h), o = img.data;
+  const f0 = Math.floor(t), f1 = Math.min(N - 1, f0 + 1), s = t - f0;
+  const c0 = f0 % E.cols, r0 = (f0 / E.cols) | 0, c1 = f1 % E.cols, r1 = (f1 / E.cols) | 0, rw = E.cols * D.w;
+  for (let j = 0; j < D.h; j++) for (let i = 0; i < D.w; i++) {
+    const b = Math.round(A[(r0 * D.h + j) * rw + c0 * D.w + i] * (1 - s) + A[(r1 * D.h + j) * rw + c1 * D.w + i] * s) * 4;
+    const q = (j * D.w + i) * 4;
+    o[q] = LUT[b]; o[q + 1] = LUT[b + 1]; o[q + 2] = LUT[b + 2]; o[q + 3] = LUT[b + 3];
+  }
+  dx.putImageData(img, 0, 0);
+}
+
+const LABELS = [["SAHARA", 8, 22, 1], ["ATLANTIC OCEAN", -38, 30, 0], ["Caribbean Sea", -74, 15, 0], ["Gulf of Mexico", -90, 25, 0],
+  ["Mediterranean Sea", 18, 34.6, 0], ["EUROPE", 15, 51, 1], ["SOUTH AMERICA", -60, 0, 1], ["NORTH AMERICA", -92, 40, 1], ["ARABIA", 45, 23, 1]];
+function labels() {
+  cx.textAlign = "center"; cx.textBaseline = "middle"; cx.lineJoin = "round";
+  for (const [n, lon, lat, land] of LABELS) {
+    cx.font = land ? "600 12px 'Source Sans 3',sans-serif" : "italic 14px 'Source Sans 3',sans-serif";
+    cx.letterSpacing = land ? "2px" : "0px";
+    cx.lineWidth = 3; cx.strokeStyle = "rgba(255,255,255,.75)"; cx.strokeText(n, px(lon), py(lat));
+    cx.fillStyle = land ? "#4a4f55" : "#33576e"; cx.fillText(n, px(lon), py(lat));
+  }
+  cx.letterSpacing = "0px";
+}
+
+// streaks carried along the dust transport velocity
+function seed(p) {
+  for (let n = 0; n < 6; n++) {
+    p.lon = D.box[0] + Math.random() * (D.box[2] - D.box[0]); p.lat = D.box[1] + Math.random() * (D.box[3] - D.box[1]);
+    if ((aodLL(p.lon, p.lat, t) || 0) > 0.25) break;
+  }
+  p.age = 40 + Math.random() * 80;
+}
+function stepParts() {
+  const f = Math.round(t);
+  tx.globalCompositeOperation = "destination-out"; tx.fillStyle = "rgba(0,0,0,.07)"; tx.fillRect(0, 0, W, H);
+  tx.globalCompositeOperation = "source-over"; tx.lineWidth = 1.1; tx.lineCap = "round";
+  for (const p of parts) {
+    const v = vel(p.lon, p.lat, Math.min(N - 1, f));
+    const a = aodLL(p.lon, p.lat, t);
+    if (!v || a === null || --p.age < 0) { seed(p); continue; }
+    const s = 0.014, nl = p.lon + v[0] * s / Math.cos(p.lat * Math.PI / 180), nt = p.lat + v[1] * s;
+    if (a > 0.2 && (v[0] || v[1])) {
+      tx.strokeStyle = `rgba(74,32,6,${Math.min(0.7, 0.15 + a * 0.3)})`;
+      tx.beginPath(); tx.moveTo(px(p.lon), py(p.lat)); tx.lineTo(px(nl), py(nt)); tx.stroke();
+    }
+    p.lon = nl; p.lat = nt;
+  }
+}
+
+function draw() {
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx.fillStyle = "#d9e3ea"; cx.fillRect(0, 0, W, H);
+  cx.fillStyle = "#f3f1ea"; cx.fill(landPath);
+  paintDust();
+  cx.imageSmoothingEnabled = true;
+  cx.drawImage(dimg, px(D.box[0] - D.dx / 2), py(D.box[3] + D.dy / 2), D.w * D.dx * LATC * k, D.h * D.dy * k);
+  cx.drawImage(trail, 0, 0, W, H);
+  cx.lineWidth = 0.6; cx.strokeStyle = "rgba(60,70,78,.55)"; cx.stroke(landPath);
+  labels();
+  if (place && !THUMB) {
+    const x = px(place[1]), y = py(place[2]);
+    cx.beginPath(); cx.arc(x, y, 6, 0, Math.PI * 2); cx.lineWidth = 3; cx.strokeStyle = "#fff"; cx.stroke();
+    cx.lineWidth = 1.6; cx.strokeStyle = "#1b1f24"; cx.stroke();
+  }
+}
+
+function readout() {
+  const d = frameTime(t);
+  document.getElementById("when").textContent = `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${String(d.getUTCHours()).padStart(2, "0")}:30 UTC`;
+  document.getElementById("t").value = t;
+  if (!place) return;
+  const a = aodLL(place[1], place[2], t) || 0;
+  document.getElementById("big").textContent = a.toFixed(1);
+  const blocked = Math.round((1 - Math.exp(-a)) * 100);
+  document.getElementById("what").textContent = `Dust optical depth over ${place[0]} at ${fmtTime(d)}. The dust blocks about ${blocked}% of sunlight coming straight down.`;
+  const cur = document.getElementById("cur");
+  if (cur) { const x = 34 + t / (N - 1) * 240; cur.setAttribute("x1", x); cur.setAttribute("x2", x); }
+}
+
+function chart() {
+  series = []; for (let f = 0; f < N; f++) series.push(aodLL(place[1], place[2], f) || 0);
+  const top = Math.max(1, Math.ceil(Math.max(...series))), X = (f) => 34 + f / (N - 1) * 240, Y = (a) => 100 - a / top * 90;
+  const pts = series.map((a, f) => `${X(f).toFixed(1)},${Y(a).toFixed(1)}`).join(" ");
+  const d0 = frameTime(0), d1 = frameTime(N - 1);
+  document.getElementById("chart").innerHTML =
+    `<line x1="34" x2="274" y1="100" y2="100" stroke="#1b1f24" stroke-width=".6"/>`
+    + `<line x1="34" x2="274" y1="${Y(top)}" y2="${Y(top)}" stroke="#c7cdd2" stroke-width=".6"/>`
+    + `<text x="28" y="${Y(top) + 4}" text-anchor="end">${top}</text><text x="28" y="104" text-anchor="end">0</text>`
+    + `<polygon points="34,100 ${pts} 274,100" fill="rgba(236,112,20,.25)"/><polyline points="${pts}" fill="none" stroke="#cc4c02" stroke-width="1.6"/>`
+    + `<line id="cur" y1="8" y2="100" stroke="#1b1f24" stroke-width="1"/>`
+    + `<text x="34" y="117">${d0.getUTCDate()} ${MONTHS[d0.getUTCMonth()]}</text><text x="274" y="117" text-anchor="end">${d1.getUTCDate()} ${MONTHS[d1.getUTCMonth()]}</text>`;
+}
+
+function setPlace(p) { place = p; chart(); readout(); draw(); }
+
+const cache = {};
+function loadImg(src) {
+  return new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = src; });
+}
+function pixels(im) {
+  const c = document.createElement("canvas"); c.width = im.width; c.height = im.height;
+  const g = c.getContext("2d", { willReadFrequently: true }); g.drawImage(im, 0, 0);
+  return g.getImageData(0, 0, im.width, im.height).data;
+}
+async function pickEvent(id) {
+  const ev = D.events.find((e) => e.id === id);
+  document.querySelectorAll("#list tr").forEach((r) => r.classList.toggle("on", r.dataset.id === id));
+  if (!cache[id]) {
+    GIS.state(document.getElementById("loading"), "Loading the dust");
+    const [a, v] = await Promise.all([loadImg(`dust/${id}_a.png`), loadImg(`dust/${id}_v.png`)]);
+    const ap = pixels(a), g = new Uint8Array(ap.length / 4);
+    for (let i = 0; i < g.length; i++) g[i] = ap[i * 4];
+    cache[id] = { A: g, V: pixels(v) };
+  }
+  E = ev; A = cache[id].A; V = cache[id].V; N = ev.frames;
+  document.getElementById("t").max = N - 1;
+  t = 0;
+  if (THUMB) {
+    // the moment with the most dust over the open Atlantic
+    let best = 0, bf = 0;
+    for (let f = 0; f < N; f += 2) { let s = 0; for (let lon = -60; lon < -20; lon += 2) for (let lat = 8; lat < 28; lat += 2) s += aodLL(lon, lat, f); if (s > best) { best = s; bf = f; } }
+    t = bf;
+  }
+  tx.clearRect(0, 0, trail.width, trail.height);
+  parts.forEach(seed);
+  GIS.state(document.getElementById("loading"), null);
+  setPlace(EVENTS[id].place);
+}
+
+function setPlay(on) {
+  playing = on;
+  document.getElementById("ico").className = on ? "bi bi-pause-fill" : "bi bi-play-fill";
+  document.getElementById("play").setAttribute("aria-label", on ? "Pause" : "Play");
+}
+document.getElementById("play").onclick = () => setPlay(!playing);
+document.getElementById("t").oninput = (e) => { t = +e.target.value; setPlay(false); readout(); };
+
+function loop(now) {
+  const dt = Math.min(100, now - (last || now)); last = now;
+  if (E) {
+    if (playing) { t += dt / MS_PER_FRAME; if (t > N - 1) t = 0; readout(); }
+    stepParts(); draw();
+  }
+  requestAnimationFrame(loop);
+}
+
+cv.addEventListener("pointermove", (e) => {
+  if (!E) return;
+  const r = cv.getBoundingClientRect(), lon = unx(e.clientX - r.left), lat = uny(e.clientY - r.top), a = aodLL(lon, lat, t);
+  if (a === null) { tip.style.display = "none"; return; }
+  tip.textContent = `Dust optical depth ${a.toFixed(1)}`;
+  tip.style.display = "block"; tip.style.left = e.clientX + 12 + "px"; tip.style.top = e.clientY - 26 + "px";
+});
+cv.addEventListener("pointerleave", () => { tip.style.display = "none"; });
+cv.addEventListener("click", (e) => {
+  if (!E) return;
+  const r = cv.getBoundingClientRect(), lon = unx(e.clientX - r.left), lat = uny(e.clientY - r.top);
+  if (aodLL(lon, lat, t) === null) return;
+  const nm = `${Math.abs(lat).toFixed(1)}° ${lat < 0 ? "S" : "N"} ${Math.abs(lon).toFixed(1)}° ${lon < 0 ? "W" : "E"}`;
+  setPlace([nm, lon, lat]);
+});
+
+function resize() {
+  dpr = devicePixelRatio || 1;
+  const r = document.getElementById("map").getBoundingClientRect(); W = r.width; H = r.height;
+  cv.width = W * dpr; cv.height = H * dpr; trail.width = W; trail.height = H;
+  if (D) { fit(); if (E) draw(); }
+}
+addEventListener("resize", resize);
+
+fetch("dust/dust.json").then((r) => { if (!r.ok) throw new Error(); return r.json(); }).then((d) => {
+  D = d; buildLut();
+  dimg.width = D.w; dimg.height = D.h;
+  parts = Array.from({ length: THUMB ? 1800 : 2600 }, () => ({ lon: 0, lat: 0, age: 0 }));
+  document.getElementById("list").innerHTML = D.events.map((e) => `<tr data-id="${e.id}" tabindex="0"><td>${EVENTS[e.id].name}</td></tr>`).join("");
+  document.querySelectorAll("#list tr").forEach((r) => {
+    const go = () => pickEvent(r.dataset.id).catch(fail);
+    r.onclick = go; r.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
+  // legend drawn from the same stops as the dust, on the same square root scale
+  const at = (a) => (Math.sqrt(a / D.aodMax) * 100).toFixed(1) + "%";
+  document.getElementById("ramp").style.background = `linear-gradient(90deg,${STOPS.map(([a, c]) => `rgb(${c}) ${at(a)}`).join(",")})`;
+  const marks = [[0.3, "0.3"], [1, "1"], [2, "2"], [4, "4 or more"]];
+  document.getElementById("rampt").innerHTML = marks.map(([a, s], i) => `<span style="position:absolute;left:${at(a)};transform:translateX(${i === marks.length - 1 ? "-100%" : "-50%"})">${s}</span>`).join("");
+  resize();
+  setPlay(playing);
+  requestAnimationFrame(loop);
+  return pickEvent(D.events[0].id);
+}).catch(fail);
+function fail() { GIS.state(document.getElementById("loading"), "The dust data could not be loaded.", true); }
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+{
+ "box": [
+  11.5,
+  -35.0,
+  41.0,
+  -8.0
+ ],
+ "w": 590,
+ "h": 540,
+ "start": 25,
+ "dry": 5,
+ "seasons": [
+  {
+   "season": 1981,
+   "byDec": 0.286
+  },
+  {
+   "season": 1982,
+   "byDec": 0.487
+  },
+  {
+   "season": 1983,
+   "byDec": 0.424
+  },
+  {
+   "season": 1984,
+   "byDec": 0.431
+  },
+  {
+   "season": 1985,
+   "byDec": 0.451
+  },
+  {
+   "season": 1986,
+   "byDec": 0.469
+  },
+  {
+   "season": 1987,
+   "byDec": 0.393
+  },
+  {
+   "season": 1988,
+   "byDec": 0.371
+  },
+  {
+   "season": 1989,
+   "byDec": 0.461
+  },
+  {
+   "season": 1990,
+   "byDec": 0.345
+  },
+  {
+   "season": 1991,
+   "byDec": 0.444
+  },
+  {
+   "season": 1992,
+   "byDec": 0.373
+  },
+  {
+   "season": 1993,
+   "byDec": 0.509
+  },
+  {
+   "season": 1994,
+   "byDec": 0.279
+  },
+  {
+   "season": 1995,
+   "byDec": 0.409
+  },
+  {
+   "season": 1996,
+   "byDec": 0.423
+  },
+  {
+   "season": 1997,
+   "byDec": 0.521
+  },
+  {
+   "season": 1998,
+   "byDec": 0.497
+  },
+  {
+   "season": 1999,
+   "byDec": 0.414
+  },
+  {
+   "season": 2000,
+   "byDec": 0.567
+  },
+  {
+   "season": 2001,
+   "byDec": 0.56
+  },
+  {
+   "season": 2002,
+   "byDec": 0.314
+  },
+  {
+   "season": 2003,
+   "byDec": 0.38
+  },
+  {
+   "season": 2004,
+   "byDec": 0.447
+  },
+  {
+   "season": 2005,
+   "byDec": 0.474
+  },
+  {
+   "season": 2006,
+   "byDec": 0.531
+  },
+  {
+   "season": 2007,
+   "byDec": 0.54
+  },
+  {
+   "season": 2008,
+   "byDec": 0.475
+  },
+  {
+   "season": 2009,
+   "byDec": 0.575
+  },
+  {
+   "season": 2010,
+   "byDec": 0.457
+  },
+  {
+   "season": 2011,
+   "byDec": 0.482
+  },
+  {
+   "season": 2012,
+   "byDec": 0.389
+  },
+  {
+   "season": 2013,
+   "byDec": 0.407
+  },
+  {
+   "season": 2014,
+   "byDec": 0.317
+  },
+  {
+   "season": 2015,
+   "byDec": 0.287
+  },
+  {
+   "season": 2016,
+   "byDec": 0.456
+  },
+  {
+   "season": 2017,
+   "byDec": 0.472
+  },
+  {
+   "season": 2018,
+   "byDec": 0.301
+  },
+  {
+   "season": 2019,
+   "byDec": 0.421
+  },
+  {
+   "season": 2020,
+   "byDec": 0.406
+  },
+  {
+   "season": 2021,
+   "byDec": 0.307
+  },
+  {
+   "season": 2022,
+   "byDec": 0.424
+  },
+  {
+   "season": 2023,
+   "byDec": 0.337
+  },
+  {
+   "season": 2024,
+   "byDec": 0.354
+  },
+  {
+   "season": 2025,
+   "byDec": 0.521
+  }
+ ]
+}

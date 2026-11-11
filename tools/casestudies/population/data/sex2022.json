@@ -1,0 +1,548 @@
+[
+ {
+  "district": "Bulawayo",
+  "male": 307983,
+  "female": 357957,
+  "total": 665940
+ },
+ {
+  "district": "Buhera",
+  "male": 125773,
+  "female": 146147,
+  "total": 271920
+ },
+ {
+  "district": "Chimanimani",
+  "male": 73240,
+  "female": 80380,
+  "total": 153620
+ },
+ {
+  "district": "Chipinge Rural",
+  "male": 174307,
+  "female": 200952,
+  "total": 375259
+ },
+ {
+  "district": "Makoni",
+  "male": 140629,
+  "female": 147815,
+  "total": 288444
+ },
+ {
+  "district": "Mutare Rural",
+  "male": 147046,
+  "female": 159714,
+  "total": 306760
+ },
+ {
+  "district": "Mutasa",
+  "male": 93955,
+  "female": 103855,
+  "total": 197810
+ },
+ {
+  "district": "Nyanga",
+  "male": 70432,
+  "female": 75850,
+  "total": 146282
+ },
+ {
+  "district": "Mutare Urban",
+  "male": 106602,
+  "female": 118200,
+  "total": 224802
+ },
+ {
+  "district": "Rusape",
+  "male": 17668,
+  "female": 20238,
+  "total": 37906
+ },
+ {
+  "district": "Chipinge Urban",
+  "male": 15880,
+  "female": 19079,
+  "total": 34959
+ },
+ {
+  "district": "Bindura Rural",
+  "male": 84080,
+  "female": 85761,
+  "total": 169841
+ },
+ {
+  "district": "Muzarabani",
+  "male": 66521,
+  "female": 67555,
+  "total": 134076
+ },
+ {
+  "district": "Guruve",
+  "male": 75670,
+  "female": 77932,
+  "total": 153602
+ },
+ {
+  "district": "Mazowe",
+  "male": 145777,
+  "female": 147585,
+  "total": 293362
+ },
+ {
+  "district": "Mount Darwin",
+  "male": 118021,
+  "female": 122706,
+  "total": 240727
+ },
+ {
+  "district": "Rushinga",
+  "male": 37062,
+  "female": 39818,
+  "total": 76880
+ },
+ {
+  "district": "Shamva",
+  "male": 81147,
+  "female": 84494,
+  "total": 165641
+ },
+ {
+  "district": "Mbire",
+  "male": 41014,
+  "female": 42710,
+  "total": 83724
+ },
+ {
+  "district": "Bindura Urban",
+  "male": 24616,
+  "female": 26777,
+  "total": 51393
+ },
+ {
+  "district": "Mvurwi",
+  "male": 7405,
+  "female": 8240,
+  "total": 15645
+ },
+ {
+  "district": "Chikomba",
+  "male": 59030,
+  "female": 64907,
+  "total": 123937
+ },
+ {
+  "district": "Goromonzi",
+  "male": 187193,
+  "female": 199006,
+  "total": 386199
+ },
+ {
+  "district": "Hwedza",
+  "male": 36486,
+  "female": 38383,
+  "total": 74869
+ },
+ {
+  "district": "Marondera Rural",
+  "male": 68180,
+  "female": 67993,
+  "total": 136173
+ },
+ {
+  "district": "Mudzi",
+  "male": 76387,
+  "female": 82096,
+  "total": 158483
+ },
+ {
+  "district": "Murehwa",
+  "male": 97564,
+  "female": 107878,
+  "total": 205442
+ },
+ {
+  "district": "Mutoko",
+  "male": 77610,
+  "female": 83481,
+  "total": 161091
+ },
+ {
+  "district": "Seke",
+  "male": 97569,
+  "female": 102907,
+  "total": 200476
+ },
+ {
+  "district": "Uzumba Maramba Pfungwe",
+  "male": 59944,
+  "female": 64281,
+  "total": 124225
+ },
+ {
+  "district": "Marondera Urban",
+  "male": 30812,
+  "female": 35391,
+  "total": 66203
+ },
+ {
+  "district": "Ruwa Local Board",
+  "male": 44489,
+  "female": 49594,
+  "total": 94083
+ },
+ {
+  "district": "Chegutu Rural",
+  "male": 89623,
+  "female": 89283,
+  "total": 178906
+ },
+ {
+  "district": "Hurungwe",
+  "male": 194930,
+  "female": 195977,
+  "total": 390907
+ },
+ {
+  "district": "Mhondoro-Ngezi",
+  "male": 71605,
+  "female": 69386,
+  "total": 140991
+ },
+ {
+  "district": "Kariba Rural",
+  "male": 22527,
+  "female": 23247,
+  "total": 45774
+ },
+ {
+  "district": "Makonde",
+  "male": 106296,
+  "female": 103651,
+  "total": 209947
+ },
+ {
+  "district": "Zvimba",
+  "male": 172019,
+  "female": 175981,
+  "total": 348000
+ },
+ {
+  "district": "Sanyati",
+  "male": 70202,
+  "female": 69031,
+  "total": 139233
+ },
+ {
+  "district": "Chinhoyi Urban",
+  "male": 48462,
+  "female": 55209,
+  "total": 103671
+ },
+ {
+  "district": "Kadoma",
+  "male": 55726,
+  "female": 61654,
+  "total": 117380
+ },
+ {
+  "district": "Chegutu Urban",
+  "male": 31376,
+  "female": 34882,
+  "total": 66258
+ },
+ {
+  "district": "Kariba Urban",
+  "male": 13688,
+  "female": 14221,
+  "total": 27909
+ },
+ {
+  "district": "Norton",
+  "male": 41002,
+  "female": 46036,
+  "total": 87038
+ },
+ {
+  "district": "Karoi",
+  "male": 17365,
+  "female": 20199,
+  "total": 37564
+ },
+ {
+  "district": "Binga",
+  "male": 72393,
+  "female": 87589,
+  "total": 159982
+ },
+ {
+  "district": "Bubi",
+  "male": 39063,
+  "female": 35021,
+  "total": 74084
+ },
+ {
+  "district": "Hwange Rural",
+  "male": 33696,
+  "female": 35661,
+  "total": 69357
+ },
+ {
+  "district": "Lupane",
+  "male": 51128,
+  "female": 56117,
+  "total": 107245
+ },
+ {
+  "district": "Nkayi",
+  "male": 54141,
+  "female": 58330,
+  "total": 112471
+ },
+ {
+  "district": "Tsholotsho",
+  "male": 53846,
+  "female": 61936,
+  "total": 115782
+ },
+ {
+  "district": "Umguza",
+  "male": 59144,
+  "female": 54121,
+  "total": 113265
+ },
+ {
+  "district": "Hwange Urban",
+  "male": 20114,
+  "female": 20127,
+  "total": 40241
+ },
+ {
+  "district": "Victoria Falls",
+  "male": 16663,
+  "female": 18536,
+  "total": 35199
+ },
+ {
+  "district": "Beitbridge Rural",
+  "male": 44358,
+  "female": 49642,
+  "total": 94000
+ },
+ {
+  "district": "Bulilima",
+  "male": 39520,
+  "female": 46080,
+  "total": 85600
+ },
+ {
+  "district": "Mangwe",
+  "male": 31067,
+  "female": 34495,
+  "total": 65562
+ },
+ {
+  "district": "Gwanda",
+  "male": 61600,
+  "female": 62948,
+  "total": 124548
+ },
+ {
+  "district": "Insiza",
+  "male": 62124,
+  "female": 60779,
+  "total": 122903
+ },
+ {
+  "district": "Matobo",
+  "male": 47124,
+  "female": 48572,
+  "total": 95696
+ },
+ {
+  "district": "Umzingwane",
+  "male": 36984,
+  "female": 34876,
+  "total": 71860
+ },
+ {
+  "district": "Gwanda Urban",
+  "male": 12773,
+  "female": 14370,
+  "total": 27143
+ },
+ {
+  "district": "Beitbridge",
+  "male": 28465,
+  "female": 30109,
+  "total": 58574
+ },
+ {
+  "district": "Plumtree",
+  "male": 6698,
+  "female": 7761,
+  "total": 14459
+ },
+ {
+  "district": "Chirumhanzu",
+  "male": 45589,
+  "female": 49683,
+  "total": 95272
+ },
+ {
+  "district": "Gokwe North",
+  "male": 119879,
+  "female": 129844,
+  "total": 249723
+ },
+ {
+  "district": "Gokwe South",
+  "male": 151782,
+  "female": 165771,
+  "total": 317553
+ },
+ {
+  "district": "Gweru Rural",
+  "male": 60433,
+  "female": 61279,
+  "total": 121712
+ },
+ {
+  "district": "Kwekwe Rural",
+  "male": 98794,
+  "female": 98269,
+  "total": 197063
+ },
+ {
+  "district": "Mberengwa",
+  "male": 99328,
+  "female": 109130,
+  "total": 208458
+ },
+ {
+  "district": "Shurugwi Rural",
+  "male": 48609,
+  "female": 49706,
+  "total": 98315
+ },
+ {
+  "district": "Zvishavane Rural",
+  "male": 41298,
+  "female": 43737,
+  "total": 85035
+ },
+ {
+  "district": "Gweru Urban",
+  "male": 74445,
+  "female": 86847,
+  "total": 161292
+ },
+ {
+  "district": "Kwekwe Urban",
+  "male": 56571,
+  "female": 63292,
+  "total": 119863
+ },
+ {
+  "district": "Redcliff",
+  "male": 19411,
+  "female": 22115,
+  "total": 41526
+ },
+ {
+  "district": "Zvishavane Urban",
+  "male": 28215,
+  "female": 31502,
+  "total": 59717
+ },
+ {
+  "district": "Gokwe Centre",
+  "male": 14933,
+  "female": 18142,
+  "total": 33075
+ },
+ {
+  "district": "Shurugwi Urban",
+  "male": 11377,
+  "female": 11927,
+  "total": 23304
+ },
+ {
+  "district": "Bikita",
+  "male": 80844,
+  "female": 95991,
+  "total": 176835
+ },
+ {
+  "district": "Chiredzi Rural",
+  "male": 146516,
+  "female": 156987,
+  "total": 303503
+ },
+ {
+  "district": "Chivi",
+  "male": 79556,
+  "female": 93423,
+  "total": 172979
+ },
+ {
+  "district": "Gutu",
+  "male": 95842,
+  "female": 112318,
+  "total": 208160
+ },
+ {
+  "district": "Masvingo Rural",
+  "male": 112557,
+  "female": 125546,
+  "total": 238103
+ },
+ {
+  "district": "Mwenezi",
+  "male": 97013,
+  "female": 112314,
+  "total": 209327
+ },
+ {
+  "district": "Zaka",
+  "male": 90910,
+  "female": 107979,
+  "total": 198889
+ },
+ {
+  "district": "Masvingo Urban",
+  "male": 41321,
+  "female": 48965,
+  "total": 90286
+ },
+ {
+  "district": "Chiredzi Urban",
+  "male": 18978,
+  "female": 21479,
+  "total": 40457
+ },
+ {
+  "district": "Harare Rural",
+  "male": 174604,
+  "female": 183256,
+  "total": 357860
+ },
+ {
+  "district": "Harare Urban",
+  "male": 710160,
+  "female": 781580,
+  "total": 1491740
+ },
+ {
+  "district": "Chitungwiza",
+  "male": 173495,
+  "female": 197749,
+  "total": 371244
+ },
+ {
+  "district": "Epworth",
+  "male": 101284,
+  "female": 105081,
+  "total": 206365
+ }
+]
