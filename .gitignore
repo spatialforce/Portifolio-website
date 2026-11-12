@@ -39,3 +39,9 @@ tools/**/out/
 tools/sitecheck/vendor/
 *.npy
 *.npz
+tools/**/rast/
+tools/**/clean/
+tools/**/data/dem/
+tools/**/data/dl/
+tools/casestudies/carbon/data/gedi_*.csv
+__pycache__/

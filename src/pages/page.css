@@ -124,6 +124,7 @@ a:hover .arrow::after,.arrow:hover::after{transform:translateX(3px)}
 .sfoot__links a{color:var(--ink);text-decoration:none;font-weight:600}
 .sfoot__links a:hover{color:var(--muted)}
 .sfoot__base{color:var(--muted)}
+.sfoot__note{margin:18px 0 0;font-size:12.5px;line-height:1.5;color:var(--muted);max-width:640px}
 
 /* ------------------------- map viewer ------------------------- */
 .viewer{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--night)}

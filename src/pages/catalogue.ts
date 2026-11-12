@@ -1,6 +1,5 @@
 import lulc from "../assets/LULC_2025.webp";
 import cs4 from "../assets/casestudies/mazowe-valley/map2_bare_2025.webp";
-import flood from "../assets/Chimanimani_Flood_Risk.webp";
 import forest from "../assets/gwaai.webp";
 import quakes from "../assets/webmap_earthquakes.webp";
 import sadc from "../assets/webmap_sadc.webp";
@@ -24,6 +23,13 @@ import wildlife from "../assets/storymap_wildlife.webp";
 import mapping from "../assets/storymap_mapping.webp";
 import cs1 from "../assets/casestudies/population/map3_density_district.webp";
 import cs2 from "../assets/casestudies/rainfall-zimbabwe/map2_mean.webp";
+import cs7 from "../assets/casestudies/solar-site-suitability/map5_suitability.webp";
+import cs16 from "../assets/casestudies/hwange-carbon/map3_carbon.webp";
+import cs14 from "../assets/casestudies/hwange-air/map2_no2_post.webp";
+import cs17 from "../assets/casestudies/chimanimani-flood/map3_susceptibility.webp";
+import cs18 from "../assets/casestudies/sugarcane/map2_vigour.webp";
+import cs19 from "../assets/casestudies/kariba/map3_exposed.webp";
+import cs20 from "../assets/casestudies/bulawayo-landfill/map4_suitability.webp";
 
 // "/" on Vercel, "/Portifolio-website/" on GitHub Pages
 const BASE = import.meta.env.BASE_URL;
@@ -32,19 +38,31 @@ export type Project = { title: string; slug: string; text: string; sub?: string;
 
 /* Case studies, in order. Each has its own page under /case-studies/<slug>. */
 export const CASESTUDIES: Project[] = [
+  { title: "Site Suitability Analysis for Utility-Scale Solar Farms in Matabeleland South Province of Zimbabwe Using the Analytic Hierarchy Process", slug: "solar-site-suitability", card: "Solar Farm Site Suitability in Matabeleland South", sub: "AHP weighted overlay of six siting criteria on a 250 m grid.", img: cs7, place: "Matabeleland South", years: "2026",
+    text: "Six siting criteria weighted by pairwise comparison and overlaid on a 250 m grid, placing the best land for utility-scale solar in Bulilima and Mangwe along the Plumtree transmission corridor." },
   { title: "A Spatial Analysis of Population Distribution, Density and Growth in Zimbabwe Between the 2012 and 2022 Population Censuses", slug: "population-zimbabwe", card: "Population Distribution and Growth in Zimbabwe", sub: "District density, growth and sex ratio from the 2012 and 2022 censuses.", img: cs1, place: "Zimbabwe", years: "2012 and 2022",
     text: "District density and growth from the 2012 and 2022 censuses, a census-scaled 300 m population grid and the sex ratio of each district." },
   { title: "Assessing the Impact of Gold Mining on River Siltation in the Mazowe Valley from 2000 to 2025", slug: "mazowe-valley", card: "Gold Mining and River Siltation in the Mazowe Valley", sub: "Land disturbance and turbidity along 359 km of the Mazowe River.", img: cs4, place: "Mazowe Valley", years: "2000 to 2025",
     text: "Bare ground and turbidity along 359 km of the Mazowe River, with the clearest disturbance of the river corridor around Shamva." },
-  { title: "A Spatial Analysis of Land Use and Land Cover Change in Bulawayo and the Marange Diamond Fields from 1987 to 2025", slug: "land-use-land-cover", card: "Land Use and Land Cover Change in Bulawayo and Marange", sub: "Urban growth, cultivation and diamond mining mapped from Landsat.", img: lulc, place: "Bulawayo and Mutare", years: "1987 to 2025",
+  { title: "A Spatial Analysis of Land Use and Land Cover Change in Bulawayo and Ward 30 of Mutare Rural District from 1987 to 2025", slug: "land-use-land-cover", card: "Land Use and Land Cover Change in Bulawayo and Mutare Ward 30", sub: "Urban growth, cultivation and diamond mining mapped from Landsat.", img: lulc, place: "Bulawayo and Mutare", years: "1987 to 2025",
     text: "Cultivation spreading over Bulawayo's grassland and woodland, house building in three northern suburbs and diamond mining across Ward 30 of Mutare Rural District." },
   { title: "Rainfall Variability and Drought Patterns in Zimbabwe from the 1991/92 to 2024/25 Agricultural Seasons", slug: "rainfall-zimbabwe", card: "Rainfall Variability and Drought in Zimbabwe", sub: "Seasonal rainfall, variability and drought frequency over 34 seasons.", img: cs2, place: "Zimbabwe", years: "1991 to 2025",
     text: "Mean October to April rainfall, its variability, the 2023/24 drought, drought frequency and trend by province from 34 seasons of rainfall data." },
+  { title: "Above-Ground Carbon Stock Estimation in Hwange National Park Using GEDI LiDAR and Random Forest Regression (2019 to 2023)", slug: "hwange-carbon", card: "Above-Ground Carbon Stock of Hwange National Park", sub: "GEDI LiDAR footprints upscaled to a 100 m carbon map with Random Forest.", img: cs16, place: "Hwange National Park", years: "2019 to 2023",
+    text: "Laser footprints from space upscaled to a 100 m map, placing about 7.87 Mt of above-ground carbon in the park (plausibly 4 to 12 Mt), two thirds of it in shrubland where a global biomass map gives far less." },
+  { title: "Nitrogen Dioxide and Sulphur Dioxide Pollution from the Hwange Thermal Power Station Expansion Using Sentinel-5P (2019 to 2025)", slug: "hwange-air", card: "Air Pollution from the Hwange Power Station Expansion", sub: "Seven years of Sentinel-5P NO₂ and SO₂ before and after Units 7 and 8, against a control station.", img: cs14, place: "Hwange", years: "2019 to 2025",
+    text: "NO₂ and SO₂ above the regional background about doubled over Hwange after Units 7 and 8 came into service, with no change at the Maamba control, and about 20 500 people now live where NO₂ is twice the background." },
+  { title: "Flood Susceptibility Mapping of Chimanimani District Using GIS-Based Multi-Criteria Analysis and the Analytic Hierarchy Process", slug: "chimanimani-flood", card: "Flood Susceptibility of Chimanimani District", sub: "Eight factors reclassified, weighted with AHP and combined by weighted overlay.", img: cs17, place: "Chimanimani", years: "1991 to 2020",
+    text: "High and very high flood susceptibility covers 31 % of the district, mostly the western lowlands and the valley floors of the highlands, and holds about 63 % of its buildings and people." },
+  { title: "Field-Level Sugarcane Monitoring at Triangle and Hippo Valley Using Remote Sensing (2019 to 2025)", slug: "sugarcane-triangle", card: "Sugarcane Field Monitoring at Triangle and Hippo Valley", sub: "Seven years of monthly satellite greenness and moisture, followed field by field.", img: cs18, place: "Triangle and Hippo Valley", years: "2019 to 2025",
+    text: "1 947 cane fields covering 16 272 ha were traced from seven years of monthly Sentinel-2 images, with harvest month, vigour and consistently weak fields mapped for each." },
+  { title: "Area–Elevation–Storage Relationships and Water Level Decline at Lake Kariba (2000 to 2025)", slug: "lake-kariba", card: "Water Level Decline at Lake Kariba", sub: "Satellite altimetry paired with Landsat lake areas to build the storage curve.", img: cs19, place: "Lake Kariba", years: "2000 to 2025",
+    text: "Mean live storage halved between 2000 to 2009 and 2016 to 2025, the lake reached its minimum operating level every year from 2022, and 850 km² of lake bed was left dry. The satellite storage curve matches the operator's figures to within about 1 %." },
+  { title: "Landfill Site Selection for Bulawayo Using GIS-Based Multi-Criteria Analysis", slug: "bulawayo-landfill", card: "Landfill Site Selection for Bulawayo", sub: "Six weighted criteria used to find land fit for a new landfill.", img: cs20, place: "Bulawayo", years: "2021 to 2024",
+    text: "Only 51.4 km² (9.4 %) of Bulawayo is highly or very highly suitable for a landfill, while 43.5 % is very low. Four candidate sites of 154 to 1 864 ha were found, and the existing Richmond landfill falls in the very low class." },
 ];
 
 export const PROJECTS: Project[] = [
-  { title: "Flood Susceptibility Mapping of Chimanimani District and Gweru Urban Using Weighted Overlay Analysis", slug: "flood-susceptibility-mapping", card: "Flood Susceptibility in Chimanimani and Gweru", sub: "Weighted overlay of rainfall, slope, soils, drainage and land cover.", img: flood, place: "Chimanimani and Gweru",
-    text: "Weighted overlay of rainfall, slope, elevation, soils, drainage and land cover to show where floods are most likely in a mountain district and a flat city." },
   { title: "Mapping Encroachment and Land Loss in Seven Gazetted Forests of Matabeleland North, Zimbabwe (2024)", slug: "zimbabwe-gazetted-forests", card: "Forest Encroachment in Matabeleland North", sub: "Clearing for cultivation in seven gazetted forests.", img: forest, place: "Matabeleland North",
     text: "How much of seven gazetted forests has been cleared for cultivation, where the clearing sits and what it means for forest protection." },
   { title: "Web mapping", slug: "web-mapping", img: quakes, place: "In the browser",

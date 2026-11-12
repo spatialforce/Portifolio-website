@@ -50,6 +50,7 @@ export function SiteFooter() {
           </div>
           <span className="sfoot__base">© {NAME}</span>
         </div>
+        <p className="sfoot__note">Every map and chart on this site is drawn from measured, cited open datasets using GIS software and code. None is an AI-generated image. Each file carries its author and data-source details in its metadata.</p>
       </div>
     </footer>
   );

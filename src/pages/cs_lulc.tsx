@@ -93,7 +93,7 @@ export default function LulcCaseStudy() {
     <>
       <SiteNav />
       <article className="cs">
-        <h1>A Spatial Analysis of Land Use and Land Cover Change in Bulawayo and the Marange Diamond Fields from 1987 to 2025</h1>
+        <h1>A Spatial Analysis of Land Use and Land Cover Change in Bulawayo and Ward 30 of Mutare Rural District from 1987 to 2025</h1>
         <p className="cs__by">Kudzanai Chakavarika. Case study 3. November 2026.</p>
 
         <h2>Introduction</h2>

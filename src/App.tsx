@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavig
 import Home from "./pages/home";
 import ProjectsPage from "./pages/projects";
 import ForestResourcesProject from "./pages/forest";
-import FloodSusceptibilityMapping from "./pages/floodsusceptibilitymapping";
 import RemoteSensingIndices from "./pages/remotesensingindices";
 import FireSusceptibilityMapping from "./pages/firesusceptibilitymapping";
 import WebMapping from "./pages/webmapping";
@@ -13,6 +12,13 @@ import PopulationCaseStudy from "./pages/cs_population";
 import RainfallCaseStudy from "./pages/cs_rainfall";
 import LulcCaseStudy from "./pages/cs_lulc";
 import MazoweCaseStudy from "./pages/cs_mazowe";
+import SolarCaseStudy from "./pages/cs_solar";
+import CarbonCaseStudy from "./pages/cs_carbon";
+import AirQualityCaseStudy from "./pages/cs_airquality";
+import ChimanimaniFloodCaseStudy from "./pages/cs_chimflood";
+import SugarcaneCaseStudy from "./pages/cs_sugarcane";
+import KaribaCaseStudy from "./pages/cs_kariba";
+import LandfillCaseStudy from "./pages/cs_landfill";
 import Seo from "./pages/seo";
 
 /* New page: start at the top, or at the #section the link points to.
@@ -115,7 +121,6 @@ function App() {
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/zimbabwe-gazetted-forests" element={<ForestResourcesProject />} />
         <Route path="/projects/land-use-land-cover" element={<Navigate to="/case-studies/land-use-land-cover" replace />} />
-        <Route path="/projects/flood-susceptibility-mapping" element={<FloodSusceptibilityMapping />} />
         <Route path="/projects/remote-sensing-indices" element={<RemoteSensingIndices />} />
         <Route path="/projects/fire-susceptibility-mapping" element={<FireSusceptibilityMapping />} />
         <Route path="/projects/web-mapping" element={<WebMapping />} />
@@ -123,6 +128,13 @@ function App() {
         <Route path="/case-studies/rainfall-zimbabwe" element={<RainfallCaseStudy />} />
         <Route path="/case-studies/land-use-land-cover" element={<LulcCaseStudy />} />
         <Route path="/case-studies/mazowe-valley" element={<MazoweCaseStudy />} />
+        <Route path="/case-studies/solar-site-suitability" element={<SolarCaseStudy />} />
+        <Route path="/case-studies/hwange-carbon" element={<CarbonCaseStudy />} />
+        <Route path="/case-studies/hwange-air" element={<AirQualityCaseStudy />} />
+        <Route path="/case-studies/chimanimani-flood" element={<ChimanimaniFloodCaseStudy />} />
+        <Route path="/case-studies/sugarcane-triangle" element={<SugarcaneCaseStudy />} />
+        <Route path="/case-studies/lake-kariba" element={<KaribaCaseStudy />} />
+        <Route path="/case-studies/bulawayo-landfill" element={<LandfillCaseStudy />} />
         <Route path="/case-studies" element={<Navigate to="/projects" replace />} />
         <Route path="/maps/:slug" element={<MapViewer />} />
         <Route path="/projects/story-maps" element={<StoryMaps />} />
