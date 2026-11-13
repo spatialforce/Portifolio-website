@@ -169,9 +169,9 @@ export default function BaobabCaseStudy() {
 
           <section>
             <h2 id="intro">1 Introduction</h2>
-            <p>The African baobab is one of the best known trees of the dry savanna. It can live for well over a thousand years and stores water in its trunk, and rural households eat, sell and use its fruit, leaves and bark. In Zimbabwe the fruit pulp is now traded for export. That adds value to the tree, but it also adds pressure. Baobabs grow very slowly and their young are often eaten by livestock and wildlife, so knowing where the climate allows them to grow helps to plan both harvesting and protection.</p>
-            <p>Species distribution models link the places where a species has been recorded to the conditions at those places, and then map where similar conditions occur. Maximum entropy, or MaxEnt, is widely used for this when only presence records are available, as is the case for most plants (Phillips et al., 2006). It has been used for the baobab across Africa (Sanchez et al., 2011) and in Zimbabwe (Moyo et al., 2019), where winter temperature and altitude were found to limit the tree.</p>
-            <p>Here a simple MaxEnt model was built for the whole of Zimbabwe from public records and climate data for one period, 1981 to 2010. The model was used to map where the climate is suitable, to find what limits the tree, and to measure how much of the suitable land lies inside the country's protected areas.</p>
+            <p>The African baobab is one of the best known trees of the dry savanna. It can live for well over a thousand years and stores water in its trunk and rural households eat, sell and use its fruit, leaves and bark. In Zimbabwe the fruit pulp is now traded for export. That adds value to the tree, but it also adds pressure. Baobabs grow very slowly and their young are often eaten by livestock and wildlife, so knowing where the climate allows them to grow helps to plan both harvesting and protection.</p>
+            <p>Species distribution models link the places where a species has been recorded to the conditions at those places and then map where similar conditions occur. Maximum entropy, or MaxEnt, is widely used for this when only presence records are available, as is the case for most plants (Phillips et al., 2006). It has been used for the baobab across Africa (Sanchez et al. 2011) and in Zimbabwe (Moyo et al., 2019), where winter temperature and altitude were found to limit the tree.</p>
+            <p>Here a simple MaxEnt model was built for the whole of Zimbabwe from public records and climate data for one period, 1981 to 2010. The model was used to map where the climate is suitable, to find what limits the tree and to measure how much of the suitable land lies inside the country's protected areas.</p>
           </section>
 
           <section>
@@ -198,11 +198,11 @@ export default function BaobabCaseStudy() {
             <Table cap="Table 1. Data used" head={["Dataset", "Resolution", "Period", "Use"]} rows={T1} num={9} />
 
             <h3 id="m-records">Baobab records</h3>
-            <p>All 535 GBIF records of Adansonia digitata in Zimbabwe with coordinates were downloaded, 513 of them field observations and 22 herbarium specimens. Removing records with coordinate errors or an uncertainty above 5 km left 461, and removing duplicates and points off land left 410. The records cluster along roads and around parks, which would push the model towards well-visited places, so only one record was kept in each 10 km block. That left 145 records for the model (Map 2).</p>
+            <p>All 535 GBIF records of Adansonia digitata in Zimbabwe with coordinates were downloaded, 513 of them field observations and 22 herbarium specimens. Removing records with coordinate errors or an uncertainty above 5 km left 461 and removing duplicates and points off land left 410. The records cluster along roads and around parks, which would push the model towards well-visited places, so only one record was kept in each 10 km block. That left 145 records for the model (Map 2).</p>
             <Fig src={map2} cap="Map 2. Baobab records. Filled dots are the 145 records used in the model; hollow dots are records removed as near duplicates or as imprecise." />
 
             <h3 id="m-climate">Climate factors</h3>
-            <p>Nine climate layers from CHELSA (Karger et al., 2017) were compared first. Many of them are closely related, which makes a model hard to read. Three were kept, each describing a different part of the climate and only weakly related to the others (correlation 0.43 or less):</p>
+            <p>Nine climate layers from CHELSA (Karger et al. 2017) were compared first. Many of them are closely related, which makes a model hard to read. Three were kept, each describing a different part of the climate and only weakly related to the others (correlation 0.43 or less):</p>
             <ol className="tc__list">
               <li>Winter temperature: the mean temperature of the coldest three months (bio11).</li>
               <li>Annual rainfall (bio12).</li>
@@ -219,25 +219,25 @@ export default function BaobabCaseStudy() {
           <section>
             <h2 id="results">5 Results</h2>
             <h3 id="r-map">Where baobabs can grow</h3>
-            <p>The model separated record points from random points well, with a checkerboard test AUC of 0.765 (0.736 and 0.794 for the two halves). Suitable habitat covers 121 857 km², or 31.3 % of the land (Table 2, Map 4). Most of it lies in two large areas. One is the south-east lowlands of the Save, Runde and Limpopo rivers, and the other is the Zambezi Valley and the slopes above Lake Kariba in the north. Smaller patches follow the Gwayi and Shangani valleys in the north-west and the Mozambique border in Manicaland. The central plateau and the Eastern Highlands are not suitable.</p>
-            <p>Of the 145 records, 107 (73.8 %) fall in moderate or high suitability, and 88 in the high class alone.</p>
+            <p>The model separated record points from random points well, with a checkerboard test AUC of 0.765 (0.736 and 0.794 for the two halves). Suitable habitat covers 121 857 km², or 31.3 % of the land (Table 2, Map 4). Most of it lies in two large areas. One is the south-east lowlands of the Save, Runde and Limpopo rivers and the other is the Zambezi Valley and the slopes above Lake Kariba in the north. Smaller patches follow the Gwayi and Shangani valleys in the north-west and the Mozambique border in Manicaland. The central plateau and the Eastern Highlands are not suitable.</p>
+            <p>Of the 145 records, 107 (73.8 %) fall in moderate or high suitability and 88 in the high class alone.</p>
             <Fig src={map4} cap="Map 4. Habitat suitability for the African baobab in four classes. Dark green shows the land where the climate suits the tree best." />
             <Table cap="Table 2. Area in each suitability class" head={["Class", "Score", "Area (km²)", "Share of land (%)", "Records"]} rows={T2} num={2} total />
 
             <h3 id="r-factors">What controls it</h3>
-            <p>Winter temperature is by far the most important factor, with 73.2 % of the model's importance (Figure 1). Rainfall seasonality adds 22.2 %, and annual rainfall only 4.6 %. Suitability climbs steeply as winters get warmer (Figure 2). Where the coldest months average under about 16.3 °C it is below 0.2, and it reaches the high class at about 18.6 °C. Half of the records lie where the coldest months average 18.6 °C or more, while the figure for the country as a whole is 17.1 °C. Suitability drops as rainfall becomes more seasonal.</p>
+            <p>Winter temperature is by far the most important factor, with 73.2 % of the model's importance (Figure 1). Rainfall seasonality adds 22.2 % and annual rainfall only 4.6 %. Suitability climbs steeply as winters get warmer (Figure 2). Where the coldest months average under about 16.3 °C it is below 0.2 and it reaches the high class at about 18.6 °C. Half of the records lie where the coldest months average 18.6 °C or more, while the figure for the country as a whole is 17.1 °C. Suitability drops as rainfall becomes more seasonal.</p>
             <Fig src={fig1} cap="Figure 1. Share of the model's importance for each climate factor." />
             <Fig src={fig2} cap="Figure 2. How habitat suitability changes with winter temperature, with the other two factors held at typical values. The dashed line is the median at the records." />
-            <p>Because winter temperature falls with height, suitability follows elevation closely (Table 3). All land below 600 m is suitable, two thirds of land between 600 and 900 m, and almost none above 1 200 m. Half of the records lie below 558 m.</p>
+            <p>Because winter temperature falls with height, suitability follows elevation closely (Table 3). All land below 600 m is suitable, two thirds of land between 600 and 900 m and almost none above 1 200 m. Half of the records lie below 558 m.</p>
             <Table cap="Table 3. Suitable habitat by elevation" head={["Elevation", "Land suitable (%)", "Records"]} rows={T3} num={1} />
 
             <h3 id="r-prov">Provinces</h3>
-            <p>Masvingo has the most suitable habitat, 40 737 km² or 72.0 % of its land, and holds 44.5 % of all high suitability land in the country (Table 4). Mashonaland West (21 921 km²) and Matabeleland South (17 407 km²) follow. Matabeleland North is the largest province but only 13.5 % of it is suitable, mostly in the valleys. Mashonaland East, on the plateau, has the least (7.6 %), and Harare and Bulawayo have none.</p>
+            <p>Masvingo has the most suitable habitat, 40 737 km² or 72.0 % of its land and holds 44.5 % of all high suitability land in the country (Table 4). Mashonaland West (21 921 km²) and Matabeleland South (17 407 km²) follow. Matabeleland North is the largest province but only 13.5 % of it is suitable, mostly in the valleys. Mashonaland East, on the plateau, has the least (7.6 %) and Harare and Bulawayo have none.</p>
             <Table cap="Table 4. Suitable habitat by province (km²), largest first" head={["Province", "Land", "High", "Moderate", "Suitable", "Share suitable (%)"]} rows={T4} num={1} total />
 
             <h3 id="r-pa">Protected areas</h3>
             <p>The 93 protected areas studied cover 62 594 km², 16.1 % of the land. Inside them are 26 309 km² of suitable habitat, which is 21.6 % of all suitable habitat in the country and 26.9 % of the high class (Map 5). Nearly four fifths of the land where baobabs can grow is therefore outside protected areas, mostly on communal land in Masvingo, Matabeleland South and the Zambezi Valley.</p>
-            <p>Safari areas hold the most suitable habitat, 10 655 km² (Table 5), followed by national parks (8 713 km²) and sanctuaries (5 316 km²). Gonarezhou National Park and the Save Conservancy are entirely suitable, and together they hold almost a third of the suitable land inside protected areas (Table 6). State forests, mostly on the higher ground of the west, are only 9.0 % suitable.</p>
+            <p>Safari areas hold the most suitable habitat, 10 655 km² (Table 5), followed by national parks (8 713 km²) and sanctuaries (5 316 km²). Gonarezhou National Park and the Save Conservancy are entirely suitable and together they hold almost a third of the suitable land inside protected areas (Table 6). State forests, mostly on the higher ground of the west, are only 9.0 % suitable.</p>
             <Fig src={map5} cap="Map 5. Suitable habitat inside (dark green) and outside (orange) protected areas. NP is national park and SA is safari area." />
             <Table cap="Table 5. Suitable habitat by type of protected area" head={["Type", "Number", "Area (km²)", "Suitable (km²)", "Share suitable (%)"]} rows={T5} num={1} total />
             <Table cap="Table 6. Protected areas with the most suitable habitat" head={["Protected area", "Type", "Area (km²)", "Suitable (km²)"]} rows={T6} num={2} />
@@ -245,19 +245,19 @@ export default function BaobabCaseStudy() {
 
           <section>
             <h2 id="discussion">6 Discussion</h2>
-            <p>On this map the baobab is a tree of Zimbabwe's warm lowlands. Winter temperature alone explains most of the pattern. Moyo et al. (2019) likewise found the temperature of the coldest quarter and altitude to be key for the baobab in Zimbabwe, and Sanchez et al. (2011) found cold to limit the tree across Africa. Young baobabs are easily damaged by frost, and frost is common on the plateau in June and July. That is probably why so few trees grow above about 1 200 m.</p>
-            <p>Rainfall matters much less. The baobab grows from about 430 to almost 1 000 mm a year in Zimbabwe, and its water-storing trunk lets it survive long dry seasons. The small negative effect of seasonality probably reflects the hot, very seasonal far south-west near Botswana, where few baobabs were recorded.</p>
+            <p>On this map the baobab is a tree of Zimbabwe's warm lowlands. Winter temperature alone explains most of the pattern. Moyo et al. (2019) likewise found the temperature of the coldest quarter and altitude to be key for the baobab in Zimbabwe and Sanchez et al. (2011) found cold to limit the tree across Africa. Young baobabs are easily damaged by frost and frost is common on the plateau in June and July. That is probably why so few trees grow above about 1 200 m.</p>
+            <p>Rainfall matters much less. The baobab grows from about 430 to almost 1 000 mm a year in Zimbabwe and its water-storing trunk lets it survive long dry seasons. The small negative effect of seasonality probably reflects the hot, very seasonal far south-west near Botswana, where few baobabs were recorded.</p>
             <p>The low share of suitable habitat inside protected areas matters for the fruit trade. Most harvesting takes place on communal land, where goats and cattle browse the young trees. The future of the baobab outside the parks will be decided on the large areas of suitable land in Masvingo and Matabeleland South.</p>
           </section>
 
           <section>
             <h2 id="limits">7 Limitations</h2>
-            <p>The model shows where the climate suits the baobab, not where it actually grows. Soil, fire, browsing, clearing and harvesting are left out. GBIF records are uneven, with more of them along roads and in parks, even after thinning. When whole regions were held out in turn the AUC was lower (mean 0.652, ranging from 0.517 to 0.863), so the model is less reliable where records are few, such as the far west. The climate data cover 1981 to 2010, and change over time was not modelled.</p>
+            <p>The model shows where the climate suits the baobab, not where it actually grows. Soil, fire, browsing, clearing and harvesting are left out. GBIF records are uneven, with more of them along roads and in parks, even after thinning. When whole regions were held out in turn the AUC was lower (mean 0.652, ranging from 0.517 to 0.863), so the model is less reliable where records are few, such as the far west. The climate data cover 1981 to 2010 and change over time was not modelled.</p>
           </section>
 
           <section>
             <h2 id="conclusion">8 Conclusion and recommendations</h2>
-            <p>About a third of Zimbabwe, 121 857 km², has a climate that suits the African baobab, mainly in the warm south-east lowlands and the Zambezi Valley. Winter temperature is the main control, and above 1 200 m there is almost no suitable land. Only 21.6 % of the suitable land lies in protected areas.</p>
+            <p>About a third of Zimbabwe, 121 857 km², has a climate that suits the African baobab, mainly in the warm south-east lowlands and the Zambezi Valley. Winter temperature is the main control and above 1 200 m there is almost no suitable land. Only 21.6 % of the suitable land lies in protected areas.</p>
             <ol className="tc__list">
               <li>Focus baobab monitoring and harvesting rules on the communal lands of Masvingo, Matabeleland South and the Zambezi Valley, where most suitable habitat lies.</li>
               <li>Protect young trees from browsing in these areas, for example with community nurseries and fenced seedlings.</li>

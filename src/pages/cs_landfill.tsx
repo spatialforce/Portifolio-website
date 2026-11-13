@@ -86,8 +86,8 @@ export default function LandfillCaseStudy() {
         <Facts rows={[["Place", "Bulawayo"], ["Period", "2021 to 2024 data"], ["Data", "WorldCover, building outlines, soil clay, Copernicus DEM, OpenStreetMap"], ["Methods", "Multi-criteria decision analysis (MCDA), analytic hierarchy process (AHP), buffer analysis, weighted overlay"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <h2>1 Introduction</h2>
-        <p>Bulawayo is Zimbabwe's second city, with 665 952 people at the 2022 census (ZimStat, 2022). Most of its solid waste goes to the Richmond landfill, a 30 ha site run by the city council and worked by more than 240 waste pickers (UN-Habitat, 2022). The site is unlined, its disposal cells are almost full, and houses have grown up around it (UN-Habitat, 2022). The city will need a new site, and that site must keep waste away from homes, rivers and groundwater while staying close enough to roads for collection trucks.</p>
-        <p>Choosing a landfill site is a long-standing use of geographic information systems. Several criteria are mapped and scored, and the scores are combined with weights to rank every part of the study area (Şener et al., 2006). The same approach was applied here to Bulawayo. Six siting factors were scored and weighted with the analytic hierarchy process (Saaty, 1980), suitability was mapped across the whole city, and the largest blocks of the best land were picked out as candidate sites.</p>
+        <p>Bulawayo is Zimbabwe's second city, with 665 952 people at the 2022 census (ZimStat, 2022). Most of its solid waste goes to the Richmond landfill, a 30 ha site run by the city council and worked by more than 240 waste pickers (UN-Habitat, 2022). The site is unlined, its disposal cells are almost full and houses have grown up around it (UN-Habitat, 2022). The city will need a new site and that site must keep waste away from homes, rivers and groundwater while staying close enough to roads for collection trucks.</p>
+        <p>Choosing a landfill site is a long-standing use of geographic information systems. Several criteria are mapped and scored and the scores are combined with weights to rank every part of the study area (Şener et al., 2006). The same approach was applied here to Bulawayo. Six siting factors were scored and weighted with the analytic hierarchy process (Saaty, 1980), suitability was mapped across the whole city and the largest blocks of the best land were picked out as candidate sites.</p>
 
         <h2>2 Objectives</h2>
         <ol>
@@ -98,7 +98,7 @@ export default function LandfillCaseStudy() {
         </ol>
 
         <h2>3 Study area</h2>
-        <p>Bulawayo lies in Matabeleland on the watershed between the Zambezi and Limpopo basins, at about 1 300 to 1 400 m above sea level (Map 1). The city covers 545.7 km². Its centre lies on a grid of streets, with suburbs spreading out on all sides and the high-density suburbs to the west and north-west. The Umguza, Khami and Umzingwane rivers and their tributaries drain the city to the north and south. Joshua Mqabuko Nkomo International Airport lies on the northern edge. Richmond landfill sits north-west of the centre between Cowdray Park and the northern suburbs, and a smaller dump site lies on the eastern edge of the city.</p>
+        <p>Bulawayo lies in Matabeleland on the watershed between the Zambezi and Limpopo basins, at about 1 300 to 1 400 m above sea level (Map 1). The city covers 545.7 km². Its centre lies on a grid of streets, with suburbs spreading out on all sides and the high-density suburbs to the west and north-west. The Umguza, Khami and Umzingwane rivers and their tributaries drain the city to the north and south. Joshua Mqabuko Nkomo International Airport lies on the northern edge. Richmond landfill sits north-west of the centre between Cowdray Park and the northern suburbs and a smaller dump site lies on the eastern edge of the city.</p>
         <Fig src={map1} cap="Map 1. Study Area Map." />
 
         <h2>4 Data and methods</h2>
@@ -112,7 +112,7 @@ export default function LandfillCaseStudy() {
         <p className="tc__src">Source: Zanaga et al. (2022); Sirko et al. (2021); Hengl et al. (2021); ESA (2021); ESA (2024); OpenStreetMap contributors (2026); OCHA (2023). Raster data were processed in Google Earth Engine (Gorelick et al., 2017). All layers were placed on a 30 m grid in UTM zone 35S.</p>
 
         <h3>Siting factors</h3>
-        <p>Six factors were used: distance from settlements, distance from surface water, soil clay, slope, distance to roads and land cover. Settlements were taken as built-up land in WorldCover, together with every 30 m cell at least one fifth covered by building outlines. Surface water was taken as the rivers, water bodies and wetlands in OpenStreetMap and WorldCover. Each factor was scored from 1 (very low suitability) to 5 (very high) (Table 2). Land far from homes and water scores high. Clay soils score high because they slow the movement of leachate into groundwater. Gentle slopes are easier to build on and shed less runoff, and land near roads is cheaper to serve. For land cover, grassland and bare ground score highest and trees lowest, so that woodland is not cleared.</p>
+        <p>Six factors were used: distance from settlements, distance from surface water, soil clay, slope, distance to roads and land cover. Settlements were taken as built-up land in WorldCover, together with every 30 m cell at least one fifth covered by building outlines. Surface water was taken as the rivers, water bodies and wetlands in OpenStreetMap and WorldCover. Each factor was scored from 1 (very low suitability) to 5 (very high) (Table 2). Land far from homes and water scores high. Clay soils score high because they slow the movement of leachate into groundwater. Gentle slopes are easier to build on and shed less runoff and land near roads is cheaper to serve. For land cover, grassland and bare ground score highest and trees lowest, so that woodland is not cleared.</p>
         <p className="tc__cap">Table 2. Factor scores</p>
         <div className="tc__tw">
           <table>
@@ -123,7 +123,7 @@ export default function LandfillCaseStudy() {
         <p className="tc__src">Source: this study. Distance from surface water is the distance to the nearest river, water body or wetland.</p>
 
         <h3>Factor weights</h3>
-        <p>The factors were compared in pairs on Saaty's 1 to 9 scale, and the weights were taken from the principal eigenvector of the comparison matrix (Saaty, 1980). Distance from settlements and from surface water were rated most important, as in most landfill siting studies (Şener et al., 2006). The consistency ratio was checked against the limit of 0.10.</p>
+        <p>The factors were compared in pairs on Saaty's 1 to 9 scale and the weights were taken from the principal eigenvector of the comparison matrix (Saaty, 1980). Distance from settlements and from surface water were rated most important, as in most landfill siting studies (Şener et al. 2006). The consistency ratio was checked against the limit of 0.10.</p>
 
         <h3>Suitability mapping</h3>
         <p>The suitability score of each cell was the weighted sum of its six factor scores, which gives a value between 1 and 5. The score was grouped into five classes across the whole city: very low (below 2.5), low (2.5 to 3.0), moderate (3.0 to 3.5), high (3.5 to 4.0) and very high (above 4.0).</p>
@@ -133,7 +133,7 @@ export default function LandfillCaseStudy() {
 
         <h2>5 Results</h2>
         <h3>Factor weights</h3>
-        <p>Distance from settlements and distance from surface water carry the most weight, 0.315 each, which together is 63 % of the score (Table 3, Figure 1). Soil clay and slope follow at 0.124 each, then distance to roads (0.074) and land cover (0.048). The largest eigenvalue is 6.074. That gives a consistency index of 0.015 and a consistency ratio of 0.012, well under the limit of 0.10. Map 2 shows the six factor scores across the city. The settlement factor is very low over almost the whole built-up area, and the water factor follows the river network in narrow bands. Clay is highest in the east and south. Slope scores very high nearly everywhere, since the city is flat.</p>
+        <p>Distance from settlements and distance from surface water carry the most weight, 0.315 each, which together is 63 % of the score (Table 3, Figure 1). Soil clay and slope follow at 0.124 each, then distance to roads (0.074) and land cover (0.048). The largest eigenvalue is 6.074. That gives a consistency index of 0.015 and a consistency ratio of 0.012, well under the limit of 0.10. Map 2 shows the six factor scores across the city. The settlement factor is very low over almost the whole built-up area and the water factor follows the river network in narrow bands. Clay is highest in the east and south. Slope scores very high nearly everywhere, since the city is flat.</p>
         <p className="tc__cap">Table 3. Pairwise comparison matrix and weights</p>
         <div className="tc__tw">
           <table>
@@ -146,7 +146,7 @@ export default function LandfillCaseStudy() {
         <Fig src={map2} cap="Map 2. Factor Suitability Maps." />
 
         <h3>Landfill suitability</h3>
-        <p>Very low land is the largest class, at 237.2 km² or 43.5 % of the city, and it covers the built-up core and the river corridors (Table 4, Figure 2, Map 3). Low and moderate land together take up 257.1 km² (47.1 %) in a ring between the suburbs and the city edge. Only 51.4 km² (9.4 %) is highly or very highly suitable, and it lies in four places: the north-east around the airport, the southern tip of the city, the far north-west and a few patches on the western edge.</p>
+        <p>Very low land is the largest class, at 237.2 km² or 43.5 % of the city and it covers the built-up core and the river corridors (Table 4, Figure 2, Map 3). Low and moderate land together take up 257.1 km² (47.1 %) in a ring between the suburbs and the city edge. Only 51.4 km² (9.4 %) is highly or very highly suitable and it lies in four places: the north-east around the airport, the southern tip of the city, the far north-west and a few patches on the western edge.</p>
         <p className="tc__cap">Table 4. Area of each suitability class</p>
         <div className="tc__tw">
           <table>
@@ -159,7 +159,7 @@ export default function LandfillCaseStudy() {
         <Fig src={map3} cap="Map 3. Landfill Suitability Map." />
 
         <h3>Candidate sites and existing landfills</h3>
-        <p>The four best blocks of high and very high land range from 154 to 1 864 ha (Table 5, Map 4). Site A, at the southern tip of the city, ranks first with a mean score of 4.08. It covers 873 ha and lies on average 1.3 km from settlements, 1.7 km from a main road and 6.7 km from the airport. Site B in the north-west is farthest from settlements (2.1 km on average) but about 4 km from a main road. Sites C and D in the north-east are within 1.5 km of airport runways. Site C is the largest block, at 1 864 ha, and wraps around the end of the main runway. On the satellite image all four are open grassland or bush.</p>
+        <p>The four best blocks of high and very high land range from 154 to 1 864 ha (Table 5, Map 4). Site A, at the southern tip of the city, ranks first with a mean score of 4.08. It covers 873 ha and lies on average 1.3 km from settlements, 1.7 km from a main road and 6.7 km from the airport. Site B in the north-west is farthest from settlements (2.1 km on average) but about 4 km from a main road. Sites C and D in the north-east are within 1.5 km of airport runways. Site C is the largest block, at 1 864 ha and wraps around the end of the main runway. On the satellite image all four are open grassland or bush.</p>
         <p className="tc__cap">Table 5. Candidate sites</p>
         <div className="tc__tw">
           <table>
@@ -180,10 +180,10 @@ export default function LandfillCaseStudy() {
         <Fig src={map4} cap="Map 4. Candidate Landfill Sites Map." />
 
         <h2>6 Discussion</h2>
-        <p>Inside its own boundary, Bulawayo has little good land for a landfill. Less than a tenth of the city is highly or very highly suitable, and nearly all of that lies at the edges, where the city is still growing. The best land will shrink as the suburbs spread, so a search that crosses into Umguza and Bulilima districts would offer more choice.</p>
-        <p>For the north-eastern sites, the airport is the problem. Waste sites attract birds, and aviation guidance treats waste sites within about 3 km of a runway as a hazard to aircraft (FAA, 2007). Sites C and D lie inside that distance. They score well on the six factors but would be hard to get approved. Site A, far from the airport and close to a main road, is the stronger choice.</p>
-        <p>Richmond landfill is an example of a city growing around its waste site. When it was chosen it lay well outside the built-up area. Houses now stand within 200 m of it, and it scores in the very low class. Any new site should be protected by a buffer written into the planning rules, so that housing cannot creep up to it.</p>
-        <p>There are limits to the method. The weights come from judgement and would shift with the views of planners, engineers and residents. The clay layer is a continental model at 30 m and is no substitute for drilling. Groundwater depth and geology matter a great deal for leachate, but they were not mapped because no detailed data exist for the city. Settlements are taken from images of 2021 and 2023, so recent building may be missing, and the Richmond outline is an approximation. The candidate sites are places to survey, not final choices.</p>
+        <p>Inside its own boundary, Bulawayo has little good land for a landfill. Less than a tenth of the city is highly or very highly suitable and nearly all of that lies at the edges, where the city is still growing. The best land will shrink as the suburbs spread, so a search that crosses into Umguza and Bulilima districts would offer more choice.</p>
+        <p>For the north-eastern sites, the airport is the problem. Waste sites attract birds and aviation guidance treats waste sites within about 3 km of a runway as a hazard to aircraft (FAA, 2007). Sites C and D lie inside that distance. They score well on the six factors but would be hard to get approved. Site A, far from the airport and close to a main road, is the stronger choice.</p>
+        <p>Richmond landfill is an example of a city growing around its waste site. When it was chosen it lay well outside the built-up area. Houses now stand within 200 m of it and it scores in the very low class. Any new site should be protected by a buffer written into the planning rules, so that housing cannot creep up to it.</p>
+        <p>There are limits to the method. The weights come from judgement and would shift with the views of planners, engineers and residents. The clay layer is a continental model at 30 m and is no substitute for drilling. Groundwater depth and geology matter a great deal for leachate, but they were not mapped because no detailed data exist for the city. Settlements are taken from images of 2021 and 2023, so recent building may be missing and the Richmond outline is an approximation. The candidate sites are places to survey, not final choices.</p>
 
         <h2>7 Recommendations</h2>
         <ol>

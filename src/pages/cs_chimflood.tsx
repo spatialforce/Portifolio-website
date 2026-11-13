@@ -87,8 +87,8 @@ export default function ChimanimaniFloodCaseStudy() {
         <Facts rows={[["Place", "Chimanimani District"], ["Period", "1991 to 2020 rainfall"], ["Data", "Copernicus DEM, CHIRPS, land cover, soil, buildings"], ["Methods", "Multi-criteria decision analysis (MCDA), analytic hierarchy process (AHP), weighted overlay"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <h2>1 Introduction</h2>
-        <p>Chimanimani District has steep highlands, heavy summer rain and narrow valleys, and most people live in those valleys. Water gathers in them quickly, and rivers rise fast after storms. A flood susceptibility map shows which ground is most likely to flood, judged from the physical conditions of each place, so that planning and early warning can be aimed at the right areas.</p>
-        <p>The map was built with GIS multi-criteria analysis. Eight flood conditioning factors were mapped on a 30 m grid and each was reclassified into five susceptibility scores. The factors were weighted with the analytic hierarchy process (AHP; Saaty, 1980) and combined by weighted overlay into one flood susceptibility index. That index was split into five classes, and the buildings and people in each class were counted.</p>
+        <p>Chimanimani District has steep highlands, heavy summer rain and narrow valleys and most people live in those valleys. Water gathers in them quickly and rivers rise fast after storms. A flood susceptibility map shows which ground is most likely to flood, judged from the physical conditions of each place, so that planning and early warning can be aimed at the right areas.</p>
+        <p>The map was built with GIS multi-criteria analysis. Eight flood conditioning factors were mapped on a 30 m grid and each was reclassified into five susceptibility scores. The factors were weighted with the analytic hierarchy process (AHP; Saaty, 1980) and combined by weighted overlay into one flood susceptibility index. That index was split into five classes and the buildings and people in each class were counted.</p>
 
         <h2>2 Objectives</h2>
         <ol>
@@ -99,7 +99,7 @@ export default function ChimanimaniFloodCaseStudy() {
         </ol>
 
         <h2>3 Study area</h2>
-        <p>Chimanimani District lies in the south-east of Manicaland Province in eastern Zimbabwe (Map 1). It covers 3 342 km². The land rises from about 300 m in the western lowlands to more than 2 000 m in the Chimanimani Mountains in the east. The eastern half is steep and deeply cut, and its southern part drains through the Rusitu River. The western half is drier and drains through the Nyanyadzi valley. Long-term rainfall ranges from about 480 mm a year in the west to more than 1 500 mm in the east (Funk et al., 2015). The district had 153 619 people at the 2022 census (City Population, 2023). Most live in Chimanimani town, around Cashel and Mutambara in the north, and along the Rusitu valley in the south.</p>
+        <p>Chimanimani District lies in the south-east of Manicaland Province in eastern Zimbabwe (Map 1). It covers 3 342 km². The land rises from about 300 m in the western lowlands to more than 2 000 m in the Chimanimani Mountains in the east. The eastern half is steep and deeply cut and its southern part drains through the Rusitu River. The western half is drier and drains through the Nyanyadzi valley. Long-term rainfall ranges from about 480 mm a year in the west to more than 1 500 mm in the east (Funk et al., 2015). The district had 153 619 people at the 2022 census (City Population, 2023). Most live in Chimanimani town, around Cashel and Mutambara in the north and along the Rusitu valley in the south.</p>
         <Fig src={map1} cap="Map 1. Study Area Map." />
 
         <h2>4 Data and methods</h2>
@@ -156,7 +156,7 @@ export default function ChimanimaniFloodCaseStudy() {
 
         <h2>5 Results</h2>
         <h3>Reclassified factors</h3>
-        <p>Each factor divides the district in its own way (Map 2, Table 4). Distance to river and drainage density pick out the valley network, and about a fifth of the district lies within 500 m of a river. Slope and elevation separate the flat, low western plains from the steep eastern highlands. A quarter of the district has slopes under 5°, and 11 % lies below 700 m, nearly all of it in the west. Rainfall runs the other way. The east gets the most, and 31 % of the district receives more than 1 250 mm a year. Land cover is mostly rangeland and trees, and both score low. Clay content is highest in the east, where 68 % of the land scores 4 or 5, compared with 25 % in the west.</p>
+        <p>Each factor divides the district in its own way (Map 2, Table 4). Distance to river and drainage density pick out the valley network and about a fifth of the district lies within 500 m of a river. Slope and elevation separate the flat, low western plains from the steep eastern highlands. A quarter of the district has slopes under 5° and 11 % lies below 700 m, nearly all of it in the west. Rainfall runs the other way. The east gets the most and 31 % of the district receives more than 1 250 mm a year. Land cover is mostly rangeland and trees and both score low. Clay content is highest in the east, where 68 % of the land scores 4 or 5, compared with 25 % in the west.</p>
         <p className="tc__cap">Table 4. Share of the district in each score, by factor (%)</p>
         <div className="tc__tw">
           <table>
@@ -166,7 +166,7 @@ export default function ChimanimaniFloodCaseStudy() {
         </div>
 
         <h3>Flood susceptibility</h3>
-        <p>Map 3 shows the final flood susceptibility map. The high and very high classes cover 1 048 km², or 31.3 % of the district, and they occur in two settings. The first is the flat western lowlands along the lower Nyanyadzi, around Nyanyadzi and Hot Springs, where low ground, gentle slopes and nearby rivers all score high. In the western half of the district, 37 % of the land is in the high or very high class. The second setting is the valley floors that cut through the highlands, such as the Rusitu valley around Machongwe and the valleys around Cashel and Mutambara in the north. There, closeness to the river and heavy rainfall outweigh the higher ground. The ridges, steep slopes and plateaus, including the ground around Chimanimani town itself, fall mostly in the very low and low classes, which together cover 42 % of the district.</p>
+        <p>Map 3 shows the final flood susceptibility map. The high and very high classes cover 1 048 km², or 31.3 % of the district and they occur in two settings. The first is the flat western lowlands along the lower Nyanyadzi, around Nyanyadzi and Hot Springs, where low ground, gentle slopes and nearby rivers all score high. In the western half of the district, 37 % of the land is in the high or very high class. The second setting is the valley floors that cut through the highlands, such as the Rusitu valley around Machongwe and the valleys around Cashel and Mutambara in the north. There, closeness to the river and heavy rainfall outweigh the higher ground. The ridges, steep slopes and plateaus, including the ground around Chimanimani town itself, fall mostly in the very low and low classes, which together cover 42 % of the district.</p>
         <Fig src={map3} cap="Map 3. Flood Susceptibility Map, five classes of the weighted overlay of eight reclassified factors." />
         <p className="tc__cap">Table 5. Area, buildings and people in each flood susceptibility class</p>
         <div className="tc__tw">
@@ -178,15 +178,15 @@ export default function ChimanimaniFloodCaseStudy() {
         <p className="tc__src">Source: this study; Sirko et al. (2021); Bondarenko et al. (2020). People are rounded to the nearest hundred.</p>
 
         <h3>Buildings and people</h3>
-        <p>Settlements in Chimanimani sit in the valleys, near water and flat land, and so many of them are on the most flood-prone ground (Figure 2). The high and very high classes cover 31 % of the district yet hold 42 087 buildings (63 % of the total) and about 95 300 people (63 %). The very high class on its own covers 11.6 % of the land but has 23 % of the buildings and 24 % of the people. Only 1.6 % of buildings stand in the very low class.</p>
+        <p>Settlements in Chimanimani sit in the valleys, near water and flat land and so many of them are on the most flood-prone ground (Figure 2). The high and very high classes cover 31 % of the district yet hold 42 087 buildings (63 % of the total) and about 95 300 people (63 %). The very high class on its own covers 11.6 % of the land but has 23 % of the buildings and 24 % of the people. Only 1.6 % of buildings stand in the very low class.</p>
         <Fig src={fig2} cap="Figure 2. Share of district area, buildings and people in each flood susceptibility class." />
 
         <h3>Check against mapped flood areas</h3>
         <p>As an independent check, the map was compared with the flood areas mapped across the district by the Royal Museum for Central Africa after the floods of March 2019 (RMCA, 2025). These areas played no part in building the map. Of the mapped flood cells, 85.7 % fall in the very high class and 11.2 % in the high class. The area under the ROC curve is 0.95, so the index separates flooded from unflooded ground well.</p>
 
         <h2>6 Discussion</h2>
-        <p>Flood susceptibility in Chimanimani is controlled mainly by where the valleys are. Distance to river and slope together carry more than half of the weight, so the high classes trace the river network and the flat ground beside it. The two halves of the district are at risk for different reasons. The western lowlands are low, flat and close to large rivers, though they get less rain. The eastern valleys are higher but narrow, and they get the heaviest rain. Both end up in the high and very high classes.</p>
-        <p>Because the weights come from expert judgement, another analyst could rank the factors differently. The consistency ratio shows that the judgements agree with each other, not that they are right. The close match with the mapped flood areas gives some confidence in the result. Some limits remain. The 30 m elevation model smooths out narrow channels, the rainfall and soil data are coarse (about 5 km and 250 m), and the land cover is from a single year. The map also shows where flooding is likely, not how deep or how often it will be.</p>
+        <p>Flood susceptibility in Chimanimani is controlled mainly by where the valleys are. Distance to river and slope together carry more than half of the weight, so the high classes trace the river network and the flat ground beside it. The two halves of the district are at risk for different reasons. The western lowlands are low, flat and close to large rivers, though they get less rain. The eastern valleys are higher but narrow and they get the heaviest rain. Both end up in the high and very high classes.</p>
+        <p>Because the weights come from expert judgement, another analyst could rank the factors differently. The consistency ratio shows that the judgements agree with each other, not that they are right. The close match with the mapped flood areas gives some confidence in the result. Some limits remain. The 30 m elevation model smooths out narrow channels, the rainfall and soil data are coarse (about 5 km and 250 m) and the land cover is from a single year. The map also shows where flooding is likely, not how deep or how often it will be.</p>
 
         <h2>7 Recommendations</h2>
         <ol>
@@ -197,7 +197,7 @@ export default function ChimanimaniFloodCaseStudy() {
         </ol>
 
         <h2>8 Conclusion</h2>
-        <p>Eight factors were reclassified, weighted with AHP (CR = 0.021) and combined by weighted overlay into a flood susceptibility map of Chimanimani District. In all, 31 % of the district is in the high or very high class, mostly in the western lowlands and on the valley floors of the highlands. Those classes hold about 63 % of the district's buildings and people, so flood risk here comes as much from where people live as from the land itself.</p>
+        <p>Eight factors were reclassified, weighted with AHP (CR = 0.021) and combined by weighted overlay into a flood susceptibility map of Chimanimani District. In all 31 % of the district is in the high or very high class, mostly in the western lowlands and on the valley floors of the highlands. Those classes hold about 63 % of the district's buildings and people, so flood risk here comes as much from where people live as from the land itself.</p>
 
         <h2>References</h2>
         <div className="tc__ref">
