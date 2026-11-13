@@ -24,6 +24,7 @@ CASE = {
     "hwange-air": "Nitrogen Dioxide and Sulphur Dioxide Pollution from the Hwange Thermal Power Station Expansion Using Sentinel-5P (2019 to 2025)",
     "kariba": "Area–Elevation–Storage Relationships and Water Level Decline at Lake Kariba (2000 to 2025)",
     "bulawayo-landfill": "Landfill Site Selection for Bulawayo Using GIS-Based Multi-Criteria Analysis",
+    "chivi-soil-erosion": "Soil Loss Estimation in Chivi District Using the Revised Universal Soil Loss Equation",
 }
 
 

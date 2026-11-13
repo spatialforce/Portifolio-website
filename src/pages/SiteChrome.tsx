@@ -29,7 +29,7 @@ export default function SiteNav({ overlay = false }: { overlay?: boolean }) {
         <NavLink to="/projects/story-maps">Story maps</NavLink>
         <Link to="/#about">About</Link>
         <Link to="/#contact">Contact</Link>
-        <a href="/cv.pdf" target="_blank" rel="noreferrer" className="snav__cv">CV</a>
+        <a href="/Kudzanai_Chakavarika_CV.pdf" target="_blank" rel="noreferrer" className="snav__cv">CV</a>
       </div>
     </nav>
   );
@@ -46,7 +46,7 @@ export function SiteFooter() {
           <div className="sfoot__links">
             <a href="https://www.linkedin.com/in/kudzanai-chakavarika-65a847372" target="_blank" rel="noreferrer"><i className="bi bi-linkedin" aria-hidden="true" /> LinkedIn</a>
             <a href="https://github.com/spatialforce" target="_blank" rel="noreferrer"><i className="bi bi-github" aria-hidden="true" /> GitHub</a>
-            <a href="/cv.pdf" target="_blank" rel="noreferrer"><i className="bi bi-file-earmark-text" aria-hidden="true" /> CV</a>
+            <a href="/Kudzanai_Chakavarika_CV.pdf" target="_blank" rel="noreferrer"><i className="bi bi-file-earmark-text" aria-hidden="true" /> CV</a>
           </div>
           <span className="sfoot__base">© {NAME}</span>
         </div>

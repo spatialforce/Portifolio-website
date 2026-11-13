@@ -40,7 +40,7 @@ export function ProjectContact({ children }: { children: ReactNode }) {
       <p>{children}</p>
       <div className="pcta__actions">
         <a href="mailto:kudzanaichakavarika67@gmail.com" className="btn">Email me</a>
-        <a href="/cv.pdf" target="_blank" rel="noreferrer" className="btn btn--line">Download CV</a>
+        <a href="/Kudzanai_Chakavarika_CV.pdf" target="_blank" rel="noreferrer" className="btn btn--line">Download CV</a>
       </div>
     </section>
   );

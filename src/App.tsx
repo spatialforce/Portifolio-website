@@ -19,6 +19,7 @@ import ChimanimaniFloodCaseStudy from "./pages/cs_chimflood";
 import SugarcaneCaseStudy from "./pages/cs_sugarcane";
 import KaribaCaseStudy from "./pages/cs_kariba";
 import LandfillCaseStudy from "./pages/cs_landfill";
+import ErosionCaseStudy from "./pages/cs_erosion";
 import Seo from "./pages/seo";
 
 /* New page: start at the top, or at the #section the link points to.
@@ -135,6 +136,7 @@ function App() {
         <Route path="/case-studies/sugarcane-triangle" element={<SugarcaneCaseStudy />} />
         <Route path="/case-studies/lake-kariba" element={<KaribaCaseStudy />} />
         <Route path="/case-studies/bulawayo-landfill" element={<LandfillCaseStudy />} />
+        <Route path="/case-studies/chivi-soil-erosion" element={<ErosionCaseStudy />} />
         <Route path="/case-studies" element={<Navigate to="/projects" replace />} />
         <Route path="/maps/:slug" element={<MapViewer />} />
         <Route path="/projects/story-maps" element={<StoryMaps />} />

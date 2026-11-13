@@ -30,6 +30,7 @@ import cs17 from "../assets/casestudies/chimanimani-flood/map3_susceptibility.we
 import cs18 from "../assets/casestudies/sugarcane/map2_vigour.webp";
 import cs19 from "../assets/casestudies/kariba/map3_exposed.webp";
 import cs20 from "../assets/casestudies/bulawayo-landfill/map4_suitability.webp";
+import cs21 from "../assets/casestudies/chivi-soil-erosion/map3_classes.webp";
 
 // "/" on Vercel, "/Portifolio-website/" on GitHub Pages
 const BASE = import.meta.env.BASE_URL;
@@ -60,6 +61,8 @@ export const CASESTUDIES: Project[] = [
     text: "Mean live storage halved between 2000 to 2009 and 2016 to 2025, the lake reached its minimum operating level every year from 2022, and 850 km² of lake bed was left dry. The satellite storage curve matches the operator's figures to within about 1 %." },
   { title: "Landfill Site Selection for Bulawayo Using GIS-Based Multi-Criteria Analysis", slug: "bulawayo-landfill", card: "Landfill Site Selection for Bulawayo", sub: "Six weighted criteria used to find land fit for a new landfill.", img: cs20, place: "Bulawayo", years: "2021 to 2024",
     text: "Only 51.4 km² (9.4 %) of Bulawayo is highly or very highly suitable for a landfill, while 43.5 % is very low. Four candidate sites of 154 to 1 864 ha were found, and the existing Richmond landfill falls in the very low class." },
+  { title: "Soil Loss Estimation in Chivi District Using the Revised Universal Soil Loss Equation", slug: "chivi-soil-erosion", card: "Soil Loss in Chivi District", sub: "Five RUSLE factors mapped at 30 m to find where soil washes away.", img: cs21, place: "Chivi", years: "2019 to 2024",
+    text: "Chivi loses about 1.81 million tonnes of soil a year, a mean of 5.19 t/ha/yr. High and very high loss covers 10.1 % of the land, and wards 14 and 15 are the only wards above the tolerance limit of 11.2 t/ha/yr." },
 ];
 
 export const PROJECTS: Project[] = [
