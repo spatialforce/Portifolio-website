@@ -32,6 +32,9 @@ import cs19 from "../assets/casestudies/kariba/map3_exposed.webp";
 import cs20 from "../assets/casestudies/bulawayo-landfill/map4_suitability.webp";
 import cs21 from "../assets/casestudies/shurugwi-soil-erosion/map4_gully.webp";
 import cs22 from "../assets/casestudies/baobab-habitat-suitability/map4_suitability.webp";
+import cs23 from "../assets/casestudies/hwange-chizarira-corridor/map5_corridor.webp";
+import cs24 from "../assets/casestudies/mukuvisi-runoff/map6_runoff.webp";
+import cs25 from "../assets/casestudies/rainfall-interpolation/map2_surfaces.webp";
 
 // "/" on Vercel, "/Portifolio-website/" on GitHub Pages
 const BASE = import.meta.env.BASE_URL;
@@ -44,6 +47,12 @@ export const CASESTUDIES: Project[] = [
     text: "Six siting criteria weighted by pairwise comparison and overlaid on a 250 m grid, placing the best land for utility-scale solar in Bulilima and Mangwe along the Plumtree transmission corridor." },
   { title: "Habitat Suitability Modelling for the African Baobab (Adansonia digitata) in Zimbabwe Using Maximum Entropy (MaxEnt)", slug: "baobab-habitat-suitability", card: "Baobab Habitat Suitability in Zimbabwe", sub: "Where the climate suits the African baobab, and how much of that land is protected.", img: cs22, place: "Zimbabwe", years: "1981 to 2010 climate",
     text: "About a third of Zimbabwe, 121 857 km², has a climate suitable for the baobab, mainly in the warm south-east lowlands and the Zambezi Valley. Winter temperature is the main control, and only 21.6 % of suitable land lies in protected areas." },
+  { title: "Least-Cost Corridor Analysis for Elephant Movement Between Hwange and Chizarira National Parks, Zimbabwe", slug: "hwange-chizarira-corridor", card: "Elephant Corridor Between Hwange and Chizarira", sub: "Five weighted resistance factors used to trace the cheapest route and corridor between the two parks.", img: cs23, place: "Hwange and Binga", years: "2020 to 2021",
+    text: "The cheapest route for elephants between the two parks runs 152.6 km, mostly through woodland and four wildlife management areas, and crosses three main roads. The corridor is narrowest (2.2 km) beside the Binga road." },
+  { title: "Comparison of Spatial Interpolation Methods for Mean Annual Rainfall in Zimbabwe: Inverse Distance Weighting, Kriging and Thin-Plate Splines", slug: "rainfall-interpolation", card: "Comparing Rainfall Interpolation Methods", sub: "Four ways of mapping rainfall from gauges, tested against the gauges and satellite estimates.", img: cs25, place: "Zimbabwe", years: "1961 to 1990",
+    text: "Ordinary kriging, universal kriging and a thin-plate spline matched within 1 % at 65 gauges; inverse distance weighting was less accurate. The methods agreed within 50 mm over 60 % of the country." },
+  { title: "Watershed Delineation and Surface Runoff Estimation for the Mukuvisi Catchment, Harare, Using the SCS Curve Number Method", slug: "mukuvisi-runoff", card: "Storm Runoff in the Mukuvisi Catchment", sub: "A catchment traced from elevation data and its storm runoff estimated from land cover and soil.", img: cs24, place: "Harare", years: "1981 to 2025",
+    text: "The 224 km² catchment has a mean curve number of 82.4. A 10-year storm of 60 mm would send a peak of about 145 m³/s past the outlet, most of it from the built-up west of the city." },
   { title: "A Spatial Analysis of Population Distribution, Density and Growth in Zimbabwe Between the 2012 and 2022 Population Censuses", slug: "population-zimbabwe", card: "Population Distribution and Growth in Zimbabwe", sub: "District density, growth and sex ratio from the 2012 and 2022 censuses.", img: cs1, place: "Zimbabwe", years: "2012 and 2022",
     text: "District density and growth from the 2012 and 2022 censuses, a census-scaled 300 m population grid and the sex ratio of each district." },
   { title: "Assessing the Impact of Gold Mining on River Siltation in the Mazowe Valley from 2000 to 2025", slug: "mazowe-valley", card: "Gold Mining and River Siltation in the Mazowe Valley", sub: "Land disturbance and turbidity along 359 km of the Mazowe River.", img: cs4, place: "Mazowe Valley", years: "2000 to 2025",
@@ -66,11 +75,11 @@ export const CASESTUDIES: Project[] = [
     text: "Only 51.4 km² (9.4 %) of Bulawayo is highly or very highly suitable for a landfill, while 43.5 % is very low. Four candidate sites of 154 to 1 864 ha were found, and the existing Richmond landfill falls in the very low class." },
   { title: "Assessment of Soil Erosion and Gully Erosion Risk in Shurugwi District, Zimbabwe", slug: "shurugwi-soil-erosion", card: "Soil Erosion and Gully Erosion Risk in Shurugwi", sub: "Where soil is washed away and where gullies are likely to form, ranked by ward.", img: cs21, place: "Shurugwi", years: "2019 to 2024",
     text: "Shurugwi loses about 1.57 million tonnes of soil a year, a mean of 4.36 t/ha/yr. Soil loss is highest on the steep northern and western hills, while the 529 km² at high gully risk lie mostly on the thinly covered lower ground of the south and east." },
+  { title: "Mapping Encroachment and Land Loss in Seven Gazetted Forests of Matabeleland North, Zimbabwe (2024)", slug: "zimbabwe-gazetted-forests", card: "Forest Encroachment in Matabeleland North", sub: "Clearing for cultivation in seven gazetted forests.", img: forest, place: "Matabeleland North", years: "2024",
+    text: "How much of seven gazetted forests has been cleared for cultivation, where the clearing sits and what it means for forest protection." },
 ];
 
 export const PROJECTS: Project[] = [
-  { title: "Mapping Encroachment and Land Loss in Seven Gazetted Forests of Matabeleland North, Zimbabwe (2024)", slug: "zimbabwe-gazetted-forests", card: "Forest Encroachment in Matabeleland North", sub: "Clearing for cultivation in seven gazetted forests.", img: forest, place: "Matabeleland North",
-    text: "How much of seven gazetted forests has been cleared for cultivation, where the clearing sits and what it means for forest protection." },
   { title: "Web mapping", slug: "web-mapping", img: quakes, place: "In the browser",
     text: "Interactive maps built on open data." },
   { title: "Story maps", slug: "story-maps", img: wildlife, place: "Zimbabwe",

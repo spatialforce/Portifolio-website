@@ -1,0 +1,28 @@
+{
+ "chirps_mean": 645.6,
+ "aquastat": 657,
+ "idw": {
+  "r": 0.824,
+  "mean_diff": 51.7,
+  "mad": 72.2
+ },
+ "ok": {
+  "r": 0.835,
+  "mean_diff": 43.3,
+  "mad": 65.0
+ },
+ "uk": {
+  "r": 0.781,
+  "mean_diff": 43.4,
+  "mad": 76.5
+ },
+ "tps": {
+  "r": 0.796,
+  "mean_diff": 37.7,
+  "mad": 69.7
+ },
+ "stations_vs_chirps": {
+  "r": 0.97,
+  "mean_diff": -22.1
+ }
+}

@@ -66,7 +66,7 @@ export default function CarbonCaseStudy() {
         <h1>Above-Ground Carbon Stock Estimation in Hwange National Park Using GEDI LiDAR and Random Forest Regression (2019 to 2023)</h1>
         <p className="tc__by">GEDI LiDAR footprints upscaled to a 100 m carbon map with Random Forest.</p>
         <p className="tc__by" style={{ marginTop: 10 }}>Kudzanai Chakavarika (30 April 2026)</p>
-        <Facts rows={[["Place", "Hwange National Park"], ["Period", "2019 to 2023"], ["Data", "GEDI L4A footprints, Sentinel-2, Sentinel-1, elevation"], ["Method", "Random Forest regression, 100 m grid"], ["Tools", "Python (scikit-learn, rasterio, geopandas)"]]} />
+        <Facts rows={[["Place", "Hwange National Park"], ["Period", "2019 to 2023"], ["Data", "GEDI L4A footprints, Sentinel-2, Sentinel-1, elevation"], ["Methods", "Random Forest regression, LiDAR biomass upscaling"], ["Tools", "Python (scikit-learn, rasterio, geopandas)"]]} />
 
         <h2>1 Introduction</h2>
         <p>The woodlands of Zimbabwe hold most of the country's land carbon, and their loss is the largest source of its land-use emissions. Under the Paris Agreement Zimbabwe has a forest reference emission level, as modified after technical assessment, of 5 187 697.6 t CO2e a year (UNFCCC, 2024), and any claim for reduced deforestation, whether through national reporting or a voluntary carbon project, must rest on maps of how much carbon the woodland holds and where. Field inventories give accurate values at a few plots but cannot cover a large protected area, and the global biomass maps are known to perform poorly in dry, open savanna, where a large share of the biomass sits in small trees and shrubs.</p>

@@ -84,7 +84,7 @@ export default function ChimanimaniFloodCaseStudy() {
         <h1>Flood Susceptibility Mapping of Chimanimani District Using GIS-Based Multi-Criteria Analysis and the Analytic Hierarchy Process</h1>
         <p className="tc__by">Eight factors reclassified, weighted with AHP and combined by weighted overlay.</p>
         <p className="tc__by" style={{ marginTop: 10 }}>Kudzanai Chakavarika (20 September 2025)</p>
-        <Facts rows={[["Place", "Chimanimani District"], ["Period", "1991 to 2020 rainfall"], ["Data", "Copernicus DEM, CHIRPS, land cover, soil, buildings"], ["Method", "AHP weighted overlay of eight factors, 30 m grid"], ["Tools", "Google Earth Engine, Python"]]} />
+        <Facts rows={[["Place", "Chimanimani District"], ["Period", "1991 to 2020 rainfall"], ["Data", "Copernicus DEM, CHIRPS, land cover, soil, buildings"], ["Methods", "Multi-criteria decision analysis (MCDA), analytic hierarchy process (AHP), weighted overlay"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <h2>1 Introduction</h2>
         <p>Chimanimani District has steep highlands, heavy summer rain and narrow valleys where most people live. Water collects quickly in these valleys and rivers rise fast after storms. A flood susceptibility map shows which parts of the land are most likely to flood, based on the physical conditions of each place, so that planning and early warning can focus on the right areas.</p>

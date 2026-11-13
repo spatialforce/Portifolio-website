@@ -21,6 +21,9 @@ import KaribaCaseStudy from "./pages/cs_kariba";
 import LandfillCaseStudy from "./pages/cs_landfill";
 import ShurugwiCaseStudy from "./pages/cs_shurugwi";
 import BaobabCaseStudy from "./pages/cs_baobab";
+import CorridorCaseStudy from "./pages/cs_corridor";
+import MukuvisiCaseStudy from "./pages/cs_mukuvisi";
+import InterpolationCaseStudy from "./pages/cs_interpolation";
 import Seo from "./pages/seo";
 
 /* New page: start at the top, or at the #section the link points to.
@@ -121,7 +124,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/projects" element={<ProjectsPage />} />
-        <Route path="/projects/zimbabwe-gazetted-forests" element={<ForestResourcesProject />} />
+        <Route path="/projects/zimbabwe-gazetted-forests" element={<Navigate to="/case-studies/zimbabwe-gazetted-forests" replace />} />
+        <Route path="/case-studies/zimbabwe-gazetted-forests" element={<ForestResourcesProject />} />
         <Route path="/projects/land-use-land-cover" element={<Navigate to="/case-studies/land-use-land-cover" replace />} />
         <Route path="/projects/remote-sensing-indices" element={<RemoteSensingIndices />} />
         <Route path="/projects/fire-susceptibility-mapping" element={<FireSusceptibilityMapping />} />
@@ -139,6 +143,9 @@ function App() {
         <Route path="/case-studies/bulawayo-landfill" element={<LandfillCaseStudy />} />
         <Route path="/case-studies/shurugwi-soil-erosion" element={<ShurugwiCaseStudy />} />
         <Route path="/case-studies/baobab-habitat-suitability" element={<BaobabCaseStudy />} />
+        <Route path="/case-studies/hwange-chizarira-corridor" element={<CorridorCaseStudy />} />
+        <Route path="/case-studies/mukuvisi-runoff" element={<MukuvisiCaseStudy />} />
+        <Route path="/case-studies/rainfall-interpolation" element={<InterpolationCaseStudy />} />
         <Route path="/case-studies" element={<Navigate to="/projects" replace />} />
         <Route path="/maps/:slug" element={<MapViewer />} />
         <Route path="/projects/story-maps" element={<StoryMaps />} />

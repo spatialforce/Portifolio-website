@@ -25,6 +25,9 @@ CASE = {
     "kariba": "Area–Elevation–Storage Relationships and Water Level Decline at Lake Kariba (2000 to 2025)",
     "bulawayo-landfill": "Landfill Site Selection for Bulawayo Using GIS-Based Multi-Criteria Analysis",
     "shurugwi-soil-erosion": "Assessment of Soil Erosion and Gully Erosion Risk in Shurugwi District, Zimbabwe",
+    "hwange-chizarira-corridor": "Least-Cost Corridor Analysis for Elephant Movement Between Hwange and Chizarira National Parks, Zimbabwe",
+    "mukuvisi-runoff": "Watershed Delineation and Surface Runoff Estimation for the Mukuvisi Catchment, Harare, Using the SCS Curve Number Method",
+    "rainfall-interpolation": "Comparison of Spatial Interpolation Methods for Mean Annual Rainfall in Zimbabwe: Inverse Distance Weighting, Kriging and Thin-Plate Splines",
     "baobab-habitat-suitability": "Habitat Suitability Modelling for the African Baobab (Adansonia digitata) in Zimbabwe Using Maximum Entropy (MaxEnt)",
 }
 

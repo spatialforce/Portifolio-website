@@ -91,7 +91,7 @@ export default function PopulationCaseStudy() {
         <h1>A Spatial Analysis of Population Distribution, Density and Growth in Zimbabwe Between the 2012 and 2022 Population Censuses</h1>
         <p className="tc__by">District density, growth and sex ratio from the 2012 and 2022 censuses.</p>
         <p className="tc__by" style={{ marginTop: 10 }}>Kudzanai Chakavarika (5 May 2025)</p>
-        <Facts rows={[["Place", "Zimbabwe, 91 districts"], ["Period", "2012 and 2022 censuses"], ["Data", "ZIMSTAT census totals, WorldPop population grid"], ["Method", "District density, growth and sex ratio; 300 m population grid"], ["Tools", "Google Earth Engine, Python"]]} />
+        <Facts rows={[["Place", "Zimbabwe, 91 districts"], ["Period", "2012 and 2022 censuses"], ["Data", "ZIMSTAT census totals, WorldPop population grid"], ["Methods", "Choropleth mapping, population density analysis, change analysis"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <h2>1 Introduction</h2>
         <p>Zimbabwe held its fifth post-independence population and housing census in April 2022. The preliminary results counted 15 178 979 people, up from 13 061 239 in the 2012 census. A national total says little about where people live or where growth is taking place, and these are the questions that matter for planning schools, clinics, water supply and roads.</p>

@@ -1,0 +1,174 @@
+{
+ "grid": [
+  3441,
+  1933,
+  100
+ ],
+ "land_km2": 55788,
+ "hw_km2": 7343,
+ "cz_km2": 1947,
+ "gap_km": 115.3,
+ "ahp": {
+  "weights": {
+   "pop": 0.419,
+   "lc": 0.263,
+   "road": 0.16,
+   "wat": 0.097,
+   "slp": 0.062
+  },
+  "lmax": 5.068,
+  "CI": 0.017,
+  "CR": 0.0152
+ },
+ "cost": {
+  "mean": 28.5,
+  "median": 20.7,
+  "share": {
+   "1-10": 31.3,
+   "10-25": 22.2,
+   "25-50": 25.7,
+   "50-101": 20.9
+  }
+ },
+ "factor_mean": {
+  "pop": 42.4,
+  "lc": 14.5,
+  "road": 17.9,
+  "wat": 39.8,
+  "slp": 3.8
+ },
+ "lcp": {
+  "length_km": 152.6,
+  "cost": 717.0,
+  "ratio": 1.32,
+  "lc_km": {
+   "Tree cover": 88.0,
+   "Shrubland": 63.1,
+   "Grassland": 1.5
+  },
+  "road_crossings": 3,
+  "prot_km": 1.7,
+  "wma_km": 84.4,
+  "elev_min": 544,
+  "elev_max": 1096,
+  "mean_cost": 4.6,
+  "max_dens": 6.0,
+  "start_xy": [
+   471350.0,
+   7949650.0
+  ],
+  "end_xy": [
+   565650.0,
+   8033750.0
+  ]
+ },
+ "corridor": {
+  "area_km2": {
+   "high": 1443.0,
+   "moderate": 699.0,
+   "low": 1415.0
+  },
+  "lc_pct": {
+   "Tree cover": 35.4,
+   "Shrubland": 60.5,
+   "Grassland": 2.4,
+   "Cropland": 1.6,
+   "Bare": 0.1,
+   "Water": 0.0
+  },
+  "people": 2400,
+  "people_high": 619,
+  "prot_pct": 4.9,
+  "wma_pct": 47.5,
+  "dens_mean": 1.1
+ },
+ "pinch": {
+  "width_km": 2.2,
+  "km_along": 68.7,
+  "xy": [
+   509050.0,
+   7990250.0
+  ],
+  "lc": "Tree cover",
+  "dens": 4.2,
+  "d_road_m": 860
+ },
+ "width": {
+  "median": 5.9,
+  "lt2_km": 0.0
+ },
+ "gbif": {
+  "n": 4,
+  "in_protected": 3,
+  "median_rec": 31.9,
+  "median_bg": 21.2,
+  "U": 26787.5,
+  "p": 0.8801283749053537,
+  "years": [
+   1995,
+   2019
+  ]
+ },
+ "sens": {
+  "AHP weights (base)": {
+   "weights": {
+    "pop": 0.419,
+    "lc": 0.263,
+    "road": 0.16,
+    "wat": 0.097,
+    "slp": 0.062
+   },
+   "len_km": 152.5,
+   "in_corr_pct": 100.0,
+   "within2km_pct": 100.0
+  },
+  "Equal weights": {
+   "weights": {
+    "pop": 0.2,
+    "lc": 0.2,
+    "road": 0.2,
+    "wat": 0.2,
+    "slp": 0.2
+   },
+   "len_km": 159.9,
+   "in_corr_pct": 67.7,
+   "within2km_pct": 50.6
+  },
+  "Land cover first": {
+   "weights": {
+    "pop": 0.263,
+    "lc": 0.419,
+    "road": 0.16,
+    "wat": 0.097,
+    "slp": 0.062
+   },
+   "len_km": 153.1,
+   "in_corr_pct": 100.0,
+   "within2km_pct": 100.0
+  },
+  "People only doubled": {
+   "weights": {
+    "pop": 0.59,
+    "lc": 0.185,
+    "road": 0.113,
+    "wat": 0.069,
+    "slp": 0.044
+   },
+   "len_km": 150.6,
+   "in_corr_pct": 100.0,
+   "within2km_pct": 100.0
+  },
+  "Without water": {
+   "weights": {
+    "pop": 0.464,
+    "lc": 0.291,
+    "road": 0.177,
+    "wat": 0.0,
+    "slp": 0.068
+   },
+   "len_km": 150.3,
+   "in_corr_pct": 100.0,
+   "within2km_pct": 69.2
+  }
+ }
+}

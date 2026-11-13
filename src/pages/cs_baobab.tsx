@@ -163,7 +163,7 @@ export default function BaobabCaseStudy() {
             <dt>Species</dt><dd>African baobab, Adansonia digitata L.</dd>
             <dt>Records</dt><dd>145 GBIF records, after cleaning 535</dd>
             <dt>Climate</dt><dd>CHELSA V2.1, 1981 to 2010</dd>
-            <dt>Method</dt><dd>Maximum entropy (MaxEnt), 1 km grid</dd>
+            <dt>Methods</dt><dd>Species distribution modelling, maximum entropy (MaxEnt)</dd>
             <dt>Tools</dt><dd>Python (elapid, rasterio, geopandas), Google Earth Engine</dd>
           </dl>
 

@@ -82,7 +82,7 @@ export default function SolarCaseStudy() {
         <h1>Site Suitability Analysis for Utility-Scale Solar Farms in Matabeleland South Province of Zimbabwe Using the Analytic Hierarchy Process</h1>
         <p className="tc__by">AHP weighted overlay of six siting criteria on a 250 m grid.</p>
         <p className="tc__by" style={{ marginTop: 10 }}>Kudzanai Chakavarika (11 August 2025)</p>
-        <Facts rows={[["Place", "Matabeleland South, 54 133 km²"], ["Data", "Global Solar Atlas, Copernicus DEM, WorldCover, OpenStreetMap"], ["Method", "AHP weighted overlay of six criteria, 250 m grid"], ["Tools", "Google Earth Engine, Python"]]} />
+        <Facts rows={[["Place", "Matabeleland South, 54 133 km²"], ["Data", "Global Solar Atlas, Copernicus DEM, WorldCover, OpenStreetMap"], ["Methods", "Multi-criteria decision analysis (MCDA), analytic hierarchy process (AHP), weighted overlay, sensitivity analysis"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <h2>1 Introduction</h2>
         <p>Zimbabwe does not generate enough electricity. Installed capacity of about 2 400 MW rests mainly on the Kariba hydropower station, whose output falls in drought years, and the ageing coal units at Hwange, and in recent years load shedding has at times exceeded twelve hours a day. The National Renewable Energy Policy set targets of 1 100 MW of renewable capacity by 2025 and 2 100 MW by 2030 (Government of Zimbabwe, 2019), and the Zimbabwe Energy Regulatory Authority has licensed dozens of independent solar producers, yet few plants have been built and fewer than 50 MW of utility-scale solar were operating by 2024.</p>

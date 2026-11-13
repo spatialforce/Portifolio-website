@@ -74,7 +74,7 @@ export default function KaribaCaseStudy() {
         <h1>Area–Elevation–Storage Relationships and Water Level Decline at Lake Kariba (2000 to 2025)</h1>
         <p className="tc__by">Satellite altimetry paired with Landsat lake areas to build the storage curve.</p>
         <p className="tc__by" style={{ marginTop: 10 }}>Kudzanai Chakavarika (12 November 2026)</p>
-        <Facts rows={[["Place", "Lake Kariba"], ["Period", "2000 to 2025"], ["Data", "DAHITI altimetry, Landsat, JRC surface water, Copernicus DEM"], ["Method", "Level and area pairs fitted to a storage curve"], ["Tools", "Google Earth Engine, Python"]]} />
+        <Facts rows={[["Place", "Lake Kariba"], ["Period", "2000 to 2025"], ["Data", "DAHITI altimetry, Landsat, JRC surface water, Copernicus DEM"], ["Methods", "Satellite altimetry, surface water extraction (MNDWI), area–elevation–storage curve fitting"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <h2>1 Introduction</h2>
         <p>Lake Kariba is the reservoir behind Kariba Dam on the Zambezi River, shared by Zambia and Zimbabwe. Water released through the dam's two power stations supplies a large part of the electricity used in both countries. When the lake falls towards its minimum operating level, the Zambezi River Authority has to cut the water allocated to the power stations. In December 2023 it reduced the allocation for 2024 from 30 to 16 billion m³, with 8 billion m³ for each country (ZRA, 2023).</p>

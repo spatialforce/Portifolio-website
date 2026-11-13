@@ -70,8 +70,7 @@
 }
 @media (max-width:800px){
   .tc{display:block;padding:92px 16px 56px;font-size:16px}
-  .tc__toc{position:static;height:auto;max-width:none;margin:0 0 20px}
-  .tc__toc ol{gap:8px}
+  .tc__toc{display:none}
   .tc__more ul{grid-template-columns:1fr}
   .tc table{font-size:13.5px}
 }

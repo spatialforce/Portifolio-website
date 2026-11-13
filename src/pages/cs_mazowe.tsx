@@ -57,7 +57,7 @@ export default function MazoweCaseStudy() {
         <h1>Assessing the Impact of Gold Mining on River Siltation in the Mazowe Valley from 2000 to 2025</h1>
         <p className="tc__by">Land disturbance and turbidity along 359 km of the Mazowe River.</p>
         <p className="tc__by" style={{ marginTop: 10 }}>Kudzanai Chakavarika (9 August 2026)</p>
-        <Facts rows={[["Place", "Mazowe River, 359 km with a 1 km corridor"], ["Period", "2000 to 2025"], ["Data", "Landsat 5, 7, 8 and 9; Sentinel-2"], ["Method", "Bare ground and river turbidity (NDTI) by 10 km reach"], ["Tools", "Google Earth Engine, Python"]]} />
+        <Facts rows={[["Place", "Mazowe River, 359 km with a 1 km corridor"], ["Period", "2000 to 2025"], ["Data", "Landsat 5, 7, 8 and 9; Sentinel-2"], ["Methods", "Change detection, spectral index analysis (NDTI)"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <h2>1 Introduction</h2>
         <p>The Mazowe River rises north of Harare and flows north-east across Mashonaland Central and Mashonaland East into Mozambique, where it joins the Zambezi. Its catchment covers about 39 000 km² and holds Mazowe Dam, built in 1920 with a capacity of about 35 million m³ near Mazowe village (Wikipedia, 2025). The valley crosses one of the main gold belts of the country, and alluvial and river-bank gold mining has grown along it over the last two decades.</p>

@@ -83,7 +83,7 @@ export default function LandfillCaseStudy() {
         <h1>Landfill Site Selection for Bulawayo Using GIS-Based Multi-Criteria Analysis</h1>
         <p className="tc__by">Six weighted criteria used to find land fit for a new landfill.</p>
         <p className="tc__by" style={{ marginTop: 10 }}>Kudzanai Chakavarika (24 March 2026)</p>
-        <Facts rows={[["Place", "Bulawayo"], ["Period", "2021 to 2024 data"], ["Data", "WorldCover, building outlines, soil clay, Copernicus DEM, OpenStreetMap"], ["Method", "AHP weighted overlay of six factors, 30 m grid"], ["Tools", "Google Earth Engine, Python"]]} />
+        <Facts rows={[["Place", "Bulawayo"], ["Period", "2021 to 2024 data"], ["Data", "WorldCover, building outlines, soil clay, Copernicus DEM, OpenStreetMap"], ["Methods", "Multi-criteria decision analysis (MCDA), analytic hierarchy process (AHP), buffer analysis, weighted overlay"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <h2>1 Introduction</h2>
         <p>Bulawayo is Zimbabwe's second city, with 665 952 people at the 2022 census (ZimStat, 2022). Most of its solid waste goes to the Richmond landfill, a 30 ha site run by the city council and worked by more than 240 waste pickers (UN-Habitat, 2022). The site is unlined, its disposal cells are almost full, and houses have grown up around it (UN-Habitat, 2022). The city will need a new site, and that site must keep waste away from homes, rivers and groundwater while staying close enough to roads for collection trucks.</p>

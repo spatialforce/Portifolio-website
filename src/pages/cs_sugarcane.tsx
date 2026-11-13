@@ -54,7 +54,7 @@ export default function SugarcaneCaseStudy() {
         <h1>Field-Level Sugarcane Monitoring at Triangle and Hippo Valley Using Remote Sensing (2019 to 2025)</h1>
         <p className="tc__by">Seven years of monthly satellite greenness and moisture, followed field by field.</p>
         <p className="tc__by" style={{ marginTop: 10 }}>Kudzanai Chakavarika (15 December 2025)</p>
-        <Facts rows={[["Place", "Triangle and Hippo Valley estates"], ["Period", "2019 to 2025, monthly"], ["Data", "Sentinel-2, 20 m"], ["Method", "Monthly NDVI and NDMI followed field by field"], ["Tools", "Google Earth Engine, Python"]]} />
+        <Facts rows={[["Place", "Triangle and Hippo Valley estates"], ["Period", "2019 to 2025, monthly"], ["Data", "Sentinel-2, 20 m"], ["Methods", "Vegetation index time series (NDVI, NDMI), zonal statistics"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <h2>1 Introduction</h2>
         <p>Sugarcane is the main irrigated crop of Zimbabwe's south-eastern lowveld. Most of it is grown on the estates around Triangle and Hippo Valley in Chiredzi District. Rainfall in the lowveld is low and unreliable, so the crop depends almost entirely on irrigation. An estate covers many thousands of hectares, so problems in single fields are hard to see without regular field visits. Such problems include poor water supply, old ratoons and late replanting.</p>

@@ -121,7 +121,7 @@ export default function ShurugwiCaseStudy() {
         <h1>Assessment of Soil Erosion and Gully Erosion Risk in Shurugwi District, Zimbabwe</h1>
         <p className="tc__by">A 30 m map of where soil is washed away and where gullies are likely to form, ranked by ward.</p>
         <p className="tc__by" style={{ marginTop: 10 }}>Kudzanai Chakavarika (22 January 2026)</p>
-        <Facts rows={[["Place", "Shurugwi District, Midlands Province, Zimbabwe"], ["Area", "3 603 km², 24 rural wards and Shurugwi Town"], ["Period", "Rainy seasons 2019/20 to 2023/24"], ["Methods", "RUSLE soil loss model, gully risk from runoff paths"], ["Grid", "30 m, UTM zone 36S"], ["Tools", "Google Earth Engine, Python"]]} />
+        <Facts rows={[["Place", "Shurugwi District, Midlands Province, Zimbabwe"], ["Area", "3 603 km², 24 rural wards and Shurugwi Town"], ["Period", "Rainy seasons 2019/20 to 2023/24"], ["Methods", "RUSLE soil loss modelling, terrain analysis (stream power and wetness indices)"], ["Grid", "30 m, UTM zone 36S"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <p style={{ marginTop: 22 }}><b>What was done.</b> Soil loss was estimated for every 30 m of land with the Revised Universal Soil Loss Equation. A separate gully risk map shows where runoff gathers strongly enough on thin cover to cut gullies.</p>
         <p><b>What was found.</b> The district loses about 1.57 million tonnes of soil a year. Soil loss is highest on the steep high ground of the north and west. Gully risk is highest on the lower ground of the south and east.</p>

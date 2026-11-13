@@ -1,0 +1,294 @@
+{
+ "n": 65,
+ "vario": {
+  "ok": {
+   "Spherical": {
+    "nugget": 0.0,
+    "psill": 37204.7,
+    "range_km": 400.0
+   },
+   "Exponential": {
+    "nugget": 0.0,
+    "psill": 35315.1,
+    "range_km": 400.0
+   },
+   "Gaussian": {
+    "nugget": 7273.8,
+    "psill": 33204.3,
+    "range_km": 400.0
+   }
+  },
+  "uk": {
+   "Spherical": {
+    "nugget": 471.3,
+    "psill": 14684.7,
+    "range_km": 123.3
+   },
+   "Exponential": {
+    "nugget": 3006.4,
+    "psill": 12739.0,
+    "range_km": 199.4
+   },
+   "Gaussian": {
+    "nugget": 3835.0,
+    "psill": 11386.7,
+    "range_km": 115.1
+   }
+  }
+ },
+ "trend": {
+  "b0": 692.94,
+  "bx": 0.5795,
+  "by": 0.5879,
+  "r2": 0.567,
+  "var_raw": 37074.1,
+  "var_res": 16044.7
+ },
+ "tuning": {
+  "idw": {
+   "1": 153.6,
+   "1.5": 135.7,
+   "2": 125.4,
+   "2.5": 123.0,
+   "3": 124.2,
+   "4": 126.7
+  },
+  "ok": {
+   "Spherical": 117.0,
+   "Exponential": 116.9,
+   "Gaussian": 131.1
+  },
+  "uk": {
+   "Spherical": 116.2,
+   "Exponential": 119.7,
+   "Gaussian": 116.8
+  },
+  "tps": {
+   "0": 116.7,
+   "1": 116.7,
+   "3": 116.7,
+   "10": 116.7,
+   "30": 116.6,
+   "100": 116.6,
+   "300": 116.8,
+   "1000": 117.8
+  },
+  "best": {
+   "idw": 2.5,
+   "ok": "Exponential",
+   "uk": "Spherical",
+   "tps": 30
+  }
+ },
+ "cv": {
+  "idw": {
+   "me": 10.6,
+   "mae": 71.4,
+   "rmse": 123.0,
+   "rmse_pct": 16.9,
+   "r2": 0.592,
+   "r": 0.772
+  },
+  "ok": {
+   "me": 4.4,
+   "mae": 64.7,
+   "rmse": 116.9,
+   "rmse_pct": 16.1,
+   "r2": 0.631,
+   "r": 0.795
+  },
+  "uk": {
+   "me": 4.8,
+   "mae": 68.9,
+   "rmse": 116.2,
+   "rmse_pct": 16.0,
+   "r2": 0.636,
+   "r": 0.8
+  },
+  "tps": {
+   "me": 4.9,
+   "mae": 67.6,
+   "rmse": 116.6,
+   "rmse_pct": 16.1,
+   "r2": 0.633,
+   "r": 0.813
+  },
+  "idw2": {
+   "me": 9.9,
+   "mae": 73.4,
+   "rmse": 125.4,
+   "rmse_pct": 17.3,
+   "r2": 0.576,
+   "r": 0.772
+  }
+ },
+ "cv_no_outlier": {
+  "idw": {
+   "me": 20.7,
+   "mae": 62.6,
+   "rmse": 95.2,
+   "rmse_pct": 13.4,
+   "r2": 0.632,
+   "r": 0.812
+  },
+  "ok": {
+   "me": 14.6,
+   "mae": 55.5,
+   "rmse": 85.3,
+   "rmse_pct": 12.0,
+   "r2": 0.705,
+   "r": 0.856
+  },
+  "uk": {
+   "me": 14.4,
+   "mae": 60.4,
+   "rmse": 89.0,
+   "rmse_pct": 12.5,
+   "r2": 0.678,
+   "r": 0.851
+  },
+  "tps": {
+   "me": 13.7,
+   "mae": 59.9,
+   "rmse": 94.5,
+   "rmse_pct": 13.3,
+   "r2": 0.638,
+   "r": 0.863
+  }
+ },
+ "outlier": {
+  "name": "Inyanga Downs",
+  "obs": 1631.4,
+  "idw": 996.9,
+  "ok": 981.1,
+  "uk": 1022.4,
+  "tps": 1072.2
+ },
+ "cv_sparse": {
+  "idw": {
+   "dense": 70.7,
+   "sparse": 72.1
+  },
+  "ok": {
+   "dense": 65.4,
+   "sparse": 63.9
+  },
+  "uk": {
+   "dense": 66.7,
+   "sparse": 71.1
+  },
+  "tps": {
+   "dense": 64.2,
+   "sparse": 71.2
+  }
+ },
+ "nn_km": {
+  "median": 33.21301269717884,
+  "mean": 41.7,
+  "max": 128.08274595534317,
+  "max_name": "Gwaai (Cl)"
+ },
+ "closest_method_count": {
+  "idw": 19,
+  "ok": 19,
+  "uk": 14,
+  "tps": 13
+ },
+ "stations": {
+  "min": 333.2,
+  "min_name": "Beitbridge",
+  "max": 1631.4,
+  "max_name": "Inyanga Downs",
+  "mean": 725.8,
+  "median": 739.3,
+  "sd": 194.0,
+  "cv_pct": 26.7,
+  "years_min": 20,
+  "r_elev": 0.59,
+  "p_elev": 2.3720851058269505e-07,
+  "r_lon": 0.597,
+  "r_lat": 0.555,
+  "elev_min": 421.0,
+  "elev_max": 1830.0,
+  "interannual_cv_median": 29.5
+ },
+ "moran": {
+  "I": 0.235,
+  "E": -0.016,
+  "p": 0.0001
+ },
+ "surface": {
+  "idw": {
+   "mean": 697.2,
+   "min": 333.3,
+   "max": 1629.7,
+   "classes_pct": [
+    2.2,
+    36.3,
+    40.4,
+    19.1,
+    2.0
+   ]
+  },
+  "ok": {
+   "mean": 688.9,
+   "min": 335.8,
+   "max": 1611.1,
+   "classes_pct": [
+    4.0,
+    38.7,
+    38.9,
+    16.2,
+    2.2
+   ]
+  },
+  "uk": {
+   "mean": 688.9,
+   "min": 338.8,
+   "max": 1578.7,
+   "classes_pct": [
+    5.0,
+    39.4,
+    29.8,
+    23.4,
+    2.5
+   ]
+  },
+  "tps": {
+   "mean": 683.3,
+   "min": 317.7,
+   "max": 1824.5,
+   "classes_pct": [
+    6.9,
+    37.2,
+    36.1,
+    16.6,
+    3.1
+   ]
+  }
+ },
+ "spread": {
+  "mean": 57.2,
+  "p50": 36.4,
+  "max": 643.1,
+  "pct_lt50": 60.0,
+  "pct_50_100": 23.0,
+  "pct_gt100": 17.0
+ },
+ "spread_pairs": {
+  "idw-ok": 20.2,
+  "idw-uk": 32.3,
+  "idw-tps": 39.5,
+  "ok-uk": 29.0,
+  "ok-tps": 25.9,
+  "uk-tps": 38.1
+ },
+ "ok_se": {
+  "min": 36.4,
+  "max": 135.4,
+  "mean": 97.7,
+  "nugget_sd": 21.7,
+  "ok_mean": 109.5
+ },
+ "area_km2": 392860
+}

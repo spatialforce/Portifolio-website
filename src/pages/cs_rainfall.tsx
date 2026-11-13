@@ -72,7 +72,7 @@ export default function RainfallCaseStudy() {
         <h1>Rainfall Variability and Drought Patterns in Zimbabwe from the 1991/92 to 2024/25 Agricultural Seasons</h1>
         <p className="tc__by">Seasonal rainfall, variability and drought frequency over 34 seasons.</p>
         <p className="tc__by" style={{ marginTop: 10 }}>Kudzanai Chakavarika (26 July 2025)</p>
-        <Facts rows={[["Place", "Zimbabwe, by province"], ["Period", "1991/92 to 2024/25, 34 seasons"], ["Data", "CHIRPS v2.0 rainfall, 0.05° grid"], ["Method", "Seasonal totals, variability, drought frequency, Mann-Kendall trend"], ["Tools", "Google Earth Engine, Python"]]} />
+        <Facts rows={[["Place", "Zimbabwe, by province"], ["Period", "1991/92 to 2024/25, 34 seasons"], ["Data", "CHIRPS v2.0 rainfall, 0.05° grid"], ["Methods", "Rainfall anomaly analysis, coefficient of variation, Mann-Kendall trend test"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <h2>1 Introduction</h2>
         <p>Most farming in Zimbabwe depends on rain that falls between October and April. When the season fails, maize harvests, livestock, water supply and hydropower all suffer at once. The drought of 1991/92 was described as the worst in living memory in southern Africa (FAO, 1992), and in April 2024 the government declared a state of disaster after the El Niño season of 2023/24 left most of the country with well below normal rainfall (NBC News, 2024).</p>
