@@ -129,9 +129,9 @@ export default function ShurugwiCaseStudy() {
 
         <Sec n="1" title="Introduction">
           <div>
-            <p>Soil erosion by water is one of the main forms of land degradation in Zimbabwe. On communal land, grazing and the clearing of woodland leave the ground thinly covered when the first storms of the rainy season arrive. Water then removes soil in two ways. Sheet and rill erosion strips a thin layer from the whole slope, while gully erosion cuts deep channels where runoff gathers along valley floors, paths and field edges. Gullies are often the more visible damage, since they remove land from use, cut roads and send sediment straight into rivers and dams.</p>
+            <p>Soil erosion by water is one of the main forms of land degradation in Zimbabwe. On communal land, grazing and woodland clearing leave the ground thinly covered when the first storms of the rainy season arrive. Water then takes soil in two ways. Sheet and rill erosion strips a thin layer off the whole slope. Gully erosion cuts deep channels where runoff gathers along valley floors, paths and field edges. Gullies are often the more visible damage, because they take land out of use, cut roads and send sediment straight into rivers and dams.</p>
             <p>The Revised Universal Soil Loss Equation (RUSLE) estimates mean annual sheet and rill loss from rainfall, soil, slope and cover (Renard et al., 1997). It does not model gullies. Gully heads form where the drainage area and slope together give runoff enough power to cut the soil, and this can be ranked with a stream power index computed from an elevation model (Moore et al., 1991). Land use changes the threshold at which gullies begin, with lower thresholds on cultivated and bare ground (Torri and Poesen, 2014).</p>
-            <p>This study applies both methods to Shurugwi District on a 30 m grid for a single recent period. Mapping soil loss and gully risk side by side shows whether the two kinds of erosion fall in the same places, and so whether one set of conservation measures would serve both.</p>
+            <p>Both methods were applied here to Shurugwi District on a 30 m grid for a single recent period. Mapping soil loss and gully risk side by side shows whether the two kinds of erosion happen in the same places, and so whether one set of conservation measures would serve for both.</p>
           </div>
         </Sec>
 
@@ -176,7 +176,7 @@ export default function ShurugwiCaseStudy() {
           </div>
           <div>
             <h3>Gully risk</h3>
-            <p>Gullies start where a lot of runoff gathers in one line on a slope with thin cover. The stream power index SPI = As tan β was calculated for every cell, where As is the drainage area per metre of contour width and β is the slope (Moore et al., 1991). Cells draining 0.5 to 100 ha were considered, which covers overland and seasonal flow lines but leaves out the permanent rivers. A cell was taken as a likely gully path when its SPI was in the top 10 % (201.6 or more) and its rainy-season C was 0.10 or more, meaning the cover was thin.</p>
+            <p>Gullies begin where a lot of runoff gathers in one line on a slope with thin cover. The stream power index SPI = As tan β was calculated for every cell, where As is the drainage area per metre of contour width and β is the slope (Moore et al., 1991). Only cells draining 0.5 to 100 ha were considered. That range covers overland and seasonal flow lines and leaves out the permanent rivers. A cell was taken as a likely gully path when its SPI was in the top 10 % (201.6 or more) and its rainy-season C was 0.10 or more, which means the cover was thin.</p>
             <p>For every point, the length of likely gully paths within 500 m was divided by the land area around it, in km/km², and grouped into five classes: very low (below 0.15), low (0.15 to 0.3), moderate (0.3 to 0.6), high (0.6 to 1.0) and very high (above 1.0). The map shows where gullies are likely, not mapped gullies, and one high-risk area was checked against satellite imagery (Map 5).</p>
           </div>
           <div>
@@ -191,8 +191,8 @@ export default function ShurugwiCaseStudy() {
         <Sec n="5" title="Results">
           <div>
             <h3>Soil erosion</h3>
-            <p>The mean soil loss over the district is 4.36 t/ha/yr and the median is 2.33 t/ha/yr, a total of about 1.57 million tonnes a year. Almost three quarters of the land is in the very low (45.4 %) or low (28.6 %) class (Table 3, Figure 1). High and very high loss covers 347.3 km², 9.7 % of the land, and 7.9 % of the land loses soil faster than 11.2 t/ha/yr. The 10 % of cells with the highest loss produce 44.2 % of all the soil lost.</p>
-            <p>Loss rises with height. The mean is 4.17 t/ha/yr below 1 200 m, 4.55 between 1 200 and 1 350 m and 5.04 above 1 350 m, because the higher ground is steeper. The north half of the district averages 4.63 t/ha/yr against 4.10 in the south, and the west 4.52 against 4.21 in the east (Map 3). On the map, 3.8 % of the land is at high or very high risk and 22.5 % at moderate risk.</p>
+            <p>Mean soil loss over the district is 4.36 t/ha/yr and the median 2.33 t/ha/yr, about 1.57 million tonnes a year in total. Almost three quarters of the land falls in the very low (45.4 %) or low (28.6 %) class (Table 3, Figure 1). High and very high loss covers 347.3 km², or 9.7 % of the land, and 7.9 % of the land loses soil faster than 11.2 t/ha/yr. The 10 % of cells with the highest loss account for 44.2 % of all the soil lost.</p>
+            <p>Loss increases with height, because the higher ground is steeper. The mean is 4.17 t/ha/yr below 1 200 m, 4.55 between 1 200 and 1 350 m and 5.04 above 1 350 m. The north half of the district averages 4.63 t/ha/yr and the south 4.10, and the west 4.52 against 4.21 in the east (Map 3). On the map, 3.8 % of the land is at high or very high risk and 22.5 % at moderate risk.</p>
           </div>
           <div>
             <Table cap="Table 3. Area in each soil loss class (t/ha/yr)" head={["Class", "Area (km²)", "Share (%)"]} rows={T3} num={1} total />
@@ -200,8 +200,8 @@ export default function ShurugwiCaseStudy() {
           </div>
           <div>
             <h3>Gully erosion</h3>
-            <p>High or very high gully risk covers 529.4 km², 14.7 % of the land (11.6 % high and 3.2 % very high), and moderate risk a further 890.5 km² (24.8 %) (Map 4). The pattern is close to the reverse of soil erosion. High gully risk covers 18.0 % of the land below 1 200 m but only 8.1 % above 1 350 m, and it is more common in the south (18.6 %) than the north (10.7 %) and in the east (16.5 %) than the west (12.8 %).</p>
-            <p>Only 15.1 % of the high gully risk area also has high soil loss. Long gentle slopes collect runoff from large areas, and the cover there is thinner in the rainy season (mean C 0.162 below 1 200 m, against 0.095 above 1 350 m). The steep hills lose more soil from their surface, but runoff there gathers less into single lines.</p>
+            <p>High or very high gully risk covers 529.4 km², 14.7 % of the land (11.6 % high and 3.2 % very high), and moderate risk another 890.5 km² (24.8 %) (Map 4). The pattern is nearly the opposite of soil erosion. High gully risk covers 18.0 % of the land below 1 200 m but only 8.1 % above 1 350 m. It is more common in the south (18.6 %) than the north (10.7 %), and in the east (16.5 %) than the west (12.8 %).</p>
+            <p>Only 15.1 % of the high gully risk area also has high soil loss. The long gentle slopes collect runoff from large areas, and their cover is thinner in the rainy season (mean C 0.162 below 1 200 m, compared with 0.095 above 1 350 m). The steep hills lose more soil from their surface, but there the runoff is less likely to gather into single lines.</p>
           </div>
           <div className="tc__row tc__row--2">
             <Fig src={map3} cap="Map 3. Soil erosion risk in five classes, with ward boundaries for reference. High risk follows the hill slopes of the north and west and the hills around Shurugwi Town." />
@@ -209,7 +209,7 @@ export default function ShurugwiCaseStudy() {
           </div>
           <div>
             <h3>Land cover</h3>
-            <p>Bare and sparse ground loses the most soil, 31.06 t/ha/yr on average, but covers only 19.6 km² (Table 4). Grassland (5.67 t/ha/yr) and shrubland (4.86) are next, and together they produce 81 % of all the soil lost. Tree cover has the lowest loss, 2.02 t/ha/yr. Cropland has the highest C of the vegetated classes, 0.26, which means the thinnest cover, but a low mean of 2.52 t/ha/yr, because most fields lie on gentle ground. For gully risk, bare ground is again highest (43.0 % of it at high risk), followed by grassland (17.9 %) and shrubland (16.2 %), with tree cover lowest (8.4 %).</p>
+            <p>Bare and sparse ground loses the most soil, 31.06 t/ha/yr on average, but it covers only 19.6 km² (Table 4). Grassland (5.67 t/ha/yr) and shrubland (4.86) come next, and between them they produce 81 % of all the soil lost. Tree cover has the lowest loss, at 2.02 t/ha/yr. Cropland has the highest C of the vegetated classes, 0.26, meaning the thinnest cover, yet its mean loss is low at 2.52 t/ha/yr because most fields are on gentle ground. Gully risk follows a similar order: bare ground is highest (43.0 % of it at high risk), then grassland (17.9 %) and shrubland (16.2 %), and tree cover is lowest (8.4 %).</p>
           </div>
           <div>
             <Table cap="Table 4. Soil loss and gully risk by land cover" head={["Land cover", "Area (km²)", "Mean C", "Mean loss (t/ha/yr)", "High and very high (%)", "Loss (kt/yr)", "High gully risk (%)"]} rows={T4} num={1} src="Built-up land (6.7 km²) has C = 0 and is left out." />
@@ -222,7 +222,7 @@ export default function ShurugwiCaseStudy() {
           </div>
           <div>
             <h3>Wards</h3>
-            <p>Ward means range from 2.86 t/ha/yr in ward 4 to 6.73 in ward 11 (Table 5). Ward 11 has the highest mean and the largest share of high and very high land (21.1 %), and also the most land at high gully risk (35.8 %). Shurugwi Town is second for soil loss (6.55) because of its steep hills, with a median slope of 13.9 %, but has little gully risk (5.5 %).</p>
+            <p>Ward means run from 2.86 t/ha/yr in ward 4 to 6.73 in ward 11 (Table 5). Ward 11 has the highest mean, the largest share of high and very high land (21.1 %) and the most land at high gully risk (35.8 %). Shurugwi Town comes second for soil loss (6.55) because of its steep hills, which have a median slope of 13.9 %, but it has little gully risk (5.5 %).</p>
             <p>Gully risk is also high in wards 7 (26.1 %) and 10 (24.6 %) in the centre and in wards 6, 20 and 5 (21.3 to 23.2 %) in the south, several of which have low soil loss. Ward figures are averages over large areas and should be read with Maps 3 and 4, which show where inside each ward the risk lies.</p>
           </div>
           <div>
@@ -232,9 +232,9 @@ export default function ShurugwiCaseStudy() {
 
         <Sec n="6" title="Discussion">
           <div>
-            <p>The main finding is that soil erosion and gully risk are driven by different things and fall in different places. Soil loss in RUSLE depends most on slope, so it peaks on the hills. Gully risk depends on how much water gathers in one line as well as on slope, so it peaks on the long, gentler slopes of the lower ground, where cover in the rainy season is also thinner. A plan based on RUSLE alone would send most of the conservation effort to the hills and miss the places where gullies are most likely to form.</p>
-            <p>Grassland and shrubland stand out on both measures and hold most of the land at high gully risk. These are mostly the open grazing areas of the communal land, where cover is thin early in the rainy season. Cropland shows low loss on both measures, but this should be read with care. The cover factor comes from the median NDVI over the season, which hides the weeks after ploughing when fields are bare, and Torri and Poesen (2014) found the lowest gully thresholds on cropland.</p>
-            <p>The results have several limits. The R equation was developed in the United States and has not been calibrated for Zimbabwe. K comes from a modelled soil map. The gully threshold is relative, the top 10 % of the district, and the risk map was not tested against mapped gullies. The imagery check in Map 5 is a single visual check, not a validation. Ward summaries depend on where the boundaries happen to fall, since erosion has no edge that matches them, so they are a guide for planning, not a measure of each ward. Culverts, roads and cattle tracks, which often start gullies, are not resolved on a 30 m grid. The values should be read as a ranking of places for field checks, not as measured losses.</p>
+            <p>Soil erosion and gully risk are driven by different things, and they fall in different places. In RUSLE, soil loss depends most on slope, so it peaks on the hills. Gully risk depends on how much water gathers in one line as well as on slope, so it peaks on the long, gentler slopes of the lower ground, where rainy-season cover is also thinner. A plan built on RUSLE alone would put most of the conservation effort on the hills and miss the places where gullies are most likely to form.</p>
+            <p>Grassland and shrubland score highly on both measures and hold most of the land at high gully risk. These are mostly the open grazing areas of the communal land, where cover is thin early in the rainy season. Cropland comes out low on both, but that needs care. The cover factor is taken from the median NDVI over the season, which hides the weeks after ploughing when fields are bare, and Torri and Poesen (2014) found the lowest gully thresholds on cropland.</p>
+            <p>There are several limits. The R equation was developed in the United States and has not been calibrated for Zimbabwe. K comes from a modelled soil map. The gully threshold is relative, set at the top 10 % of the district, and the risk map was not tested against mapped gullies; the imagery check in Map 5 is one visual check, not a validation. Ward summaries depend on where the boundaries happen to fall, since erosion has no edge that matches them, so they are a planning guide rather than a measure of each ward. Culverts, roads and cattle tracks, which often start gullies, are too small to resolve on a 30 m grid. The values are best read as a ranking of places for field checks, not as measured losses.</p>
           </div>
         </Sec>
 
@@ -248,7 +248,7 @@ export default function ShurugwiCaseStudy() {
 
         <Sec n="8" title="Conclusion">
           <div>
-            <p>Shurugwi District loses about 1.57 million tonnes of soil a year to sheet and rill erosion, a mean of 4.36 t/ha/yr, and 7.9 % of its land is above the tolerance of 11.2 t/ha/yr. Soil loss is highest on the steep high ground, while the 529 km² at high gully risk lie mostly on the thinly covered lower ground. Only 15 % of the high gully risk area also has high soil loss, so the two kinds of erosion need to be planned for separately. Ward 11 ranks high on both and should come first.</p>
+            <p>Sheet and rill erosion costs Shurugwi District about 1.57 million tonnes of soil a year, a mean of 4.36 t/ha/yr, and 7.9 % of its land is above the tolerance of 11.2 t/ha/yr. Soil loss is highest on the steep high ground, while most of the 529 km² at high gully risk lies on the thinly covered lower ground. Only 15 % of the high gully risk area also has high soil loss, so the two kinds of erosion need separate plans. Ward 11 ranks high on both and should come first.</p>
           </div>
         </Sec>
 

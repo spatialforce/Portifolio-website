@@ -57,8 +57,8 @@ export default function SugarcaneCaseStudy() {
         <Facts rows={[["Place", "Triangle and Hippo Valley estates"], ["Period", "2019 to 2025, monthly"], ["Data", "Sentinel-2, 20 m"], ["Methods", "Vegetation index time series (NDVI, NDMI), zonal statistics"], ["Tools", "Google Earth Engine, Python"]]} />
 
         <h2>1 Introduction</h2>
-        <p>Sugarcane is the main irrigated crop of Zimbabwe's south-eastern lowveld. Most of it is grown on the estates around Triangle and Hippo Valley in Chiredzi District. Rainfall in the lowveld is low and unreliable, so the crop depends almost entirely on irrigation. An estate covers many thousands of hectares, so problems in single fields are hard to see without regular field visits. Such problems include poor water supply, old ratoons and late replanting.</p>
-        <p>Optical satellite images give a regular, low-cost record of crop condition. Sentinel-2 revisits the area every five days at 10 to 20 m resolution (Drusch et al., 2012). Two indices derived from it can track growth, harvest and water stress through the season: greenness (NDVI; Tucker, 1979) and canopy water content (NDMI; Gao, 1996). This study applies a seven-year record of these images to the Triangle and Hippo Valley estates. It asks whether cane fields and their harvest calendar can be recovered from the images alone. It also asks whether fields that are persistently weaker than the rest can be identified.</p>
+        <p>Sugarcane is the main irrigated crop of Zimbabwe's south-eastern lowveld, and most of it is grown on the estates around Triangle and Hippo Valley in Chiredzi District. Lowveld rainfall is low and unreliable, so the crop depends almost entirely on irrigation. An estate covers many thousands of hectares, and trouble in single fields, such as poor water supply, old ratoons or late replanting, is hard to spot without regular field visits.</p>
+        <p>Optical satellite images give a regular, low-cost record of crop condition. Sentinel-2 passes over the area every five days at 10 to 20 m resolution (Drusch et al., 2012), and two indices derived from it can follow growth, harvest and water stress through the season: greenness (NDVI; Tucker, 1979) and canopy water content (NDMI; Gao, 1996). A seven-year record of these images was applied here to the Triangle and Hippo Valley estates. Two questions were asked. Can the cane fields and their harvest calendar be recovered from the images alone, and can fields that stay weaker than the rest year after year be picked out?</p>
 
         <h2>2 Objectives</h2>
         <ol>
@@ -88,7 +88,7 @@ export default function SugarcaneCaseStudy() {
         <p>NDVI was computed from the red and near-infrared bands. NDMI was computed from the near-infrared and shortwave infrared bands. After masking, 99.6 % of the monthly values over the cane had a clear observation. The remaining gaps were filled by linear interpolation between neighbouring months.</p>
 
         <h3>Cane identification and field delineation</h3>
-        <p>Cane was separated from natural vegetation and other crops by its behaviour over time rather than by a single image. A pixel was classed as cane when three conditions were met. First, it was strongly green in the dry season (NDVI above 0.6) in at least five of the seven years, when the surrounding bush is senescent. Second, it showed at least three harvest-like drops, defined as a fall in NDVI to below 0.35 within three months of a value above 0.6; this condition excludes riverine woodland, which stays green but is never cut. Third, it had a clear value in more than 40 % of months.</p>
+        <p>Cane was separated from natural vegetation and other crops by how it behaves over time, not by a single image. A pixel was classed as cane when it met three conditions. It had to be strongly green in the dry season (NDVI above 0.6), when the surrounding bush has died back, in at least five of the seven years. It had to show at least three harvest-like drops, meaning a fall in NDVI to below 0.35 within three months of a value above 0.6; this rules out riverine woodland, which stays green but is never cut. And it had to have a clear value in more than 40 % of months.</p>
         <p>Cane pixels were then grouped into fields with the graph-based segmentation of Felzenszwalb and Huttenlocher (2004), applied to the seven-year NDVI series. Neighbouring pixels that shared the same growth and harvest rhythm formed one field. Segments smaller than 5 ha were discarded.</p>
 
         <h3>Seasonal cycle</h3>
@@ -103,7 +103,7 @@ export default function SugarcaneCaseStudy() {
 
         <h3>Field vigour and persistent weakness</h3>
         <p>The seven annual peaks of each field were averaged to give a mean peak NDVI. Fields were grouped into five classes at intervals of 0.02. Variation within fields was measured as the coefficient of variation of the pixel values inside each field.</p>
-        <p>A single poor year can follow a late harvest or a replant, so it does not show lasting weakness. To separate the two, the fields whose peak NDVI fell in the lowest 10 % of all fields were flagged in each year. A field flagged in five or more of the seven years was classed as persistently weak.</p>
+        <p>A single poor year can follow a late harvest or a replant, so on its own it does not mean lasting weakness. To tell the two apart, the fields whose peak NDVI fell in the lowest 10 % of all fields were flagged in each year. A field flagged in five or more of the seven years was classed as persistently weak.</p>
 
         <h2>5 Results</h2>
         <h3>Cane fields</h3>
@@ -113,17 +113,17 @@ export default function SugarcaneCaseStudy() {
 
         <h3>Seasonal cycle of greenness and moisture</h3>
         <p>The cane follows the same cycle in every year (Figure 1). Area-weighted NDVI is highest in March or April, at about 0.72, and lowest in August or September, at about 0.44. NDMI follows the same pattern at lower values.</p>
-        <p>The seasonal low falls in the harvest season, not at the end of the rains. Harvested fields drop to bare stubble while uncut fields remain green, which lowers the area-weighted mean. Rain falls mainly from November to February, yet the cane keeps greening up after the rains end. This shows that growth is sustained by irrigation.</p>
+        <p>The seasonal low comes in the harvest season, not at the end of the rains. Harvested fields drop to bare stubble while uncut fields stay green, which pulls down the area-weighted mean. Most rain falls from November to February, yet the cane goes on greening after the rains end, so growth is being kept up by irrigation.</p>
         <Fig src={fig1} cap="Figure 1. Area-weighted NDVI and NDMI of the cane fields (top) and monthly rainfall (bottom), January 2019 to December 2025." />
 
         <h3>Harvest timing</h3>
-        <p>Harvesting begins in May, peaks in September with an average of 2 238 ha cut, and declines through November (Figure 2). The months from May to November account for 94.5 % of the harvested area. The spread between the lowest and highest year is small in every month, so the harvest calendar is stable between years.</p>
-        <p>In any one year, between 66 % and 80 % of fields showed a harvest (Table 2). The other fields were replanted or left on a longer cycle. Some may have been cut and regrown within a single month, so the monthly composite did not capture the drop.</p>
+        <p>Harvesting starts in May, peaks in September with an average of 2 238 ha cut, and tails off through November (Figure 2). May to November accounts for 94.5 % of the harvested area. In every month the spread between the lowest and highest year is small, so the harvest calendar barely changes from year to year.</p>
+        <p>In any one year, between 66 % and 80 % of fields showed a harvest (Table 2). The rest were replanted or left on a longer cycle. Some may have been cut and regrown within a single month, in which case the monthly composite would miss the drop.</p>
         <Fig src={fig2} cap="Figure 2. Area harvested by month, mean of 2019 to 2025, with the lowest and highest year." />
 
         <h3>Differences between years</h3>
         <p>Cane condition differed little from year to year (Table 2, Figure 3). Peak NDVI ranged from 0.767 in 2023 to 0.800 in 2025. Dry-season NDMI declined from 0.230 in 2019 to 0.198 in 2024 and 0.201 in 2025, a fitted trend of about −0.0055 per year.</p>
-        <p>Neither value was related to seasonal rainfall. The correlation with rainfall is 0.12 for peak NDVI and −0.21 for dry-season NDMI. The wettest season, 2020/21 with 759 mm, did not produce the greenest cane. Dry-season NDMI also remained low in 2025 after 708 mm of rain.</p>
+        <p>Neither value was related to seasonal rainfall. The correlation with rainfall is 0.12 for peak NDVI and −0.21 for dry-season NDMI. The wettest season, 2020/21 with 759 mm, did not give the greenest cane, and dry-season NDMI stayed low in 2025 despite 708 mm of rain.</p>
         <p className="tc__cap">Table 2. Annual values for the cane fields, 2019 to 2025</p>
         <div className="tc__tw">
           <table>
@@ -135,12 +135,12 @@ export default function SugarcaneCaseStudy() {
         <Fig src={fig3} cap="Figure 3. Peak NDVI and dry-season NDMI of the cane by year, with the rainfall of the preceding season under each year." />
 
         <h3>Field vigour</h3>
-        <p>Mean peak NDVI varies little between fields (Map 2). The median is 0.785, and 90 % of fields lie between 0.753 and 0.817. In total, 184 fields average below 0.76 and 68 average above 0.82. Fields in the lowest and highest classes are scattered across the estates rather than grouped in one area. This points to causes that act at field level, such as cane age, variety and water delivery, rather than to soil or climate gradients across the area.</p>
-        <p>Variation inside fields is also low. The median within-field coefficient of variation of peak NDVI is 3.1 %, and 90 % of fields are below 4.4 %. The pixels that departed most from their field mean lay along field margins, roads and canals, where a 20 m pixel mixes cane with other surfaces. They did not form coherent patches. At 20 m resolution the fields therefore appear uniform, and no management zones within fields could be defined. Zoning within fields would need 10 m bands or drone imagery.</p>
+        <p>Mean peak NDVI varies little between fields (Map 2). The median is 0.785, and 90 % of fields lie between 0.753 and 0.817. In total, 184 fields average below 0.76 and 68 above 0.82. The lowest and highest fields are scattered across the estates instead of grouped in one area. That points to causes acting field by field, such as cane age, variety and water delivery, more than to soil or climate gradients across the area.</p>
+        <p>Variation inside fields is low as well. The median within-field coefficient of variation of peak NDVI is 3.1 %, and 90 % of fields are below 4.4 %. The pixels furthest from their field mean lay along field margins, roads and canals, where a 20 m pixel mixes cane with other surfaces, and they did not form coherent patches. At 20 m the fields look uniform, so no management zones within fields could be defined. That would need the 10 m bands or drone imagery.</p>
         <Fig src={map2} cap="Map 2. Mean peak NDVI of each field, 2019 to 2025." />
 
         <h3>Persistently weak fields</h3>
-        <p>Most low years were isolated (Table 3, Map 3). Over half of the fields (1 084) never ranked in the lowest 10 %, and a further 756 did so in only one or two years. A smaller group of 101 fields ranked low in three or four years. Six fields, covering 42.2 ha, ranked low in five of the seven years and are classed as persistently weak.</p>
+        <p>Most low years were one-offs (Table 3, Map 3). Over half of the fields (1 084) never ranked in the lowest 10 %, and another 756 did so in only one or two years. A smaller group of 101 fields ranked low in three or four years. Six fields, covering 42.2 ha, ranked low in five of the seven years and are classed as persistently weak.</p>
         <p>The mean peak NDVI of the six persistently weak fields is 0.726 to 0.740, against the median of 0.785 for all fields. Four of the six lie in the west of the study area, between 31.41 and 31.47° E.</p>
         <p className="tc__cap">Table 3. Fields by number of years in the lowest 10 % for peak NDVI</p>
         <div className="tc__tw">
@@ -153,9 +153,9 @@ export default function SugarcaneCaseStudy() {
         <Fig src={map3} cap="Map 3. Number of years each field ranked in the lowest 10 % for peak NDVI, 2019 to 2025. Persistently weak fields are circled." />
 
         <h2>6 Discussion</h2>
-        <p>The results show that a free, cloud-masked remote sensing record is enough to monitor these estates field by field. The time-based rules found the cane without any field map, and the segmentation produced fields of a realistic size. The lowveld's clear skies are an advantage. Almost every month was observed, so harvests could be dated to the month and the seasonal cycle followed without gaps.</p>
-        <p>The weak link between cane condition and rainfall fits a fully irrigated system. Peak greenness and the harvest calendar were stable across seasons with 384 to 759 mm of rain. The decline in dry-season NDMI since 2023 is therefore unlikely to come from local rainfall. Changes in irrigation supply, scheduling or the age of the cane may explain it instead. Seven years is too short a record to tell these causes apart, and no irrigation data were available to test them.</p>
-        <p>Several limitations apply. NDVI and NDMI describe the condition of the canopy, not yield, and no mill or field yield records were available to validate them. Monthly composites date harvests to the month only, so a field cut and regrown within one month may be missed. The classification rules leave out land that was fallow or replanted for long periods, so the cane area is a lower bound. Finally, the field outlines come from the images rather than estate records, and two adjacent fields with the same planting history may be merged into one.</p>
+        <p>A free, cloud-masked satellite record turns out to be enough to monitor these estates field by field. The time-based rules found the cane without any field map, and the segmentation gave fields of a realistic size. The clear lowveld skies help. Almost every month was observed, so harvests could be dated to the month and the seasonal cycle followed without gaps.</p>
+        <p>A weak link between cane condition and rainfall is what a fully irrigated system should show. Peak greenness and the harvest calendar held steady across seasons with 384 to 759 mm of rain. The drop in dry-season NDMI since 2023 is therefore unlikely to come from local rainfall. Changes in irrigation supply or scheduling, or in the age of the cane, are more likely. Seven years is too short to tell these apart, and no irrigation data were available to test them.</p>
+        <p>There are several limitations. NDVI and NDMI describe the canopy, not yield, and no mill or field yield records were available to check them against. Monthly composites date harvests only to the month, so a field cut and regrown within one month may be missed. The classification rules leave out land that was fallow or being replanted for long periods, so the cane area is a lower bound. The field outlines also come from the images rather than estate records, and two neighbouring fields with the same planting history may have been merged into one.</p>
 
         <h2>7 Recommendations</h2>
         <ol>
@@ -166,8 +166,8 @@ export default function SugarcaneCaseStudy() {
         </ol>
 
         <h2>8 Conclusion</h2>
-        <p>A seven-year monthly remote sensing record identified 1 947 sugarcane fields covering 16 272 ha at Triangle and Hippo Valley, without any field records. The cane follows a stable yearly cycle set by irrigation and the cutting calendar. Harvest runs from May to November and peaks in September.</p>
-        <p>Cane condition varied little between years and did not follow seasonal rainfall, although dry-season canopy moisture has been lower since 2023. At 20 m the fields are uniform inside and differ only slightly from one another. Six fields, covering 42.2 ha, were among the weakest tenth in five of the seven years. They are the clearest targets for investigation on the ground.</p>
+        <p>From a seven-year monthly satellite record, 1 947 sugarcane fields covering 16 272 ha were identified at Triangle and Hippo Valley without any field records. The cane follows a steady yearly cycle set by irrigation and the cutting calendar, with harvest running from May to November and peaking in September.</p>
+        <p>Cane condition changed little between years and did not follow seasonal rainfall, though dry-season canopy moisture has been lower since 2023. At 20 m the fields are uniform inside and differ only slightly from one another. Six fields, covering 42.2 ha, were among the weakest tenth in five of the seven years, and they are the clearest places to check on the ground.</p>
 
         <h2>References</h2>
         <div className="tc__ref">
