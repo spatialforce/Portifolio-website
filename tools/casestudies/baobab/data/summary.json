@@ -1,0 +1,296 @@
+{
+ "land_km2": 389459,
+ "classes": {
+  "Not suitable": [
+   126783,
+   32.6
+  ],
+  "Low": [
+   140820,
+   36.2
+  ],
+  "Moderate": [
+   48686,
+   12.5
+  ],
+  "High": [
+   73171,
+   18.8
+  ]
+ },
+ "suitable_km2": 121857,
+ "suitable_pct": 31.3,
+ "prov": {
+  "Masvingo": {
+   "land": 56613,
+   "high": 32532,
+   "mod": 8205,
+   "suit": 40737,
+   "pct": 72.0,
+   "mean": 0.605
+  },
+  "Mashonaland West": {
+   "land": 56313,
+   "high": 11535,
+   "mod": 10386,
+   "suit": 21921,
+   "pct": 38.9,
+   "mean": 0.382
+  },
+  "Matabeleland South": {
+   "land": 54270,
+   "high": 9948,
+   "mod": 7459,
+   "suit": 17407,
+   "pct": 32.1,
+   "mean": 0.347
+  },
+  "Manicaland": {
+   "land": 35946,
+   "high": 6587,
+   "mod": 4104,
+   "suit": 10691,
+   "pct": 29.7,
+   "mean": 0.346
+  },
+  "Matabeleland North": {
+   "land": 74720,
+   "high": 3967,
+   "mod": 6124,
+   "suit": 10090,
+   "pct": 13.5,
+   "mean": 0.306
+  },
+  "Midlands": {
+   "land": 49526,
+   "high": 985,
+   "mod": 8557,
+   "suit": 9542,
+   "pct": 19.3,
+   "mean": 0.255
+  },
+  "Mashonaland Central": {
+   "land": 28298,
+   "high": 7022,
+   "mod": 1999,
+   "suit": 9021,
+   "pct": 31.9,
+   "mean": 0.321
+  },
+  "Mashonaland East": {
+   "land": 32283,
+   "high": 594,
+   "mod": 1854,
+   "suit": 2447,
+   "pct": 7.6,
+   "mean": 0.166
+  },
+  "Bulawayo": {
+   "land": 552,
+   "high": 0,
+   "mod": 0,
+   "suit": 0,
+   "pct": 0.0,
+   "mean": 0.135
+  },
+  "Harare": {
+   "land": 937,
+   "high": 0,
+   "mod": 0,
+   "suit": 0,
+   "pct": 0.0,
+   "mean": 0.09
+  }
+ },
+ "pa_n": 93,
+ "pa_km2": 62594,
+ "pa_land_pct": 16.1,
+ "suit_in_pa_km2": 26309,
+ "suit_in_pa_pct": 21.6,
+ "high_in_pa_pct": 26.9,
+ "pa_suit_pct": 42.0,
+ "pa_by": {
+  "National Park": {
+   "n": 11,
+   "area": 26956,
+   "suit": 8713
+  },
+  "Safari Area": {
+   "n": 16,
+   "area": 18969,
+   "suit": 10655
+  },
+  "Recreation Park": {
+   "n": 14,
+   "area": 1391,
+   "suit": 765
+  },
+  "Sanctuary": {
+   "n": 10,
+   "area": 6251,
+   "suit": 5316
+  },
+  "Botanical Reserve": {
+   "n": 10,
+   "area": 481,
+   "suit": 142
+  },
+  "State Forest": {
+   "n": 32,
+   "area": 8629,
+   "suit": 773
+  }
+ },
+ "pa_top": [
+  [
+   "Gonarezhou",
+   "National Park",
+   4936,
+   4936
+  ],
+  [
+   "Save Conservancy",
+   "Sanctuary",
+   3498,
+   3498
+  ],
+  [
+   "Chewore",
+   "Safari Area",
+   2208,
+   3406
+  ],
+  [
+   "Hurungwe",
+   "Safari Area",
+   2158,
+   2885
+  ],
+  [
+   "Mana Pools",
+   "National Park",
+   1739,
+   2124
+  ],
+  [
+   "Charara",
+   "Safari Area",
+   1306,
+   1724
+  ],
+  [
+   "Sapi",
+   "Safari Area",
+   1187,
+   1195
+  ],
+  [
+   "Matusadona",
+   "National Park",
+   1121,
+   1426
+  ]
+ ],
+ "rec": {
+  "elev": [
+   333.5,
+   558.0,
+   1257.3
+  ],
+  "bio6": [
+   7.6,
+   11.6,
+   15.2
+  ],
+  "bio11": [
+   15.1,
+   18.6,
+   21.5
+  ],
+  "bio12": [
+   428.8,
+   622.8,
+   985.3
+  ],
+  "bio15": [
+   88.5,
+   94.3,
+   122.4
+  ],
+  "bio17": [
+   1.4,
+   13.5,
+   30.9
+  ],
+  "bio1": [
+   19.3,
+   23.1,
+   25.6
+  ]
+ },
+ "land": {
+  "elev": [
+   429.5,
+   1023.8,
+   1430.8
+  ],
+  "bio6": [
+   7.1,
+   9.5,
+   13.5
+  ],
+  "bio11": [
+   14.0,
+   17.1,
+   20.2
+  ],
+  "bio12": [
+   440.7,
+   667.8,
+   937.4
+  ],
+  "bio15": [
+   88.6,
+   104.0,
+   122.5
+  ],
+  "bio17": [
+   1.8,
+   5.4,
+   29.7
+  ],
+  "bio1": [
+   18.2,
+   21.5,
+   24.5
+  ]
+ },
+ "rec_class": {
+  "Not suitable": 14,
+  "Low": 24,
+  "Moderate": 19,
+  "High": 88
+ },
+ "elev_band": {
+  "0-600": [
+   100.0,
+   80
+  ],
+  "600-900": [
+   66.2,
+   29
+  ],
+  "900-1200": [
+   6.7,
+   25
+  ],
+  "1200-1500": [
+   0.4,
+   9
+  ],
+  "1500-3000": [
+   0.0,
+   2
+  ]
+ }
+}

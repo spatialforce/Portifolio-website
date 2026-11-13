@@ -1,0 +1,8 @@
+{
+ "gbif": 535,
+ "uncert_le_5km": 461,
+ "unique_xy": 421,
+ "inside": 410,
+ "one_per_1km": 269,
+ "one_per_10km": 145
+}

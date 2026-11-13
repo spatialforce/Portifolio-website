@@ -30,7 +30,8 @@ import cs17 from "../assets/casestudies/chimanimani-flood/map3_susceptibility.we
 import cs18 from "../assets/casestudies/sugarcane/map2_vigour.webp";
 import cs19 from "../assets/casestudies/kariba/map3_exposed.webp";
 import cs20 from "../assets/casestudies/bulawayo-landfill/map4_suitability.webp";
-import cs21 from "../assets/casestudies/chivi-soil-erosion/map3_classes.webp";
+import cs21 from "../assets/casestudies/shurugwi-soil-erosion/map4_gully.webp";
+import cs22 from "../assets/casestudies/baobab-habitat-suitability/map4_suitability.webp";
 
 // "/" on Vercel, "/Portifolio-website/" on GitHub Pages
 const BASE = import.meta.env.BASE_URL;
@@ -41,6 +42,8 @@ export type Project = { title: string; slug: string; text: string; sub?: string;
 export const CASESTUDIES: Project[] = [
   { title: "Site Suitability Analysis for Utility-Scale Solar Farms in Matabeleland South Province of Zimbabwe Using the Analytic Hierarchy Process", slug: "solar-site-suitability", card: "Solar Farm Site Suitability in Matabeleland South", sub: "AHP weighted overlay of six siting criteria on a 250 m grid.", img: cs7, place: "Matabeleland South", years: "2026",
     text: "Six siting criteria weighted by pairwise comparison and overlaid on a 250 m grid, placing the best land for utility-scale solar in Bulilima and Mangwe along the Plumtree transmission corridor." },
+  { title: "Habitat Suitability Modelling for the African Baobab (Adansonia digitata) in Zimbabwe Using Maximum Entropy (MaxEnt)", slug: "baobab-habitat-suitability", card: "Baobab Habitat Suitability in Zimbabwe", sub: "Where the climate suits the African baobab, and how much of that land is protected.", img: cs22, place: "Zimbabwe", years: "1981 to 2010 climate",
+    text: "About a third of Zimbabwe, 121 857 km², has a climate suitable for the baobab, mainly in the warm south-east lowlands and the Zambezi Valley. Winter temperature is the main control, and only 21.6 % of suitable land lies in protected areas." },
   { title: "A Spatial Analysis of Population Distribution, Density and Growth in Zimbabwe Between the 2012 and 2022 Population Censuses", slug: "population-zimbabwe", card: "Population Distribution and Growth in Zimbabwe", sub: "District density, growth and sex ratio from the 2012 and 2022 censuses.", img: cs1, place: "Zimbabwe", years: "2012 and 2022",
     text: "District density and growth from the 2012 and 2022 censuses, a census-scaled 300 m population grid and the sex ratio of each district." },
   { title: "Assessing the Impact of Gold Mining on River Siltation in the Mazowe Valley from 2000 to 2025", slug: "mazowe-valley", card: "Gold Mining and River Siltation in the Mazowe Valley", sub: "Land disturbance and turbidity along 359 km of the Mazowe River.", img: cs4, place: "Mazowe Valley", years: "2000 to 2025",
@@ -61,8 +64,8 @@ export const CASESTUDIES: Project[] = [
     text: "Mean live storage halved between 2000 to 2009 and 2016 to 2025, the lake reached its minimum operating level every year from 2022, and 850 km² of lake bed was left dry. The satellite storage curve matches the operator's figures to within about 1 %." },
   { title: "Landfill Site Selection for Bulawayo Using GIS-Based Multi-Criteria Analysis", slug: "bulawayo-landfill", card: "Landfill Site Selection for Bulawayo", sub: "Six weighted criteria used to find land fit for a new landfill.", img: cs20, place: "Bulawayo", years: "2021 to 2024",
     text: "Only 51.4 km² (9.4 %) of Bulawayo is highly or very highly suitable for a landfill, while 43.5 % is very low. Four candidate sites of 154 to 1 864 ha were found, and the existing Richmond landfill falls in the very low class." },
-  { title: "Soil Loss Estimation in Chivi District Using the Revised Universal Soil Loss Equation", slug: "chivi-soil-erosion", card: "Soil Loss in Chivi District", sub: "Five RUSLE factors mapped at 30 m to find where soil washes away.", img: cs21, place: "Chivi", years: "2019 to 2024",
-    text: "Chivi loses about 1.81 million tonnes of soil a year, a mean of 5.19 t/ha/yr. High and very high loss covers 10.1 % of the land, and wards 14 and 15 are the only wards above the tolerance limit of 11.2 t/ha/yr." },
+  { title: "Assessment of Soil Erosion and Gully Erosion Risk in Shurugwi District, Zimbabwe", slug: "shurugwi-soil-erosion", card: "Soil Erosion and Gully Erosion Risk in Shurugwi", sub: "Where soil is washed away and where gullies are likely to form, ranked by ward.", img: cs21, place: "Shurugwi", years: "2019 to 2024",
+    text: "Shurugwi loses about 1.57 million tonnes of soil a year, a mean of 4.36 t/ha/yr. Soil loss is highest on the steep northern and western hills, while the 529 km² at high gully risk lie mostly on the thinly covered lower ground of the south and east." },
 ];
 
 export const PROJECTS: Project[] = [

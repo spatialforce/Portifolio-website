@@ -1,5 +1,4 @@
-import SiteNav, { SiteFooter } from "./SiteChrome";
-import "./casestudy.css";
+import CaseLayout, { Facts } from "./CaseLayout";
 import map1 from "../assets/casestudies/chimanimani-flood/map1_study_area.webp";
 import map2 from "../assets/casestudies/chimanimani-flood/map2_factors.webp";
 import map3 from "../assets/casestudies/chimanimani-flood/map3_susceptibility.webp";
@@ -81,16 +80,17 @@ const A = ({ href }: { href: string }) => <a href={href} target="_blank" rel="no
 export default function ChimanimaniFloodCaseStudy() {
   return (
     <>
-      <SiteNav />
-      <article className="cs">
+      <CaseLayout slug="chimanimani-flood">
         <h1>Flood Susceptibility Mapping of Chimanimani District Using GIS-Based Multi-Criteria Analysis and the Analytic Hierarchy Process</h1>
-        <p className="cs__by">Kudzanai Chakavarika. Case study 6. November 2026.</p>
+        <p className="tc__by">Eight factors reclassified, weighted with AHP and combined by weighted overlay.</p>
+        <p className="tc__by" style={{ marginTop: 10 }}>Kudzanai Chakavarika (20 September 2025)</p>
+        <Facts rows={[["Place", "Chimanimani District"], ["Period", "1991 to 2020 rainfall"], ["Data", "Copernicus DEM, CHIRPS, land cover, soil, buildings"], ["Method", "AHP weighted overlay of eight factors, 30 m grid"], ["Tools", "Google Earth Engine, Python"]]} />
 
-        <h2>Introduction</h2>
+        <h2>1 Introduction</h2>
         <p>Chimanimani District has steep highlands, heavy summer rain and narrow valleys where most people live. Water collects quickly in these valleys and rivers rise fast after storms. A flood susceptibility map shows which parts of the land are most likely to flood, based on the physical conditions of each place, so that planning and early warning can focus on the right areas.</p>
         <p>This study builds that map using GIS multi-criteria analysis. Eight flood conditioning factors are mapped on a 30 m grid. Each one is reclassified into five susceptibility scores. They are given weights with the analytic hierarchy process (AHP; Saaty, 1980) and combined into one flood susceptibility index by weighted overlay. The index is then split into five classes, and buildings and people are counted in each class.</p>
 
-        <h2>Objectives</h2>
+        <h2>2 Objectives</h2>
         <ol>
           <li>To identify and classify the physical and land-cover factors that control flooding in Chimanimani District.</li>
           <li>To derive factor weights with the analytic hierarchy process and evaluate the consistency of the judgements.</li>
@@ -98,19 +98,19 @@ export default function ChimanimaniFloodCaseStudy() {
           <li>To assess the exposure of buildings and people in each susceptibility class.</li>
         </ol>
 
-        <h2>Study area</h2>
+        <h2>3 Study area</h2>
         <p>Chimanimani District lies in the south-east of Manicaland Province in eastern Zimbabwe (Map 1). It covers 3 342 km². The land rises from about 300 m in the western lowlands to more than 2 000 m in the Chimanimani Mountains in the east. The eastern half is steep and deeply cut, and its southern part drains through the Rusitu River. The western half is drier and drains through the Nyanyadzi valley. Long-term rainfall ranges from about 480 mm a year in the west to more than 1 500 mm in the east (Funk et al., 2015). The district had 153 619 people at the 2022 census (City Population, 2023). Most live in Chimanimani town, around Cashel and Mutambara in the north, and along the Rusitu valley in the south.</p>
         <Fig src={map1} cap="Map 1. Study Area Map." />
 
-        <h2>Data and methods</h2>
-        <p className="cs__cap">Table 1. Data used in the study</p>
-        <div className="cs__tw">
+        <h2>4 Data and methods</h2>
+        <p className="tc__cap">Table 1. Data used in the study</p>
+        <div className="tc__tw">
           <table>
             <thead><tr><th>Dataset</th><th>Resolution</th><th>Period</th><th>Used for</th></tr></thead>
             <tbody><Rows rows={T1} num={9} /></tbody>
           </table>
         </div>
-        <p className="cs__src">Source: ESA (2021); Funk et al. (2015); Karra et al. (2021); Hengl (2018); Sirko et al. (2021); Bondarenko et al. (2020); OCHA (2023). Rainfall, land cover, soil, buildings and population were processed in Google Earth Engine (Gorelick et al., 2017).</p>
+        <p className="tc__src">Source: ESA (2021); Funk et al. (2015); Karra et al. (2021); Hengl (2018); Sirko et al. (2021); Bondarenko et al. (2020); OCHA (2023). Rainfall, land cover, soil, buildings and population were processed in Google Earth Engine (Gorelick et al., 2017).</p>
 
         <h3>Flood conditioning factors</h3>
         <p>All layers were placed on one 30 m grid in UTM zone 36S. Eight factors were used:</p>
@@ -127,8 +127,8 @@ export default function ChimanimaniFloodCaseStudy() {
 
         <h3>Reclassification</h3>
         <p>Each factor was reclassified into five scores, from 1 (very low susceptibility) to 5 (very high), as Table 2 shows. The breaks follow the spread of each factor inside the district and the way it affects flooding. Map 2 shows all eight reclassified factors.</p>
-        <p className="cs__cap">Table 2. Reclassification of the flood conditioning factors</p>
-        <div className="cs__tw">
+        <p className="tc__cap">Table 2. Reclassification of the flood conditioning factors</p>
+        <div className="tc__tw">
           <table>
             <thead><tr><th>Factor</th><th>1 Very low</th><th>2 Low</th><th>3 Moderate</th><th>4 High</th><th>5 Very high</th></tr></thead>
             <tbody><Rows rows={T2} num={9} /></tbody>
@@ -139,14 +139,14 @@ export default function ChimanimaniFloodCaseStudy() {
         <h3>Weighting with the analytic hierarchy process</h3>
         <p>The factors were compared in pairs on Saaty's 1 to 9 scale (Saaty, 1980), where 1 means two factors are equally important and 9 means one is extremely more important than the other (Table 3). Distance to river was judged the most important factor, followed by slope, then elevation and wetness index (equal), then rainfall, drainage density, land cover and soil. The weights are the principal eigenvector of the matrix.</p>
         <p>The consistency of the judgements was checked with the consistency ratio, CR = CI ÷ RI, where CI = (λmax − n) ÷ (n − 1). For this matrix λmax = 8.207 and n = 8, so CI = 0.030. The random index RI for eight factors is 1.41, which gives CR = 0.021. This is well below the 0.10 limit, so the judgements are consistent (Saaty, 1980).</p>
-        <p className="cs__cap">Table 3. Pairwise comparison matrix and factor weights</p>
-        <div className="cs__tw">
+        <p className="tc__cap">Table 3. Pairwise comparison matrix and factor weights</p>
+        <div className="tc__tw">
           <table>
             <thead><tr><th>Factor</th><th>DR</th><th>SL</th><th>EL</th><th>TWI</th><th>RF</th><th>DD</th><th>LC</th><th>SC</th><th>Weight (%)</th></tr></thead>
             <tbody><Rows rows={T3} num={1} /></tbody>
           </table>
         </div>
-        <p className="cs__src">DR distance to river, SL slope, EL elevation, TWI topographic wetness index, RF annual rainfall, DD drainage density, LC land cover, SC soil clay. λmax = 8.207, CI = 0.030, RI = 1.41, CR = 0.021.</p>
+        <p className="tc__src">DR distance to river, SL slope, EL elevation, TWI topographic wetness index, RF annual rainfall, DD drainage density, LC land cover, SC soil clay. λmax = 8.207, CI = 0.030, RI = 1.41, CR = 0.021.</p>
         <Fig src={fig1} cap="Figure 1. AHP weights of the eight flood conditioning factors." />
 
         <h3>Weighted overlay and classification</h3>
@@ -154,11 +154,11 @@ export default function ChimanimaniFloodCaseStudy() {
         <p>FSI = 0.314 DR + 0.211 SL + 0.134 EL + 0.134 TWI + 0.085 RF + 0.056 DD + 0.038 LC + 0.027 SC</p>
         <p>The index can run from 1 to 5. In the district it ranges from 1.08 to 4.95. It was split into five classes (very low, low, moderate, high and very high) with natural breaks (Jenks, 1967). Buildings and people were then counted in each class.</p>
 
-        <h2>Results</h2>
+        <h2>5 Results</h2>
         <h3>Reclassified factors</h3>
         <p>The factors split the district in different ways (Map 2, Table 4). Distance to river and drainage density pick out the valley network. About a fifth of the district lies within 500 m of a river. Slope and elevation separate the flat, low western plains from the steep eastern highlands: a quarter of the district has slopes under 5°, and 11 % lies below 700 m, almost all of it in the west. Rainfall works the other way: the east gets the most, and 31 % of the district receives more than 1 250 mm a year. Land cover is mostly rangeland and trees, which both score low. Clay content is highest in the east, where 68 % of the land scores 4 or 5, against 25 % in the west.</p>
-        <p className="cs__cap">Table 4. Share of the district in each score, by factor (%)</p>
-        <div className="cs__tw">
+        <p className="tc__cap">Table 4. Share of the district in each score, by factor (%)</p>
+        <div className="tc__tw">
           <table>
             <thead><tr><th>Factor</th><th>1 Very low</th><th>2 Low</th><th>3 Moderate</th><th>4 High</th><th>5 Very high</th></tr></thead>
             <tbody><Rows rows={T4} num={1} /></tbody>
@@ -168,14 +168,14 @@ export default function ChimanimaniFloodCaseStudy() {
         <h3>Flood susceptibility</h3>
         <p>Map 3 shows the final flood susceptibility map. The high and very high classes cover 1 048 km², or 31.3 % of the district. They follow two settings. The first is the flat western lowlands along the lower Nyanyadzi, around Nyanyadzi and Hot Springs. Here low ground, gentle slopes and nearby rivers all score high. 37 % of the western half of the district is in the high or very high class. The second is the valley floors that cut through the highlands, such as the Rusitu valley around Machongwe and the valleys around Cashel and Mutambara in the north. In these valleys, closeness to the river and high rainfall make up for the higher ground. The ridges, steep slopes and plateaus, including the ground around Chimanimani town itself, fall mostly in the very low and low classes, which together cover 42 % of the district.</p>
         <Fig src={map3} cap="Map 3. Flood Susceptibility Map, five classes of the weighted overlay of eight reclassified factors." />
-        <p className="cs__cap">Table 5. Area, buildings and people in each flood susceptibility class</p>
-        <div className="cs__tw">
+        <p className="tc__cap">Table 5. Area, buildings and people in each flood susceptibility class</p>
+        <div className="tc__tw">
           <table>
             <thead><tr><th>Class</th><th>FSI range</th><th>Area (km²)</th><th>Area (%)</th><th>Buildings</th><th>Buildings (%)</th><th>People</th><th>People (%)</th></tr></thead>
             <tbody><Rows rows={T5} num={1} /></tbody>
           </table>
         </div>
-        <p className="cs__src">Source: this study; Sirko et al. (2021); Bondarenko et al. (2020). People are rounded to the nearest hundred.</p>
+        <p className="tc__src">Source: this study; Sirko et al. (2021); Bondarenko et al. (2020). People are rounded to the nearest hundred.</p>
 
         <h3>Buildings and people</h3>
         <p>Settlements in Chimanimani sit in the valleys, close to water and flat land. This puts many of them on the most flood-prone ground (Figure 2). The high and very high classes cover 31 % of the district, but they hold 42 087 buildings (63 % of the total) and about 95 300 people (63 %). The very high class alone covers 11.6 % of the land, but has 23 % of the buildings and 24 % of the people. Only 1.6 % of buildings stand in the very low class.</p>
@@ -184,11 +184,11 @@ export default function ChimanimaniFloodCaseStudy() {
         <h3>Check against mapped flood areas</h3>
         <p>As an independent check, the map was compared with the flood areas mapped across the district by the Royal Museum for Central Africa after the floods of March 2019 (RMCA, 2025). These were not used to build the map. 85.7 % of the mapped flood cells fall in the very high class and 11.2 % in the high class. The area under the ROC curve is 0.95, which means the index separates flooded from unflooded ground well.</p>
 
-        <h2>Discussion</h2>
+        <h2>6 Discussion</h2>
         <p>The map shows that flood susceptibility in Chimanimani is controlled mainly by where the valleys are. Distance to river and slope together carry more than half of the weight, so the high classes trace the river network and the flat ground beside it. The two halves of the district are prone for different reasons. The western lowlands are low, flat and close to large rivers, but they get less rain. The eastern valleys are higher, but they are narrow and get the heaviest rain. Both end up in the high and very high classes.</p>
         <p>The weights come from expert judgement, so a different analyst could rank the factors differently. The consistency ratio shows that the judgements agree with each other, but not that they are correct. The close match with the mapped flood areas gives some confidence in the result. Several limits remain. The 30 m elevation model smooths narrow channels. Rainfall and soil data are coarse (about 5 km and 250 m). The land cover is from a single year. The map shows where flooding is likely, not how deep or how often it will be.</p>
 
-        <h2>Recommendations</h2>
+        <h2>7 Recommendations</h2>
         <ol>
           <li>Use the high and very high classes to guide where new homes, schools and clinics are built, and keep valley floors such as the Rusitu and Nyanyadzi free of new building.</li>
           <li>Give priority for early warning and evacuation planning to the settlements in the very high class, starting with the valley villages and the Nyanyadzi lowlands.</li>
@@ -196,11 +196,11 @@ export default function ChimanimaniFloodCaseStudy() {
           <li>Refine the map with a finer elevation model and local rain gauge records, and test the weights with the people who know the district.</li>
         </ol>
 
-        <h2>Conclusion</h2>
+        <h2>8 Conclusion</h2>
         <p>Eight factors were reclassified, weighted with AHP (CR = 0.021) and combined by weighted overlay into a flood susceptibility map of Chimanimani District. 31 % of the district is in the high or very high class, mostly the western lowlands and the valley floors of the highlands. These classes hold about 63 % of the district's buildings and people, so flood risk here comes as much from where people live as from the land itself.</p>
 
         <h2>References</h2>
-        <div className="cs__ref">
+        <div className="tc__ref">
           <p>Beven, K.J. and Kirkby, M.J. (1979) A physically based, variable contributing area model of basin hydrology. Hydrological Sciences Bulletin, 24(1), 43-69. <A href="https://doi.org/10.1080/02626667909491834" /></p>
           <p>Bondarenko, M., Kerr, D., Sorichetta, A. and Tatem, A.J. (2020) Census/projection-disaggregated gridded population datasets for 51 countries across sub-Saharan Africa in 2020 using building footprints. WorldPop, University of Southampton. <A href="https://doi.org/10.5258/SOTON/WP00682" /></p>
           <p>City Population (2023) Chimanimani (District, Zimbabwe): population statistics from the Zimbabwe National Statistics Agency census. <A href="https://www.citypopulation.de/en/zimbabwe/admin/manicaland/102__chimanimani/" /></p>
@@ -215,8 +215,7 @@ export default function ChimanimaniFloodCaseStudy() {
           <p>Saaty, T.L. (1980) The Analytic Hierarchy Process: Planning, Priority Setting, Resource Allocation. McGraw-Hill, New York.</p>
           <p>Sirko, W., Kashubin, S., Ritter, M., Annkah, A. et al. (2021) Continental-scale building detection from high resolution satellite imagery. arXiv:2107.12283. <A href="https://doi.org/10.48550/arXiv.2107.12283" /></p>
         </div>
-      </article>
-      <SiteFooter />
+      </CaseLayout>
     </>
   );
 }
