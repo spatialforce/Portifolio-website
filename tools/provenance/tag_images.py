@@ -24,6 +24,8 @@ CASE = {
     "hwange-air": "Nitrogen Dioxide and Sulphur Dioxide Pollution from the Hwange Thermal Power Station Expansion Using Sentinel-5P (2019 to 2025)",
     "kariba": "Area–Elevation–Storage Relationships and Water Level Decline at Lake Kariba (2000 to 2025)",
     "bulawayo-landfill": "Landfill Site Selection for Bulawayo Using GIS-Based Multi-Criteria Analysis",
+    "harare-health-access": "Network Analysis of Walking Access to Public Health Facilities in Harare Using PostGIS and pgRouting",
+    "chimanimani-landslide": "Landslide Susceptibility Mapping of Chimanimani District Using GIS-Based Multi-Criteria Analysis and the Analytic Hierarchy Process",
     "shurugwi-soil-erosion": "Assessment of Soil Erosion and Gully Erosion Risk in Shurugwi District, Zimbabwe",
     "hwange-chizarira-corridor": "Least-Cost Corridor Analysis for Elephant Movement Between Hwange and Chizarira National Parks, Zimbabwe",
     "mukuvisi-runoff": "Watershed Delineation and Surface Runoff Estimation for the Mukuvisi Catchment, Harare, Using the SCS Curve Number Method",

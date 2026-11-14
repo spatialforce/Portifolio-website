@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { CASESTUDIES, PROJECTS, WEBMAPS, STORYMAPS } from "./catalogue";
+import { CASESTUDIES, PROJECTS, WEBMAPS, STORYMAPS, DASHBOARDS } from "./catalogue";
 
 // One place for every page's title, description and canonical address.
 // Search engines run the site's JavaScript, so each route gets its own head tags as it opens.
@@ -18,6 +18,7 @@ function lookup(path: string): { title: string; text: string } {
   if (p === "/projects") return { title: `Case studies | ${NAME}`, text: "GIS and remote sensing case studies: population, rainfall and drought, land use change, mining, floods and forests, mostly in Zimbabwe." };
   if (p === "/projects/web-mapping") return { title: `Web maps | ${NAME}`, text: "Interactive web maps on earthquakes, cyclones, rivers, cities, health access, rainfall and more across Africa." };
   if (p === "/projects/story-maps") return { title: `Story maps | ${NAME}`, text: "ArcGIS story maps on Zimbabwe's wildlife heartlands and on different ways of mapping geospatial data." };
+  if (p === "/projects/dashboards") return { title: `Dashboards | ${NAME}`, text: "Interactive Tableau dashboards built from open data, starting with COVID-19 in the world, SADC and Zimbabwe." };
   let m = p.match(/^\/case-studies\/(.+)$/);
   if (m) { const c = CASESTUDIES.find((x) => x.slug === m![1]); if (c) return { title: `${c.title} | ${NAME}`, text: cut(c.text) }; }
   m = p.match(/^\/projects\/(.+)$/);
@@ -26,6 +27,8 @@ function lookup(path: string): { title: string; text: string } {
   if (m) { const w = WEBMAPS.find((x) => x.slug === m![1]); if (w) return { title: `${w.title} | Web map | ${NAME}`, text: cut(w.text) }; }
   m = p.match(/^\/stories\/(.+)$/);
   if (m) { const s = STORYMAPS.find((x) => x.slug === m![1]); if (s) return { title: `${s.title} | Story map | ${NAME}`, text: cut(s.text) }; }
+  m = p.match(/^\/dashboards\/(.+)$/);
+  if (m) { const d = DASHBOARDS.find((x) => x.slug === m![1]); if (d) return { title: `${d.title} | Dashboard | ${NAME}`, text: cut(d.text) }; }
   return HOME;
 }
 

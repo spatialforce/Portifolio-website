@@ -27,6 +27,8 @@ import cs7 from "../assets/casestudies/solar-site-suitability/map5_suitability.w
 import cs16 from "../assets/casestudies/hwange-carbon/map3_carbon.webp";
 import cs14 from "../assets/casestudies/hwange-air/map2_no2_post.webp";
 import cs17 from "../assets/casestudies/chimanimani-flood/map3_susceptibility.webp";
+import csLs from "../assets/casestudies/chimanimani-landslide/map3_susceptibility.webp";
+import csPg from "../assets/casestudies/harare-health-access/map2_distance_all.webp";
 import cs18 from "../assets/casestudies/sugarcane/map2_vigour.webp";
 import cs19 from "../assets/casestudies/kariba/map3_exposed.webp";
 import cs20 from "../assets/casestudies/bulawayo-landfill/map4_suitability.webp";
@@ -37,6 +39,8 @@ import cs24 from "../assets/casestudies/mukuvisi-runoff/map6_runoff.webp";
 import cs25 from "../assets/casestudies/rainfall-interpolation/map2_surfaces.webp";
 
 // "/" on Vercel, "/Portifolio-website/" on GitHub Pages
+import covidDash from "../assets/dashboards/covid.webp";
+
 const BASE = import.meta.env.BASE_URL;
 
 export type Project = { title: string; slug: string; text: string; sub?: string; card?: string; img?: string; place?: string; years?: string };
@@ -67,6 +71,10 @@ export const CASESTUDIES: Project[] = [
     text: "NO₂ and SO₂ above the regional background about doubled over Hwange after Units 7 and 8 came into service, with no change at the Maamba control, and about 20 500 people now live where NO₂ is twice the background." },
   { title: "Flood Susceptibility Mapping of Chimanimani District Using GIS-Based Multi-Criteria Analysis and the Analytic Hierarchy Process", slug: "chimanimani-flood", card: "Flood Susceptibility of Chimanimani District", sub: "Eight factors reclassified, weighted with AHP and combined by weighted overlay.", img: cs17, place: "Chimanimani", years: "1991 to 2020",
     text: "High and very high flood susceptibility covers 31 % of the district, mostly the western lowlands and the valley floors of the highlands, and holds about 63 % of its buildings and people." },
+  { title: "Landslide Susceptibility Mapping of Chimanimani District Using GIS-Based Multi-Criteria Analysis and the Analytic Hierarchy Process", slug: "chimanimani-landslide", card: "Landslide Susceptibility of Chimanimani District", sub: "Eight factors reclassified, weighted with AHP and checked against mapped landslides.", img: csLs, place: "Chimanimani", years: "1991 to 2020",
+    text: "High and very high landslide susceptibility covers 39 % of the district, almost all on the steep, wet eastern highlands, and holds 95 % of the mapped landslides (AUC 0.867) and about 28 % of its buildings."},
+  { title: "Network Analysis of Walking Access to Public Health Facilities in Harare Using PostGIS and pgRouting", slug: "harare-health-access", card: "Walking Access to Health Facilities in Harare", sub: "Shortest walks on the street network to the nearest clinic, worked out in PostGIS and pgRouting.", img: csPg, place: "Harare", years: "2025 to 2026",
+    text: "57 % of the 2.69 million people in Harare Metropolitan Province live within a 2 km walk of a mapped clinic or hospital, but only 19 % of a listed public one, and five new clinics would bring about 239 000 more within 2 km."},
   { title: "Field-Level Sugarcane Monitoring at Triangle and Hippo Valley Using Remote Sensing (2019 to 2025)", slug: "sugarcane-triangle", card: "Sugarcane Field Monitoring at Triangle and Hippo Valley", sub: "Seven years of monthly satellite greenness and moisture, followed field by field.", img: cs18, place: "Triangle and Hippo Valley", years: "2019 to 2025",
     text: "1 947 cane fields covering 16 272 ha were traced from seven years of monthly Sentinel-2 images, with harvest month, vigour and consistently weak fields mapped for each." },
   { title: "Area–Elevation–Storage Relationships and Water Level Decline at Lake Kariba (2000 to 2025)", slug: "lake-kariba", card: "Water Level Decline at Lake Kariba", sub: "Satellite altimetry paired with Landsat lake areas to build the storage curve.", img: cs19, place: "Lake Kariba", years: "2000 to 2025",
@@ -101,6 +109,13 @@ export const STORYMAPS: StoryMap[] = [
     src: "https://storymaps.arcgis.com/stories/8dd0af85af5e40dc97ecec44746021c8",
     text: "An exploration of different cartographic techniques and how they can be used to represent, interpret and communicate spatial information through maps of Zimbabwe.",
     stack: ["ArcGIS StoryMaps", "ArcGIS Online"] },
+];
+
+export const DASHBOARDS: StoryMap[] = [
+  { slug: "covid-19", title: "COVID-19 Dashboard", img: covidDash,
+    src: "https://public.tableau.com/views/covid_dashboard_17946409485600/COVID-19Dashboard?:showVizHome=no&:embed=true&:toolbar=bottom",
+    text: "Cases, deaths and vaccination from 2020 to 2026: a world map of deaths per million, the SADC countries compared and weekly trends.",
+    stack: ["Tableau Public", "Python"] },
 ];
 
 export type WebMap = {

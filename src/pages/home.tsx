@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import Terrain3D from "./Terrain3D";
 import SiteNav, { SiteFooter, NAME } from "./SiteChrome";
-import { CASESTUDIES, PROJECTS, STORYMAPS, WEBMAPS } from "./catalogue";
+import { CASESTUDIES, PROJECTS, STORYMAPS, DASHBOARDS, WEBMAPS } from "./catalogue";
 import { GALLERY, RENDERS } from "./gallery";
 import { useReveal } from "./reveal";
 import profile from "../assets/myself.webp";
@@ -255,8 +255,29 @@ export default function Home() {
         </section>
       )}
 
+      {/* ------------------------------ dashboards ------------------------------ */}
+      <section className="band band--cloud" id="dashboards">
+        <div className="wrap wrap--wide">
+          <Head title="Dashboards" lede="Interactive dashboards built in Tableau from open data." />
+          <Slider label="Dashboards">
+            {DASHBOARDS.map((m) => (
+              <article className="sl__item sl__item--wide story-card" key={m.slug}>
+                <Link to={`/dashboards/${m.slug}`} className="story__img">
+                  <img src={m.img} alt={m.title} loading="lazy" draggable={false} />
+                </Link>
+                <div>
+                  <h3 className="h3">{m.title}</h3>
+                  <p>{m.text}</p>
+                  <Link to={`/dashboards/${m.slug}`} className="arrow">Open the dashboard</Link>
+                </div>
+              </article>
+            ))}
+          </Slider>
+        </div>
+      </section>
+
       {/* ------------------------------ 3D terrain ------------------------------ */}
-      <section className="band band--cloud" id="terrain">
+      <section className="band band--white" id="terrain">
         <div className="wrap wrap--wide">
           <div className="sec-top rv">
             <h2 className="h2">3D work</h2>
@@ -269,7 +290,7 @@ export default function Home() {
       </section>
 
       {/* ------------------------------ map gallery ------------------------------ */}
-      <section className="band band--white" id="gallery">
+      <section className="band band--cloud" id="gallery">
         <div className="wrap wrap--wide">
           <Head title="Map Galore" lede="A selection of maps from my projects." />
           <MapGallery />
@@ -277,7 +298,7 @@ export default function Home() {
       </section>
 
       {/* -------------------------------- about ------------------------------- */}
-      <section className="band band--cloud" id="about">
+      <section className="band band--white" id="about">
         <div className="wrap about__grid">
           <figure className="about__photo rv">
             <img src={profile} alt={NAME} loading="lazy" />

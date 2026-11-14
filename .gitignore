@@ -45,3 +45,14 @@ tools/**/data/dem/
 tools/**/data/dl/
 tools/casestudies/carbon/data/gedi_*.csv
 __pycache__/
+tools/casestudies/postgis/pgdata/
+tools/casestudies/postgis/dl/
+tools/casestudies/postgis/pg.log
+tools/casestudies/postgis/clean/
+tools/dashboards/*/dl/
+tools/dashboards/*/~*.twbr
+tools/dashboards/*/data/extracts/
+tools/dashboards/covid/data/covid_weekly.csv
+tools/casestudies/postgis/exp/cell.csv
+tools/casestudies/postgis/exp/cover.csv
+*.projlib

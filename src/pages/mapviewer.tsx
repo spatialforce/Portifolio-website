@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
-import { STORYMAPS, WEBMAPS } from "./catalogue";
+import { DASHBOARDS, STORYMAPS, WEBMAPS } from "./catalogue";
 import "./page.css";
 
 type Item = { slug: string; title: string; src: string };
 
 /* A web map or story map filling the screen, with a thin bar to get back to the site. */
-export default function MapViewer({ kind = "map" }: { kind?: "map" | "story" }) {
+export default function MapViewer({ kind = "map" }: { kind?: "map" | "story" | "dashboard" }) {
   const { slug } = useParams();
-  const items: Item[] = kind === "story" ? STORYMAPS : WEBMAPS;
-  const back = kind === "story" ? "/projects/story-maps" : "/projects/web-mapping";
-  const base = kind === "story" ? "/stories" : "/maps";
+  const items: Item[] = kind === "story" ? STORYMAPS : kind === "dashboard" ? DASHBOARDS : WEBMAPS;
+  const back = kind === "story" ? "/projects/story-maps" : kind === "dashboard" ? "/projects/dashboards" : "/projects/web-mapping";
+  const base = kind === "story" ? "/stories" : kind === "dashboard" ? "/dashboards" : "/maps";
   const i = items.findIndex((m) => m.slug === slug);
   const m = items[i];
   const [loaded, setLoaded] = useState(false);
@@ -41,7 +41,7 @@ export default function MapViewer({ kind = "map" }: { kind?: "map" | "story" }) 
         </div>
       </div>
       <div className="viewer__stage">
-        {!loaded && <div className="viewer__load">{kind === "story" ? "Loading the story..." : "Loading the map..."}</div>}
+        {!loaded && <div className="viewer__load">{kind === "story" ? "Loading the story..." : kind === "dashboard" ? "Loading the dashboard..." : "Loading the map..."}</div>}
         <iframe key={m.slug} src={m.src} title={m.title} onLoad={() => setLoaded(true)}
           allow="fullscreen; geolocation" />
       </div>

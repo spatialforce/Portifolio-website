@@ -27,6 +27,7 @@ export default function SiteNav({ overlay = false }: { overlay?: boolean }) {
         <NavLink to="/projects" end>Case studies</NavLink>
         <NavLink to="/projects/web-mapping">Web maps</NavLink>
         <NavLink to="/projects/story-maps">Story maps</NavLink>
+        <NavLink to="/projects/dashboards">Dashboards</NavLink>
         <Link to="/#about">About</Link>
         <Link to="/#contact">Contact</Link>
         <a href="/Kudzanai_Chakavarika_CV.pdf" target="_blank" rel="noreferrer" className="snav__cv">CV</a>
