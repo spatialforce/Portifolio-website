@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigationType } from "react-router-dom";
 import Home from "./pages/home";
+import ChatBot from "./chat/ChatBot";
 import ProjectsPage from "./pages/projects";
 import ForestResourcesProject from "./pages/forest";
 import RemoteSensingIndices from "./pages/remotesensingindices";
@@ -119,6 +120,12 @@ function ScrollManager() {
   return null;
 }
 
+/* the chat button sits on every page except the full-screen map, story and dashboard viewers */
+function ChatSlot() {
+  const { pathname } = useLocation();
+  return /^\/(maps|stories|dashboards)\//.test(pathname) ? null : <ChatBot />;
+}
+
 function App() {
   return (
     <Router basename={import.meta.env.BASE_URL}>
@@ -160,6 +167,7 @@ function App() {
         <Route path="/projects/study-area-maps" element={<Navigate to="/#gallery" replace />} />
         <Route path="/projects/drought-analysis" element={<Navigate to="/projects" replace />} />
       </Routes>
+      <ChatSlot />
     </Router>
   );
 }

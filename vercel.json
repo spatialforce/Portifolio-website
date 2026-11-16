@@ -7,6 +7,6 @@
   "rewrites": [
     { "source": "/data/(.*)", "destination": "/event-gallery/data/$1" },
     { "source": "/event-gallery/(.*)", "destination": "/event-gallery/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

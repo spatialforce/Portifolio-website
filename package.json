@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "node tools/chat/build_knowledge.mjs && tsc --noEmit && vite build",
     "preview": "vite preview",
     "gallery": "cd ../portfolio/events && npx vite build --base=/event-gallery/ --outDir ../../portifolio_website/public/event-gallery --emptyOutDir"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
     "animate.css": "^4.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
