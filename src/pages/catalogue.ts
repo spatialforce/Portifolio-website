@@ -40,6 +40,7 @@ import cs25 from "../assets/casestudies/rainfall-interpolation/map2_surfaces.web
 
 // "/" on Vercel, "/Portifolio-website/" on GitHub Pages
 import covidDash from "../assets/dashboards/covid.webp";
+import africaPowerDash from "../assets/dashboards/africa_power.webp";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -115,6 +116,10 @@ export const DASHBOARDS: StoryMap[] = [
   { slug: "covid-19", title: "COVID-19 Dashboard", img: covidDash,
     src: "https://public.tableau.com/views/covid_dashboard_17946409485600/COVID-19Dashboard?:showVizHome=no&:embed=true&:toolbar=bottom",
     text: "Cases, deaths and vaccination from 2020 to 2026: a world map of deaths per million, the SADC countries compared and weekly trends.",
+    stack: ["Tableau Public", "Python"] },
+  { slug: "africa-electricity", title: "Africa Electricity Dashboard", img: africaPowerDash,
+    src: "https://public.tableau.com/views/africa_power/AfricaElectricityDashboard?:showVizHome=no&:embed=true&:toolbar=bottom",
+    text: "Power generated and source from 2000 to 2024: electricity by source, people without electricity by region and the share from clean sources.",
     stack: ["Tableau Public", "Python"] },
 ];
 
